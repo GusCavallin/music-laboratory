@@ -394,9 +394,14 @@ $("fl_graph").onchange=()=>{if(sort.k&&!COLS[ck()].some(c=>c[0]===sort.k))sort={
 $("fl_color").onchange=()=>{render();saveSession()};
 const feelReset=()=>{for(const [k] of FEEL){$("fl_"+k+"_lo").value=0;$("fl_"+k+"_hi").value=10}$("fl_conf").value="all";readFeel()};
 $("fl_reset").onclick=()=>{feelReset();run()};readFeel();
+// Back button (mouse button 4, Alt+Left): each tab switch is a history entry, so Back returns to the tab you came from.
+let histNav=false,booted=false;
+const tabKey=()=>feelMode?"feel":cubeMode?"cube":src;
+const histPush=()=>{if(histNav)return;const k=tabKey();if(!booted){history.replaceState({tab:k},"");return}if(!history.state||history.state.tab!==k)history.pushState({tab:k},"")};
 document.querySelectorAll("#tabs button[data-s]").forEach(b=>b.onclick=()=>{src=b.dataset.s;feelMode=b.dataset.feel==="1";cubeMode=b.dataset.cube==="1";if(src!=="archive"&&facet.volume!=null){facet.volume=null;chips()}sort={k:null,d:0};
  document.querySelectorAll("#tabs button[data-s]").forEach(x=>x.classList.toggle("on",x===b));
- picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run()});
+ picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run();histPush()});
+addEventListener("popstate",e=>{const t=e.state&&e.state.tab;if(!t||!TABSEL[t]||t===tabKey())return;histNav=true;try{document.querySelector(TABSEL[t]).click()}finally{histNav=false}});
 // --- Feel Axes tab (internal id "cube"): every rated song is a dot; the three axes are independent principal components of the nine GEMS scales
 // (tools/emotions/axes.py); dot colour = maturity (cool = below the average song, warm = above, hollow = no score).
 // The slider box picks the songs: dots inside stay bright, the list on the left shows exactly those. Plain canvas, no library. ---
@@ -660,4 +665,5 @@ picker();restoreSession();sessionReady=true;saveSession();
  if(asApp&&matchMedia("(pointer: fine)").matches){
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
+booted=true;history.replaceState({tab:tabKey()},"");
 </script></body></html>

@@ -47,6 +47,9 @@ Without the helper you can still double-click `index.html`: search, filters and 
 The top row has the title, the tab strip and, at the right, **⟳ Refresh data** with its status message. Right under it are the search box (an **×** at its right end clears the text when
 there is some), the result count, **★ Presets** and **✕ Clear filters**.
 
+**Back button.** Each tab switch is a history entry, so the mouse's Back button (or Alt+Left) returns to the tab you came from, and Forward
+goes the other way. It steps through tabs only; filters and searches are not part of the history.
+
 ## Searching, filtering and sorting
 
 **Search.** Type words in the box: all words must match (in name, artist, album, composer or genre), accents are ignored, and punctuation counts as a word break
