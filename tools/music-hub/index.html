@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Music Hub</title>
+<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" href="/icon-192.png">
+<meta name="theme-color" content="#2f6fed">
+<style>
+:root{--bg:#fff;--fg:#1b1d21;--mut:#6b7280;--line:#e3e5e8;--acc:#2f6fed;--chip:#f1f3f6;--cool:#2f6fed;--warm:#ee8a1d}
+@media(prefers-color-scheme:dark){:root{--bg:#16181c;--fg:#e6e8eb;--mut:#9aa1ab;--line:#2c3037;--acc:#6b9bff;--chip:#22262c;--cool:#6b9bff;--warm:#f2a03d}}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+h1{margin:0;font-size:20px}#top{display:flex;align-items:flex-end;gap:20px;margin:0 -16px 12px;padding:0 16px;box-shadow:inset 0 -1px 0 var(--line)}#top h1{padding-bottom:7px}#acts{margin-left:auto;padding-bottom:5px}@media (max-width:760px){#top{flex-wrap:wrap;row-gap:6px}#acts{order:2}#tabs{order:3;flex:1 0 100%}}#acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}#tabs{flex:1 1 auto;min-width:0;display:flex;gap:2px;align-items:flex-end;overflow-x:auto;overflow-y:hidden}#tabs button{flex:none;white-space:nowrap;padding:8px 16px;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:var(--mut);font-weight:500}#tabs button:hover{background:var(--chip);color:var(--fg)}#tabs button.on{background:var(--bg);color:var(--fg);border-color:var(--line);box-shadow:inset 0 3px 0 var(--acc);font-weight:600}
+header{flex:none;background:var(--bg);border-bottom:1px solid var(--line);padding:16px 16px 12px;z-index:2}
+#q{width:100%;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+select,input[type=number],input#pl,button{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--fg)}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+label{color:var(--mut)}#f1,#f2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}#f1[hidden],#f2[hidden]{display:none}#pl{max-width:260px}#qrow{display:flex;gap:10px;align-items:center}#qrow #q{flex:1;min-width:0;width:auto;padding-right:36px}#qwrap{position:relative;flex:1;min-width:0;display:flex}#qclear{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mut);font-size:20px;line-height:1;padding:2px 9px 4px;border-radius:50%;cursor:pointer}#qclear:hover{color:var(--fg);background:var(--chip)}#q:placeholder-shown+#qclear{display:none}#rmsg{color:var(--mut)}#count{color:var(--mut);white-space:nowrap;text-align:right;min-width:11ch}
+main{flex:1;min-height:0;overflow:auto;padding:0 16px 40px}
+table{border-collapse:collapse;table-layout:fixed;min-width:100%}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{cursor:pointer;color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--bg);z-index:1;box-shadow:0 1px 0 var(--line)}
+th.dragging{opacity:.4}th.over{box-shadow:inset 3px 0 0 var(--acc),0 1px 0 var(--line)}
+th.s::after{content:" ▲"}th.s.d::after{content:" ▼"}
+td.n{text-align:right}th[data-k=loved],td[data-k=loved],th[data-k=in_itunes],td[data-k=in_itunes]{text-align:center}td[data-k=in_itunes]{color:#2ea043;font-weight:700}.tag{background:var(--chip);border-radius:4px;padding:0 5px;color:var(--mut)}
+#colbox{position:fixed;z-index:30;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:4px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.35);max-height:calc(100vh - 16px);overflow:auto}#colbox[hidden]{display:none}#colbox .mh{font-weight:600;color:var(--mut);margin-bottom:2px}#colbox .mh small{font-weight:400}
+#more{margin:12px 0}
+#tip{position:fixed;z-index:20;display:none;max-width:min(70vw,640px);padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:13px;line-height:1.35;pointer-events:none;white-space:pre-wrap;overflow-wrap:anywhere}
+tr.rated{background:#2ea04333}tr.out td{opacity:0;transition:opacity .4s}tr.rated td{transition:background .3s}td.st{letter-spacing:1px}td.st span{color:var(--mut);cursor:pointer}td.st span.on{color:#e8a317}td.st span:hover{color:#e8a317;transform:scale(1.25);display:inline-block}#feel[hidden]{display:none}.lg{height:10px;width:128px;border-radius:5px;background:linear-gradient(to right,color-mix(in srgb,var(--cool) 55%,transparent),transparent 50%,color-mix(in srgb,var(--warm) 55%,transparent));border:1px solid var(--line)}#fsl{flex:1 1 100%;display:grid;grid-template-columns:repeat(auto-fill,128px);gap:6px 16px;align-items:end}@media (min-width:760px){#fsl{grid-template-columns:repeat(5,128px)}}@media (min-width:1000px){#feel{flex-wrap:nowrap;align-items:flex-start;gap:24px}#feel #fsl{flex:0 0 auto}#feel #fopts{flex:0 1 340px;align-content:flex-start;gap:8px 12px}}#fopts{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}#fopts select{width:auto}.fo{display:inline-flex;align-items:center;gap:6px}#feel{gap:6px 16px;align-items:flex-end}.fbox{display:flex;flex-direction:column;gap:1px;min-width:128px}.fbox b{font-size:12px}.fbox small{color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums}.fbox select{width:128px}
+.dual{position:relative;height:22px;width:128px}.dual .tr{position:absolute;top:9px;left:7px;right:7px;height:4px;border-radius:2px;background:var(--line)}
+#cubectl .dual{width:230px}
+.dual .fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--acc)}
+.dual input{position:absolute;left:0;top:0;width:100%;height:22px;margin:0;padding:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+.dual input::-webkit-slider-runnable-track{background:transparent;height:22px;border:0}.dual input::-moz-range-track{background:transparent;height:22px;border:0}
+.dual input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:14px;height:14px;margin-top:4px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc);cursor:grab}
+.dual input::-moz-range-thumb{pointer-events:auto;width:10px;height:10px;border-radius:50%;background:var(--acc);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--acc);cursor:grab}td.fv{text-align:center}td[data-k=artist],td[data-k=album],td[data-k=volume]{cursor:alias}tbody td[data-k=artist]:hover,tbody td[data-k=album]:hover,tbody td[data-k=volume]:hover{text-decoration:underline}#fchips{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.chip{font:inherit;font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:12px;background:var(--chip);color:var(--fg)}button.chip{cursor:pointer}.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}.chip b{cursor:pointer;margin-left:2px}#split{flex:1;min-height:0;display:flex}#split>main{flex:1 1 0;min-width:0}
+#cubebox{flex:0 0 46%;min-width:340px;display:flex;flex-direction:column;border-left:1px solid var(--line)}#cubebox[hidden]{display:none}#cubectl[hidden]{display:none}
+#cubebar{display:flex;gap:6px;align-items:center;padding:8px 10px}#cubecount{color:var(--mut);margin-left:auto}
+#cubestage{flex:1;min-height:0;position:relative}#cv{width:100%;height:100%;display:block;cursor:grab;touch-action:none}#cv[hidden]{display:none}#cv:active{cursor:grabbing}
+#flatwrap{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;overflow:auto;align-content:start}#flatwrap[hidden]{display:none}#flatwrap canvas{width:100%;aspect-ratio:1/1;display:block;border:1px solid var(--line);border-radius:6px}
+#cubestats{padding:4px 12px 0;font-size:12px}#cubestats .sth{color:var(--mut);margin-bottom:4px}#cubestats .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 8px}
+#cubestats .sc{display:flex;gap:6px;align-items:baseline;padding:1px 6px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums}#cubestats .sc small{color:var(--mut)}
+#cubesep{margin:6px 22px 0;border-top:1px solid var(--line)} /* a thin rule that stops short of both edges */
+#cubelegend{padding:6px 10px 8px;color:var(--mut);font-size:12px;display:flex;gap:4px 10px;align-items:center;flex-wrap:wrap}#cubelegend .lg{width:70px}
+#presetmenu{position:fixed;z-index:30;min-width:300px;max-width:400px;max-height:70vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:8px}#presetmenu[hidden]{display:none}
+.pm-save{display:flex;gap:6px;margin-bottom:6px}.pm-save input{flex:1;min-width:0;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.pm-row{display:flex;gap:4px;margin-top:4px}.pm-row .nm{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pm-row .nm small{color:var(--mut);margin-left:6px}.pm-empty{color:var(--mut);padding:6px 4px;font-size:13px}
+tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:var(--chip)}tbody tr.now{background:var(--chip);color:var(--acc);font-weight:600}
+#player[hidden]{display:none}#player{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+#player button{min-width:38px;font-size:16px}#pnow{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}#pnow:hover{color:var(--acc)}tr.ping td{animation:ping 1.4s ease-out}@keyframes ping{0%,40%{background:#e8a31766}100%{background:transparent}}
+.zone{display:flex;align-items:center;gap:10px;padding:8px 8px;margin:-8px 0;border-radius:8px}.zone:hover{background:var(--chip)}#seekbox{flex:0 1 auto}#vol{flex:0 0 90px;width:90px}#seek{flex:0 1 260px;min-width:60px}#ptime{color:var(--mut);min-width:84px;text-align:right;font-variant-numeric:tabular-nums}
+</style></head><body>
+<header>
+ <div id="top"><h1>Music Hub</h1>
+  <div id="tabs" role="tablist"><button data-s="itunes" class="on">iTunes Library</button><button data-s="itunes" data-feel="1" data-tip="Find songs by emotional tone (nine GEMS scales + maturity). Only songs that have been rated for feeling.">Raw Feel</button><button data-s="itunes" data-cube="1" data-tip="Every rated song as a dot in a cube of three independent feelings (Calm, Ease, Awe), colored by maturity; the box you size picks the songs in the list">Feel Axes</button><button data-s="archive">MP3 Archive (CDs)</button></div>
+  <div id="acts"><span id="rmsg"></span><button id="refresh" data-tip="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)">⟳ Refresh data</button></div></div>
+ <div id="qrow"><span id="qwrap"><input id="q" placeholder="Search name, artist, album, composer, genre… (all words must match; accents ignored)" autofocus><button id="qclear" type="button" aria-label="Clear the search text" data-tip="Clear the search text">×</button></span>
+  <span id="count"></span><span id="fchips"></span><button id="presetbtn" data-tip="Saved views: tab, filters, sliders, 3D box and sort">★ Presets ▾</button><button id="clearf" data-tip="Reset the search box and all filters (keeps sort and columns)">✕ Clear filters</button></div>
+<div class="row" id="feel" hidden></div>
+<div class="row" id="cubectl" hidden></div>
+ <div class="row" id="src">
+  <span id="f1"><label>Playlist <input id="pl" type="search" list="pllist" placeholder="any (type to filter)" autocomplete="off" spellcheck="false"><datalist id="pllist"></datalist></label>
+  <label>Rating <select id="stars" data-tip="Rating from"><option>0<option>1<option>2<option>3<option>4<option>5</select> – <select id="starsmax" data-tip="Rating to"><option>0<option>1<option>2<option>3<option>4<option selected>5</select></label>
+  <label><input type="checkbox" id="loved"> Loved</label>
+  <label>Decade <select id="dec"><option value="">any</option></select></label>
+  <label>Country <select id="cty"><option value="">any</option></select></label></span>
+  <span id="f2" hidden><label>Category <select id="cat"><option value="">any</select></label>
+  <label>In iTunes <select id="inits"><option value="">any</option><option value="in">in iTunes</option><option value="out">not in iTunes</option></select></label></span>
+ </div>
+<div id="player">
+ <button id="pprev" data-tip="Previous">⏮</button><button id="pstop" data-tip="Stop">⏹</button><button id="pplay" data-tip="Play / Pause">▶</button><button id="pnext" data-tip="Next">⏭</button>
+ <button id="pshuf" data-tip="Shuffle">🔀</button>
+ <span id="pnow">Click a song to play the current selection</span>
+ <div class="zone" id="seekbox"><input type="range" id="seek" min="0" max="1000" value="0" data-tip="Drag to seek; mouse wheel skips 5 s"><span id="ptime">0:00 / 0:00</span></div>
+ <div class="zone" id="volbox"><button id="pmute" data-tip="Mute">🔊</button><input type="range" id="vol" min="0" max="100" value="80" data-tip="Volume 80%"></div>
+</div>
+</header>
+<div id="colbox" hidden></div>
+<div id="presetmenu" hidden></div>
+<div id="split"><main><table id="tbl"><colgroup id="cg"></colgroup><thead id="th"></thead><tbody id="tb"></tbody></table><button id="more" hidden>Show more</button></main>
+<section id="cubebox" hidden>
+ <div id="cubebar"><button data-v="cube" class="on">Cube</button><button data-v="flat">Flat</button><button id="cvreset" data-tip="Reset the camera (or double-click the cube)">⟲ View</button><span id="cubecount"></span></div>
+ <div id="cubestage"><canvas id="cv"></canvas><div id="flatwrap" hidden><canvas id="fc0"></canvas><canvas id="fc1"></canvas><canvas id="fc2"></canvas></div></div>
+ <div id="cubestats"></div><div id="cubesep"></div>
+ <div id="cubelegend"></div>
+</section></div>
+<script src="data.js"></script>
+<script>
+const $=id=>document.getElementById(id), PAGE=300;
+const fold=s=>(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const objs=(cols,rows)=>rows.map(r=>{const o={};cols.forEach((c,i)=>o[c]=r[i]);return o});
+let D;
+// Feel: the nine GEMS scales (Zentner et al. 2008) plus maturity, rated 0-10 by Claude for the songs in tools/emotions/gems.json
+const FEEL=[["wonder","Wonder","filled with wonder, amazed"],["transcendence","Transcendence","spiritual, uplifted, awe"],["tenderness","Tenderness","tender, affectionate, in love"],["nostalgia","Nostalgia","nostalgic, sentimental, dreamy"],["peacefulness","Peacefulness","calm, serene, relaxed"],["power","Power","strong, energetic, triumphant"],["joyful","Joyful activation","joyful, bouncy, makes you want to dance"],["tension","Tension","tense, agitated, nervous"],["sadness","Sadness","sad, sorrowful, tearful"],["maturity","Maturity","emotionally mature: ambivalence, responsibility, commitment, repair, acceptance, honest loss (empty for instrumentals)"]];
+const FEELCOLS=[...FEEL.map(s=>["f_"+s[0],s[1],1]),["f_conf","Sure",1]],FEEL_KEYS=["name","artist","stars",...FEELCOLS.map(c=>c[0]),"album"];
+let feelMode=false,cubeMode=false,FEELSTAT={};
+// tooltip of a score: where it stands in the distribution of ALL rated songs (any stars, hearts or category)
+const colorDev=()=>{const e=$("fl_color");return !e||e.value==="dev"};
+// cool (page blue) below the mean, warm (orange) above; full colour at ±2.5 stdev, nothing at the mean
+function devStyle(k,v){const s=FEELSTAT[k.slice(2)],z=s&&s.sd?(v-s.m)/s.sd:0,c=Math.max(-2.5,Math.min(2.5,z)),pct=Math.round(Math.abs(c)/2.5*55);
+ return pct<3?"":` style="background:color-mix(in srgb,var(${c>0?"--warm":"--cool"}) ${pct}%,transparent)"`}
+function feelTip(k,o){if(k==="f_conf")return o.f_conf==null?"":"Confidence in these ratings: "+["","low","medium","high"][o.f_conf];
+ const key=k.slice(2),s=FEELSTAT[key],v=o[k],lab=FEEL.find(x=>x[0]===key)[1];
+ if(v==null)return lab+": no score (an instrumental has no words to judge)";
+ const d=v-s.m,z=s.sd?d/s.sd:0,sg=x=>(x<0?"−":"+")+Math.abs(x).toFixed(2);
+ return `${lab} ${v} · mean ${s.m.toFixed(2)} · stdev ${s.sd.toFixed(2)} · ${sg(d)} points from the mean (${sg(z)} stdev) · all ${s.n.toLocaleString()} rated songs`}
+// two search forms: punctuation as word breaks (_h: "spider man") and joined (_j: "spiderman", "aha" for a-ha, "acdc")
+const sp=s=>fold(s).replace(/[^\p{L}\p{N}]+/gu," ").trim(), jn=s=>fold(s).replace(/[-'’.\/&]/g,"").replace(/[^\p{L}\p{N}]+/gu," ").trim();
+const index=(o,f)=>{const t=f.map(k=>o[k]).join(" | ");o._h=" "+sp(t)+" ";o._j=" "+jn(t)+" "};
+function build(){D={itunes:objs(LIB.itunes_cols,LIB.itunes),archive:objs(LIB.archive_cols,LIB.archive)};
+D.itunes.forEach((o,i)=>{o._ix=i;const f=o.feel;FEEL.forEach((s,j)=>o["f_"+s[0]]=f?f[j]:null);o.f_conf=f?f[10]:null});
+ FEELSTAT={};FEEL.forEach((s,j)=>{const v=D.itunes.map(o=>o.feel?o.feel[j]:null).filter(x=>x!=null),n=v.length,m=v.reduce((a,b)=>a+b,0)/n;FEELSTAT[s[0]]={n,m,sd:Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1))}}); // mean and stdev of each scale over all rated songs
+ for(const o of D.itunes)index(o,["name","artist","album","composer","genres"]);
+ for(const o of D.archive)index(o,["name","artist","album","category","volume"])}
+build();
+const COLS={
+ itunes:[["name","Name"],["artist","Artist"],["album","Album"],["year","Year",1],["loved","❤️",1],["stars","Rating"],["plays","Plays",1],["last_played","Last played"],["genres","Genres"],["country","Ctry"],["composer","Composer"],["secs","Time",1],["path","Path"]],
+ archive:[["name","Name"],["artist","Artist"],["album","Album"],["category","Category"],["volume","Volume"],["in_itunes","In iTunes",1],["path","Path"]]};
+// the Feel tab has its own column set (same song columns plus the scores), with its own hidden/order settings
+{const it=k=>COLS.itunes.find(c=>c[0]===k);COLS.feel=[it("name"),it("artist"),it("stars"),...FEELCOLS,...COLS.itunes.filter(c=>!["name","artist","stars"].includes(c[0]))];
+ COLS.cube=[it("name"),it("artist"),it("stars"),FEELCOLS.find(c=>c[0]==="f_maturity"),...COLS.itunes.filter(c=>!["name","artist","stars"].includes(c[0]))]}
+let hidden={itunes:new Set(),archive:new Set(),feel:new Set(),cube:new Set()};
+const HIDE_BY_DEFAULT={itunes:["path"],archive:[],feel:["year","loved","plays","last_played","genres","country","composer","secs","path"],cube:["year","loved","last_played","genres","country","composer","secs","path"]},allKeys=()=>({itunes:COLS.itunes.map(c=>c[0]),archive:COLS.archive.map(c=>c[0]),feel:COLS.feel.map(c=>c[0]),cube:COLS.cube.map(c=>c[0])});
+const graphOn=()=>feelMode&&!!$("fl_graph")&&$("fl_graph").checked; // Feel tab with its graph switched on
+const ck=()=>cubeMode||graphOn()?"cube":feelMode?"feel":src; // which column group is on screen (the graph hides the score columns, like Feel Axes)
+try{const h=JSON.parse(localStorage.getItem("ls_hidden")||"{}"),seen=h.seen||{};
+ for(const k in hidden){hidden[k]=new Set(h[k]||[]);for(const c of HIDE_BY_DEFAULT[k])if(!(seen[k]||[]).includes(c))hidden[k].add(c)}}catch(e){
+ for(const k in hidden)HIDE_BY_DEFAULT[k].forEach(c=>hidden[k].add(c))}
+const defOrder=()=>({itunes:COLS.itunes.map(c=>c[0]),archive:COLS.archive.map(c=>c[0]),feel:COLS.feel.map(c=>c[0]),cube:COLS.cube.map(c=>c[0])});
+let colOrder=defOrder();
+try{const o=JSON.parse(localStorage.getItem("ls_order")||"{}");for(const k in colOrder){const base=colOrder[k],saved=(o[k]||[]).filter(x=>base.includes(x));{const res=[...saved];for(const m of base.filter(x=>!saved.includes(x))){const nxt=base.slice(base.indexOf(m)+1).find(x=>res.includes(x));nxt?res.splice(res.indexOf(nxt),0,m):res.push(m)}colOrder[k]=res}}}catch(e){}
+const saveOrder=()=>{try{localStorage.setItem("ls_order",JSON.stringify(colOrder))}catch(e){}};
+const ordered=()=>colOrder[ck()].map(k=>COLS[ck()].find(c=>c[0]===k));
+const vis=()=>ordered().filter(c=>!hidden[ck()].has(c[0]));
+function picker(){$("colbox").innerHTML=`<div class="mh">Columns <small>(drag headers to reorder)</small></div>`+ordered().map(([k,l])=>`<label><input type="checkbox" data-c="${k}" ${hidden[ck()].has(k)?"":"checked"}> ${l}</label>`).join("")+`<button id="resetorder">↺ Reset order</button>`}
+$("colbox").onclick=e=>{if(e.target.id==="resetorder"){colOrder[ck()]=defOrder()[ck()];saveOrder();picker();render()}};
+$("colbox").onchange=e=>{const k=e.target.dataset.c,h=hidden[ck()];e.target.checked?h.delete(k):h.add(k);
+ if(h.size>=COLS[ck()].length){h.delete(k);e.target.checked=true}
+ if(sort.k&&h.has(sort.k))sort={k:null,d:0};
+ try{localStorage.setItem("ls_hidden",JSON.stringify({itunes:[...hidden.itunes],archive:[...hidden.archive],feel:[...hidden.feel],cube:[...hidden.cube],seen:allKeys()}))}catch(e){}
+ run()};
+// right-click any column header: the column menu pops up at the pointer
+function showColMenu(x,y){picker();const m=$("colbox");m.hidden=false;
+ m.style.left=Math.max(4,Math.min(x,innerWidth-m.offsetWidth-8))+"px";m.style.top=Math.max(4,Math.min(y,innerHeight-m.offsetHeight-8))+"px"}
+const hideColMenu=()=>{$("colbox").hidden=true};
+$("th").addEventListener("contextmenu",e=>{e.preventDefault();hideTip();showColMenu(e.clientX,e.clientY)});
+document.addEventListener("mousedown",e=>{if(!$("colbox").contains(e.target))hideColMenu()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideColMenu()});
+addEventListener("blur",hideColMenu);
+let src="itunes",sort={k:null,d:0},shown=PAGE,res=[];
+const noFacet=()=>({artist:null,album:null,volume:null});
+let facet=noFacet(),hist=[]; // artist/album/CD volume picked by clicking a cell; hist = filter states to go back to
+function fill(sel,vals){const keep=sel.value;while(sel.options.length>1)sel.remove(1);
+ for(const v of [...new Set(vals)].filter(Boolean).sort())sel.add(new Option(v,v));sel.value=keep}
+function fillFilters(){
+ fill($("dec"),D.itunes.filter(o=>o.year).map(o=>Math.floor(o.year/10)*10+"s"));
+ fill($("cty"),D.itunes.map(o=>o.country));
+ {const n=D.archive.length,inn=D.archive.filter(o=>o.in_itunes).length,o=$("inits").options;
+  o[0].text="any ("+n.toLocaleString()+")";o[1].text="in iTunes ("+inn.toLocaleString()+")";o[2].text="not in iTunes ("+(n-inn).toLocaleString()+")"}
+ fill($("cat"),D.archive.map(o=>o.category));
+ const dl=$("pllist"),pl=$("pl");dl.innerHTML="";
+ for(const [n,ids] of LIB.playlists||[]){const o=document.createElement("option");o.value=n;o.label=ids.length.toLocaleString()+" songs";dl.appendChild(o)}
+ if(pl.value&&!(LIB.playlists||[]).some(p=>p[0]===pl.value))pl.value=""}
+fillFilters();
+function fmt(k,v){if(k==="secs")return Math.floor(v/60)+":"+String(v%60).padStart(2,"0");
+ if(k==="stars")return v?"⭐".repeat(v):"";if(k==="loved")return v?"❤️":"";if(k==="year"&&!v)return"";if(k==="in_itunes")return v?"✔":"";return v}
+function run(keep){
+ if(keep!==true&&Q.length){stale=true;if(cur)$("pnow").textContent=nowText()} // a filter/search/sort change drops what comes next, not the song playing now
+ const terms=fold($("q").value).split(/\s+/).filter(Boolean).map(t=>[sp(t),jn(t)]).filter(t=>t[0]||t[1]);
+ let a=D[src];
+ const dec=$("dec").value,cty=$("cty").value,cat=$("cat").value,st=+$("stars").value,smax=+$("starsmax").value;
+ const plName=src==="itunes"?$("pl").value:"",plIds=plName?((LIB.playlists.find(p=>p[0]===plName)||[0,null])[1]):null; // text that is not (yet) a playlist name filters nothing
+ const rank=plIds&&new Map(plIds.map((ix,i)=>[ix,i]).reverse()); // first position wins if a track is listed twice
+ res=a.filter(o=>{
+  if(rank&&!rank.has(o._ix))return false;
+  if(!terms.every(([a,b])=>(a&&o._h.includes(a))||(b&&o._j.includes(b))))return false;
+  if(facet.volume!=null&&o.volume!==facet.volume)return false;
+  if(facet.artist||facet.album){ // exact name, but ignoring capitals/accents so a chip also works across tabs ("A-HA" in the archive = "a-ha")
+   if(facet.artist&&(o._fa??=fold(o.artist))!==fold(facet.artist))return false;
+   if(facet.album&&(o._fb??=fold(o.album))!==fold(facet.album))return false}
+  if(src==="itunes"){
+   if(feelMode&&!feelOk(o))return false;
+   if(cubeMode&&!cubeOk(o))return false;
+   if(o.stars<st||o.stars>smax||($("loved").checked&&!o.loved))return false;
+   if(dec&&Math.floor(o.year/10)*10+"s"!==dec)return false;
+   if(cty&&o.country!==cty)return false;
+  }else{ if(cat&&o.category!==cat)return false; const it=$("inits").value;if(it==="in"&&!o.in_itunes)return false;if(it==="out"&&o.in_itunes)return false; }
+  return true});
+ if(rank&&!sort.k)res.sort((x,y)=>rank.get(x._ix)-rank.get(y._ix)); // no sort chosen: playlist order
+ if(sort.k){const k=sort.k;res.sort((x,y)=>(x[k]>y[k]?1:x[k]<y[k]?-1:0)*(sort.d?-1:1))}
+ shown=PAGE;document.querySelector("main").scrollTop=0;render();saveSession()}
+const W={f_wonder:74,f_transcendence:96,f_tenderness:86,f_nostalgia:84,f_peacefulness:96,f_power:66,f_joyful:112,f_tension:74,f_sadness:76,f_maturity:80,f_conf:60,year:64,loved:48,stars:120,plays:64,secs:64,country:56,in_itunes:84,last_played:110,track:56,genres:240,path:520,volume:90,category:140,composer:180};
+function render(){
+ const cols=vis();let tw=0;
+ $("cg").innerHTML=cols.map(([k])=>{const w=W[k]||200;tw+=w;return `<col style="width:${w}px">`}).join("");
+ $("tbl").style.width=tw+"px";
+ $("th").innerHTML="<tr>"+vis().map(([k,l,n])=>`<th data-k="${k}" draggable="true" data-tip="Click to sort, drag to move, right-click for columns" class="${sort.k===k?"s"+(sort.d?" d":""):""}">${l}</th>`).join("")+"</tr>";
+ $("tb").innerHTML=res.slice(0,shown).map((o,i)=>`<tr data-i="${i}"${cur&&o.path===cur.path?' class="now"':""}>`+vis().map(([k,,n])=>{
+  if(k==="stars"&&src==="itunes")return `<td class="st" data-k="stars">`+[1,2,3,4,5].map(n=>`<span data-n="${n}" class="${n<=o.stars?"on":""}">${n<=o.stars?"★":"☆"}</span>`).join("")+"</td>";
+  const v=((k==="name"&&o.protected?"🔒 ":"")+String(fmt(k,o[k])??"")).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const fv=k.startsWith("f_")&&k!=="f_conf"&&o[k]!=null?(colorDev()?devStyle(k,o[k]):` style="background:hsl(205 80% 50% / ${o[k]*0.06})"`):"";
+  return `<td class="${n?(k.startsWith("f_")?"fv":"n"):""}" data-k="${k}" data-tip="${k.startsWith("f_")?feelTip(k,o):v}"${fv}>${v}</td>`}).join("")+"</tr>").join("");
+ $("count").textContent=res.length.toLocaleString()+" of "+((feelMode||cubeMode)?D.itunes.filter(o=>o.feel).length:D[src].length).toLocaleString()+((feelMode||cubeMode)?" with feel ratings":"");
+ $("more").hidden=res.length<=shown;if(plotOn())drawCube()}
+// --- player: works on the current selection (itunes tab), a snapshot taken when playback starts ---
+const audio=new Audio();let Q=[],order=[],pos=-1,cur=null,shuf=false,errs=0,stale=false; // stale: selection changed since the queue was built
+const mmss=t=>isFinite(t)?Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0"):"0:00";
+const served=location.protocol==="http:";
+if(served)new EventSource("/presence"); // kept open while this window lives; the helper stops itself when the last one closes (server.py)
+if(served&&"serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{}); // lets the browser install the page as an app
+// opened through server.py: it streams audio and can rebuild data.js
+const fileUrl=p=>served?"/audio?p="+encodeURIComponent(p):"file:///"+p.split("\\").join("/").split("/").map((s,i)=>i?encodeURIComponent(s):s).join("/");
+function shuffled(first){const a=[...Q.keys()];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+ if(first>=0){a.splice(a.indexOf(first),1);a.unshift(first)}return a}
+function setOrder(first){order=shuf?shuffled(first):[...Q.keys()];pos=first>=0?order.indexOf(first):-1}
+const nowText=()=>"▶ "+cur.name+" — "+cur.artist+"  ("+(stale?"next: from the current results":(pos+1)+"/"+Q.length+(shuf?", shuffled":""))+")";
+function rebuildQueue(){Q=res.slice();setOrder(cur?Q.findIndex(o=>o.path===cur.path):-1);stale=false} // keeps the playing song's place if it is in the new results
+function startQueue(i){if(src!=="itunes"){$("pnow").textContent="Archive songs are on CDs, so they can't be played here";return}
+ if(i!=null&&res[i]&&res[i].protected){protectedNote(res[i]);return}  // clicked a protected song: say why, keep what is playing
+ if(!res.length)return;Q=res.slice();stale=false;const first=i==null?(shuf?Math.floor(Math.random()*Q.length):0):i;setOrder(first);playAt(pos)}
+function protectedNote(o){const prev=$("pnow").textContent,msg="🔒 "+o.name+": a protected iTunes purchase, a browser can't play it. Play it in iTunes.";
+ $("pnow").textContent=msg;setTimeout(()=>{if($("pnow").textContent===msg)$("pnow").textContent=prev},3000)}
+function playAt(p){if(!Q.length)return;pos=(p+order.length)%order.length;
+ if(Q[order[pos]].protected){ // in the queue but unplayable here: say so and skip to the next song (stop if everything left is protected)
+  const o=Q[order[pos]];$("pnow").textContent="🔒 "+o.name+" is protected, skipping (play it in iTunes)";
+  if(++errs<5)setTimeout(()=>playAt(pos+1),900);else{errs=0;$("pnow").textContent="🔒 Stopped: only protected songs came up";audio.pause()}return}
+ cur=Q[order[pos]];audio.src=fileUrl(cur.path);audio.play().catch(()=>{});
+ $("pnow").textContent=nowText();
+ $("pnow").dataset.tip=cur.path;mark();saveSession();
+ if("mediaSession"in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:cur.name,artist:cur.artist,album:cur.album})}
+function mark(){document.querySelectorAll("#tb tr").forEach(tr=>tr.classList.toggle("now",cur&&res[+tr.dataset.i].path===cur.path));
+ if(plotOn())paint()} // the playing song's ring on the graphs
+const next=()=>{if(stale&&src==="itunes")rebuildQueue();Q.length?playAt(pos+1):startQueue()},
+ prev=()=>{if(cur&&audio.currentTime>3){audio.currentTime=0;return}if(stale&&src==="itunes")rebuildQueue();if(!Q.length)return startQueue();playAt(pos<0?0:pos-1)};
+const toggle=()=>{if(!cur)return startQueue();audio.paused?audio.play():audio.pause()};
+const IDLE=$("pnow").textContent;
+function stopPlayback(){ // back to the idle state: song unloaded and rewound, queue dropped; Play then starts the current results
+ audio.pause();audio.removeAttribute("src");audio.load();
+ cur=null;Q=[];order=[];pos=-1;stale=false;errs=0;
+ $("pplay").textContent="▶";$("pnow").textContent=IDLE;delete $("pnow").dataset.tip;$("seek").value=0;$("ptime").textContent="0:00 / 0:00";mark();
+ if("mediaSession"in navigator)navigator.mediaSession.metadata=null;saveSession()}
+$("pnext").onclick=()=>{next();showNow()};$("pprev").onclick=()=>{prev();showNow()};$("pplay").onclick=toggle;$("pstop").onclick=stopPlayback;
+$("pshuf").onclick=()=>{shuf=!shuf;$("pshuf").classList.toggle("on",shuf);if(Q.length&&!stale)setOrder(Q.indexOf(cur));saveSession()};
+// volume: the slider is squared before it reaches the audio element (feels natural at low levels); remembered
+let vol=80,muted=false;
+try{const sv=JSON.parse(localStorage.getItem("ls_volume")||"null");if(sv&&sv.vol>=0&&sv.vol<=100){vol=sv.vol;muted=!!sv.muted}}catch(e){}
+function applyVolume(){audio.volume=muted?0:Math.pow(vol/100,2);$("vol").value=vol;$("vol").dataset.tip="Volume "+vol+"% (mouse wheel adjusts)";
+ $("pmute").textContent=muted||vol===0?"🔇":vol<50?"🔉":"🔊";$("pmute").dataset.tip=muted?"Unmute":"Mute";
+ try{localStorage.setItem("ls_volume",JSON.stringify({vol,muted}))}catch(e){}}
+$("vol").oninput=e=>{vol=+e.target.value;muted=false;applyVolume()};
+$("pmute").onclick=()=>{muted=!muted;applyVolume()};
+applyVolume();
+audio.onplay=()=>{restoring=false;$("pplay").textContent="⏸"};audio.onpause=()=>{$("pplay").textContent="▶"};
+audio.onplaying=()=>{errs=0};audio.onended=next;
+audio.onerror=()=>{if(!cur)return;if(restoring){restoring=false;cur=null;Q=[];order=[];pos=-1;$("pnow").textContent=IDLE;mark();saveSession();return}if(++errs<5){$("pnow").textContent="Can't play "+cur.name+" (skipping)";setTimeout(next,600)}else{$("pnow").textContent="Stopped: several songs in a row couldn't be played"}};
+audio.ontimeupdate=()=>{const now=Date.now();if(now-lastSave>3000){lastSave=now;saveSession()}; // position is kept up to date while playing
+ $("seek").value=audio.duration?audio.currentTime/audio.duration*1000:0;$("ptime").textContent=mmss(audio.currentTime)+" / "+mmss(audio.duration)};
+$("seek").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/1000*audio.duration};
+let rtimer;
+function flash(msg){const el=$("rmsg"),old=el.dataset.old??el.textContent;el.dataset.old=old;el.textContent=msg;clearTimeout(rtimer);
+ rtimer=setTimeout(()=>{el.textContent=old;delete el.dataset.old},2000)}
+async function copyText(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}}
+const TAG="[To Rate]"; // rating from a playlist with this tag in its name also takes the song off it (server.py checks the same tag)
+async function rateSong(o,n,tr){ // click a star = set that rating in iTunes (click the current rating again = no rating)
+ if(!served){flash("Rating needs serve.bat (the helper talks to iTunes)");return}
+ const stars=n===o.stars?0:n,plName=$("pl").value,toRate=plName.includes(TAG)&&LIB.playlists.some(p=>p[0]===plName)&&stars>0;flash("Setting "+stars+" stars in iTunes…");
+ try{const j=await (await fetch("/rate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:o.path,name:o.name,stars,from_playlist:toRate?plName:""})})).json();
+  if(!j.ok){flash("Not changed: "+j.error);return}
+  o.stars=j.stars;
+  if(!toRate||!j.removed){render();flash(o.name+": "+j.stars+" stars");return}
+  // rated from the to-rate list: the row turns green, then slides out; the playlist is updated here and in iTunes
+  tr.classList.add("rated");tr.querySelectorAll("td.st span").forEach(s=>{const k=+s.dataset.n<=o.stars;s.className=k?"on":"";s.textContent=k?"★":"☆"});
+  flash("Rated "+j.stars+"★ and removed from the playlist");
+  setTimeout(()=>{tr.classList.add("out");setTimeout(()=>{
+   const pl=LIB.playlists.find(p=>p[0]===plName);if(pl)pl[1]=pl[1].filter(ix=>ix!==o._ix);
+   const at=res.indexOf(o);if(at>=0)res.splice(at,1);render();
+   const f=[...$("pllist").options].find(o=>o.value===plName);if(f&&pl)f.label=pl[1].length.toLocaleString()+" songs"},450)},1000)}
+ catch(e){flash("Can't reach the helper")}}
+$("tb").onclick=e=>{const td=e.target.closest("td"),tr=e.target.closest("tr");if(!tr)return;
+ const sp=e.target.closest("span[data-n]");if(sp&&src==="itunes"){rateSong(res[+tr.dataset.i],+sp.dataset.n,tr);return}
+ if(td&&td.dataset.k==="path"){copyText(td.dataset.tip).then(()=>flash("Copied path"));return}
+ if(td&&(td.dataset.k==="artist"||td.dataset.k==="album"||(td.dataset.k==="volume"&&src==="archive"))&&!String(getSelection())){const o=res[+tr.dataset.i],v=o&&o[td.dataset.k];if(v||v===0){pickFacet(td.dataset.k,v,e.ctrlKey||e.metaKey);return}}
+ if(String(getSelection()))return; // user is selecting text: don't start a song
+ startQueue(+tr.dataset.i)};
+function showNow(){ // jump to the playing song's row in the list (click the now-playing text, or Next / Previous)
+ if(!cur)return;const at=res.findIndex(o=>o.path===cur.path);
+ if(at<0){flash("The playing song is not in the current results");return}
+ if(at>=shown){shown=at+PAGE;render()}
+ const tr=document.querySelector(`#tb tr[data-i="${at}"]`);if(!tr)return;
+ tr.scrollIntoView({block:"center"});tr.classList.remove("ping");void tr.offsetWidth;tr.classList.add("ping")}
+$("pnow").onclick=showNow;
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&!/INPUT|SELECT|BUTTON|SUMMARY/.test(e.target.tagName)){e.preventDefault();toggle()}});
+if("mediaSession"in navigator)for(const[a,f]of[["play",toggle],["pause",toggle],["stop",stopPlayback],["nexttrack",next],["previoustrack",prev]])navigator.mediaSession.setActionHandler(a,f);
+function reloadData(){
+ const before=D.itunes.length,btn=$("refresh"),sc=document.createElement("script"),done=()=>{btn.disabled=false;btn.textContent="⟳ Refresh data";sc.remove()};
+ sc.src="data.js?"+Date.now();
+ sc.onload=()=>{const mn=document.querySelector("main"),st=mn.scrollTop,sh=shown;build();buildCube();fillFilters();run(true);shown=sh;render();mn.scrollTop=st;mark();
+  const d=D.itunes.length-before;$("rmsg").textContent=(LIB.built?"Data from "+LIB.built+" · ":"")+(d?(d>0?"+":"")+d+" tracks":"no new tracks")+(served?"":" (not rebuilt: open via serve.bat to rebuild from here)");
+  done()};
+ sc.onerror=()=>{$("rmsg").textContent="Couldn't reload data.js";done()};
+ document.head.appendChild(sc)}
+$("refresh").onclick=async()=>{
+ const btn=$("refresh");btn.disabled=true;
+ if(!served)return reloadData();
+ btn.textContent="⟳ Rebuilding…";$("rmsg").textContent="Rebuilding from iTunes (the list stays usable)…";
+ try{const r=await fetch("/rebuild",{method:"POST"}),j=await r.json();
+  if(!j.ok){$("rmsg").textContent="Rebuild failed: "+(j.error||j.output||r.status);btn.disabled=false;btn.textContent="⟳ Refresh data";return}
+ }catch(e){$("rmsg").textContent="Can't reach server.py (is its window still open?)";btn.disabled=false;btn.textContent="⟳ Refresh data";return}
+ reloadData()};
+const resetFilters=()=>{resetCube();feelReset();$("q").value="";$("stars").value="0";$("loved").checked=false;$("inits").value="";
+ for(const id of["pl","dec","cty","cat"])$(id).value="";$("starsmax").value="5"};
+$("clearf").onclick=()=>{facet=noFacet();resetFilters();chips();run()};
+// click an Artist / Album cell: show only that artist/album (clears the other filters; Ctrl-click keeps them). "back" restores the filters from before.
+const TABSEL={itunes:"#tabs [data-s=itunes]:not([data-feel]):not([data-cube])",archive:"#tabs [data-s=archive]",feel:"#tabs [data-feel]",cube:"#tabs [data-cube]"};
+const tabName=()=>cubeMode?"cube":feelMode?"feel":src;
+function captureState(){const cx={};if(CUBE)for(const k of["0","1","2","m"])cx[k]=[$("cx"+k+"_lo").value,$("cx"+k+"_hi").value];
+ return{tab:tabName(),f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),loved:$("loved").checked,facet:{...facet},cx,g:$("fl_graph").checked,fo:[...feelOrder],sort:{...sort}}}
+function applyState(s,push){if(push){hist.push(captureState());if(hist.length>20)hist.shift()}
+ const want=TABSEL[s.tab]?s.tab:"itunes";if(want!==tabName())document.querySelector(TABSEL[want]).click();
+ if(want==="feel")$("fl_graph").checked=!!s.g; // the graph switch belongs to the Feel tab; other presets leave it as it is
+ feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];layout();picker();
+ for(const id of SESSION_FIELDS)if(s.f&&s.f[id]!=null&&$(id))$(id).value=s.f[id];
+ $("loved").checked=!!s.loved;facet={...noFacet(),...(s.facet||{})};
+ if(CUBE&&s.cx)for(const k in s.cx)if($("cx"+k+"_lo")){$("cx"+k+"_lo").value=s.cx[k][0];$("cx"+k+"_hi").value=s.cx[k][1]}
+ sort=s.sort&&s.sort.k&&COLS[ck()].some(c=>c[0]===s.sort.k)?{k:s.sort.k,d:s.sort.d?1:0}:{k:null,d:0};
+ readFeel();readCube();chips();run()}
+const snap=captureState,restoreSnap=s=>applyState(s,false);
+function pickFacet(kind,value,keep){hist.push(snap());if(hist.length>20)hist.shift();
+ if(!keep){resetFilters();facet=noFacet()}
+ facet[kind]=value;readFeel();chips();run()}
+function chips(){const c=$("fchips"),esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+ c.innerHTML=(hist.length?'<button class="chip" data-x="back" data-tip="Back to the filters you had before the last artist/album click">← back</button>':"")
+  +(facet.artist?`<span class="chip on">Artist: ${esc(facet.artist)} <b data-x="artist" data-tip="Remove this filter">×</b></span>`:"")
+  +(facet.album?`<span class="chip on">Album: ${esc(facet.album)} <b data-x="album" data-tip="Remove this filter">×</b></span>`:"")
+  +(facet.volume!=null?`<span class="chip on">Volume: ${esc(facet.volume)} <b data-x="volume" data-tip="Remove this filter">×</b></span>`:"")}
+$("fchips").onclick=e=>{const x=e.target.dataset.x;if(!x)return;
+ if(x==="back"){restoreSnap(hist.pop());return}
+ facet[x]=null;chips();run()};
+$("q").oninput=run;
+$("qclear").onclick=()=>{$("q").value="";$("q").focus();run()}; // the × shows only while there is text (CSS :placeholder-shown)$("more").onclick=()=>{shown+=PAGE;render()};
+document.querySelectorAll("select,input[type=checkbox]").forEach(e=>e.onchange=run);
+// playlist box: filters when the text is exactly a playlist name (picked from the list or typed in full); leaving it with anything else clears it
+const plOk=v=>(LIB.playlists||[]).some(p=>p[0]===v);
+$("pl").oninput=()=>{const v=$("pl").value;if(v===""||plOk(v))run()};
+$("pl").onchange=()=>{if(!plOk($("pl").value))$("pl").value="";run()};
+// custom tooltips (the browser's own title= tooltip has a fixed, slow delay): any [data-tip] element
+const TIP_DELAY=150; // ms
+const tip=document.body.appendChild(Object.assign(document.createElement("div"),{id:"tip"}));
+let tipTimer;
+const hideTip=()=>{clearTimeout(tipTimer);tip.style.display="none"};
+function placeTip(e){const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=e.clientY+20;
+ tip.style.left=Math.max(4,x)+"px";tip.style.top=(y+tip.offsetHeight>innerHeight?Math.max(4,e.clientY-tip.offsetHeight-12):y)+"px"}
+document.addEventListener("mouseover",e=>{hideTip();const el=e.target.closest&&e.target.closest("[data-tip]");if(!el)return;
+ if(el.tagName==="TD"&&el.scrollWidth<=el.clientWidth&&!el.classList.contains("fv"))return; // cell text fully visible: nothing to add (except Feel scores: their tooltip is the distribution)
+ tipTimer=setTimeout(()=>{tip.textContent=el.dataset.tip;tip.style.display="block";placeTip(e)},TIP_DELAY)});
+document.addEventListener("mousemove",e=>{if(tip.style.display==="block")placeTip(e)});
+for(const ev of["mousedown","wheel","dragstart","keydown"])document.addEventListener(ev,hideTip,true);
+document.querySelector("main").addEventListener("scroll",()=>{hideTip();hideColMenu()});
+document.documentElement.addEventListener("mouseleave",hideTip);
+// mouse wheel anywhere in the volume rectangle (icon + slider) = +/-5 %, anywhere in the progress rectangle (slider + time) = skip +/-5 s; wheel up = more / forward
+let wheelAcc=0,lastWheel=0;
+function wheelSteps(e){const t=performance.now();if(t-lastWheel>400)wheelAcc=0;lastWheel=t;
+ wheelAcc+=e.deltaMode?e.deltaY*40:e.deltaY;const n=Math.trunc(wheelAcc/100);wheelAcc-=n*100;return -n} // touchpads: small deltas add up to a step
+function tipNow(e,text){tip.textContent=text;tip.style.display="block";placeTip(e)}
+for(const id of["volbox"])$(id).addEventListener("wheel",e=>{e.preventDefault();const n=wheelSteps(e);if(!n)return;
+ vol=Math.max(0,Math.min(100,vol+5*n));muted=false;applyVolume();tipNow(e,"Volume "+vol+"%")},{passive:false});
+for(const id of["seekbox"])$(id).addEventListener("wheel",e=>{e.preventDefault();const n=wheelSteps(e);if(!n||!audio.duration)return;
+ audio.currentTime=Math.max(0,Math.min(audio.duration,audio.currentTime+5*n));tipNow(e,mmss(audio.currentTime)+" / "+mmss(audio.duration))},{passive:false});
+let dragK=null;
+const clearDrag=()=>{dragK=null;document.querySelectorAll("th.over,th.dragging").forEach(x=>x.classList.remove("over","dragging"))};
+$("th").ondragstart=e=>{const th=e.target.closest("th");if(!th)return;dragK=th.dataset.k;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",dragK);th.classList.add("dragging")};
+$("th").ondragover=e=>{const th=e.target.closest("th");if(!th||!dragK)return;e.preventDefault();
+ document.querySelectorAll("th.over").forEach(x=>x.classList.remove("over"));if(th.dataset.k!==dragK)th.classList.add("over")};
+$("th").ondrop=e=>{const th=e.target.closest("th");if(!th||!dragK)return;e.preventDefault();
+ const a=colOrder[ck()],to=th.dataset.k,from=dragK;
+ if(to!==from){const ti=a.indexOf(to);a.splice(a.indexOf(from),1);a.splice(ti,0,from);saveOrder()} // the dragged column takes the target's place
+ clearDrag();render()};
+$("th").ondragend=clearDrag;
+const DESC_FIRST=new Set(["stars","plays","loved",...FEEL.map(s=>"f_"+s[0])]); // columns whose first click sorts high to low: rating, plays, the ten Feel scores (maturity included)
+$("th").onclick=e=>{const k=e.target.dataset.k;if(!k)return;sort={k,d:sort.k===k?(sort.d?0:1):(DESC_FIRST.has(k)?1:0)};run()};
+// --- Feel: one min/max slider pair per scale (0-10). A song stays only if every scale is inside its range. ---
+$("feel").innerHTML='<div id="fsl">'+FEEL.map(([k,l,tip])=>`<div class="fbox" data-tip="${tip}"><b>${l} <small id="fv_${k}">0–10</small></b><div class="dual"><div class="tr"></div><div class="fill" id="ff_${k}"></div><input type="range" id="fl_${k}_lo" min="0" max="10" value="0"><input type="range" id="fl_${k}_hi" min="0" max="10" value="10"></div></div>`).join("")+"</div>"
+ +`<div id="fopts"><button id="fl_reset" data-tip="All scales back to 0–10">Reset sliders</button><label class="fo" data-tip="Plot the songs: the first four scales you narrow become the graph (a line, a quadrant, a cube, then a fourth color). The score columns are hidden while it is on."><input type="checkbox" id="fl_graph"> Show graph</label><label class="fo" data-tip="How sure Claude was when rating the song: show only the songs rated with that confidence (Low = the ones to take with a grain of salt)">Confidence <select id="fl_conf"><option value="all">All</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label><label class="fo">Color <select id="fl_color" data-tip="vs. mean: cool = below the average song, warm = above (all rated songs, capped at ±2.5 stdev). Raw: darker = higher score."><option value="dev">vs. the mean</option><option value="raw">raw score</option></select></label></div>`;
+const CONF={all:0,low:1,medium:2,high:3};let feelRange=[],feelConf=0,feelOrder=[]; // feelOrder: the scales whose slider is narrowed, in the order they were narrowed (the first four make the graph)
+const layout=()=>{$("cubebox").hidden=!plotOn()};
+function readFeel(){feelRange=FEEL.map(([k])=>[+$("fl_"+k+"_lo").value,+$("fl_"+k+"_hi").value]);{const c=$("fl_conf");if(c.selectedIndex<0)c.selectedIndex=0;feelConf=CONF[c.value]||0} // a value saved by an older version (1, 2, 3) matches no option: back to All
+ 
+ const nar=i=>feelRange[i][0]>0||feelRange[i][1]<10;feelOrder=feelOrder.filter(nar);FEEL.forEach((_,i)=>{if(nar(i)&&!feelOrder.includes(i))feelOrder.push(i)});
+ FEEL.forEach(([k],i)=>{const [lo,hi]=feelRange[i];$("fv_"+k).textContent=lo+"–"+hi;
+  const f=$("ff_"+k);f.style.left=`calc(7px + (100% - 14px) * ${lo/10})`;f.style.width=`calc((100% - 14px) * ${(hi-lo)/10})`;
+  $("fl_"+k+"_lo").style.zIndex=lo>=5?1:3;$("fl_"+k+"_hi").style.zIndex=lo>=5?3:1})}
+function feelOk(o){const f=o.feel;if(!f||(feelConf&&f[10]!==feelConf))return false;
+ for(let i=0;i<10;i++){const [lo,hi]=feelRange[i],v=f[i];if(v==null){if(lo>0||hi<10)return false;continue}if(v<lo||v>hi)return false}return true}
+$("feel").oninput=e=>{const t=e.target;if(t.type==="range"){const m=t.id.match(/^fl_(.+)_(lo|hi)$/);if(m){const lo=$("fl_"+m[1]+"_lo"),hi=$("fl_"+m[1]+"_hi");if(+lo.value>+hi.value){if(m[2]==="lo")hi.value=lo.value;else lo.value=hi.value}}}readFeel();run()};
+$("fl_conf").onchange=()=>{readFeel();run()};
+$("fl_graph").onchange=()=>{if(sort.k&&!COLS[ck()].some(c=>c[0]===sort.k))sort={k:null,d:0};layout();picker();run()};
+$("fl_color").onchange=()=>{render();saveSession()};
+const feelReset=()=>{for(const [k] of FEEL){$("fl_"+k+"_lo").value=0;$("fl_"+k+"_hi").value=10}$("fl_conf").value="all";readFeel()};
+$("fl_reset").onclick=()=>{feelReset();run()};readFeel();
+document.querySelectorAll("#tabs button[data-s]").forEach(b=>b.onclick=()=>{src=b.dataset.s;feelMode=b.dataset.feel==="1";cubeMode=b.dataset.cube==="1";if(src!=="archive"&&facet.volume!=null){facet.volume=null;chips()}sort={k:null,d:0};
+ document.querySelectorAll("#tabs button[data-s]").forEach(x=>x.classList.toggle("on",x===b));
+ picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run()});
+// --- Feel Axes tab (internal id "cube"): every rated song is a dot; the three axes are independent principal components of the nine GEMS scales
+// (tools/emotions/axes.py); dot colour = maturity (cool = below the average song, warm = above, hollow = no score).
+// The slider box picks the songs: dots inside stay bright, the list on the left shows exactly those. Plain canvas, no library. ---
+const CAM0={yaw:-0.6,pitch:0.4,zoom:1.4}; // the starting view: about three mouse-wheel ticks in
+let cubeView="cube",CUBE=null,cubeSel=new Set(),cubeProj=[],flatProj=[[],[],[]],cubeCam={...CAM0};
+const cubeRange=[[0,0],[0,0],[0,0]],cubeMat=[0,10];
+const matNarrowed=()=>cubeMat[0]>0||cubeMat[1]<10;
+function buildCube(){ // coordinates of every rated song on the three axes (from the axes saved by tools/emotions/axes.py)
+ CUBE=null;const A=LIB.axes;if(!A)return;
+ const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9],s1=[0,0,0],s2=[0,0,0];let cnt=0;
+ for(const o of D.itunes){o.cx=null;if(!o.feel)continue;
+  const z=[];for(let j=0;j<9;j++)z.push((o.feel[j]-A.mean[j])/A.sd[j]);
+  o.cx=A.axes.map(a=>{let s=0;for(let j=0;j<9;j++)s+=a.loadings[j]*z[j];return s/Math.sqrt(a.eigenvalue)});
+  let h=(o._ix*2654435761)>>>0; // a small fixed jitter, so songs with identical scores do not hide each other
+  o.cj=[0,1,2].map(()=>{h=(h*1664525+1013904223)>>>0;return(h/4294967296-0.5)*0.3});
+  cnt++;for(let i=0;i<3;i++){lo[i]=Math.min(lo[i],o.cx[i]);hi[i]=Math.max(hi[i],o.cx[i]);s1[i]+=o.cx[i];s2[i]+=o.cx[i]**2}}
+ if(lo[0]>hi[0])return;
+ const mean=s1.map(x=>x/cnt),sd=s2.map((x,i)=>Math.sqrt(Math.max(0,x/cnt-mean[i]**2))); // mean and spread of every rated song on each axis (for the statistics block)
+ CUBE={ax:A.axes,lo:lo.map(x=>Math.floor(x*2-0.2)/2),hi:hi.map(x=>Math.ceil(x*2+0.2)/2),mean,sd};
+ buildCubeCtl();resetCube()}
+function buildCubeCtl(){
+ $("cubectl").innerHTML=CUBE.ax.map((a,i)=>`<div class="fbox" data-tip="${a.low}  ←  →  ${a.high}"><b>${a.name} <small id="cxv${i}"></small></b><div class="dual"><div class="tr"></div><div class="fill" id="cxf${i}"></div><input type="range" id="cx${i}_lo" min="${CUBE.lo[i]}" max="${CUBE.hi[i]}" step="0.1"><input type="range" id="cx${i}_hi" min="${CUBE.lo[i]}" max="${CUBE.hi[i]}" step="0.1"></div></div>`).join("")
+  +`<div class="fbox" data-tip="Maturity is the dot colour. Instrumentals have no maturity score, so narrowing this slider leaves them out"><b>Maturity <small id="cxvm"></small></b><div class="dual"><div class="tr"></div><div class="fill" id="cxfm"></div><input type="range" id="cxm_lo" min="0" max="10" step="1"><input type="range" id="cxm_hi" min="0" max="10" step="1"></div></div><button id="cx_reset" data-tip="The box grows back to every song">Reset box</button>`}
+function readCube(){if(!CUBE)return;
+ const one=(id,lo,hi,min,max,label,fmt)=>{const f=$("cxf"+id),d=max-min,l=$("cx"+id+"_lo"),h=$("cx"+id+"_hi");
+  $("cxv"+id).textContent=fmt(lo)+" – "+fmt(hi);f.style.left=`calc(7px + (100% - 14px) * ${(lo-min)/d})`;f.style.width=`calc((100% - 14px) * ${(hi-lo)/d})`;
+  l.style.zIndex=(lo-min)/d>=0.5?1:3;h.style.zIndex=(lo-min)/d>=0.5?3:1};
+ for(let i=0;i<3;i++){const lo=+$("cx"+i+"_lo").value,hi=+$("cx"+i+"_hi").value;cubeRange[i]=[lo,hi];one(i,lo,hi,CUBE.lo[i],CUBE.hi[i],"",x=>x.toFixed(1))}
+ const lo=+$("cxm_lo").value,hi=+$("cxm_hi").value;cubeMat[0]=lo;cubeMat[1]=hi;one("m",lo,hi,0,10,"",x=>String(x))}
+function resetCube(){if(!CUBE)return;for(let i=0;i<3;i++){$("cx"+i+"_lo").value=CUBE.lo[i];$("cx"+i+"_hi").value=CUBE.hi[i]}$("cxm_lo").value=0;$("cxm_hi").value=10;readCube()}
+function cubeOk(o){const c=o.cx;if(!c)return false;
+ for(let i=0;i<3;i++)if(c[i]<cubeRange[i][0]||c[i]>cubeRange[i][1])return false;
+ if(matNarrowed()){const m=o.f_maturity;if(m==null||m<cubeMat[0]||m>cubeMat[1])return false}
+ return true}
+$("cubectl").oninput=e=>{const m=e.target.id.match(/^cx(\d|m)_(lo|hi)$/);if(!m)return;
+ const lo=$("cx"+m[1]+"_lo"),hi=$("cx"+m[1]+"_hi");
+ if(+lo.value>+hi.value){if(m[2]==="lo")hi.value=lo.value;else lo.value=hi.value}
+ readCube();run()};
+$("cubectl").onclick=e=>{if(e.target.id==="cx_reset"){resetCube();run()}};
+// ---- drawing -------------------------------------------------------------------------------------------------
+// Both graph tabs share this code through a "model": Feel Axes = the three PCA axes (cubeModel); Feel + "Show graph" = the first four
+// narrowed scales (feelModel: up to three axes, the fourth colours the dots). A model says how many axes (n), where each song sits
+// (pos, with a small fixed jitter), its colour, the slider box, and which scales the statistics block reports.
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hex2=h=>{h=h.replace("#","");if(h.length===3)h=[...h].map(c=>c+c).join("");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]};
+const mixc=(a,b,t)=>`rgb(${[0,1,2].map(i=>Math.round(a[i]+(b[i]-a[i])*t)).join(",")})`;
+function sizeCanvas(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1,w=Math.max(10,Math.round(r.width*d)),h=Math.max(10,Math.round(r.height*d));
+ if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}const g=cv.getContext("2d");g.setTransform(d,0,0,d,0,0);return[r.width,r.height,g]}
+function palette(){const mut=hex2(cssv("--mut")||"#6b7280");return{mut,cool:hex2(cssv("--cool")||"#2f6fed"),warm:hex2(cssv("--warm")||"#ee8a1d"),acc:cssv("--acc")||"#2f6fed",line:cssv("--line")||"#e3e5e8",mutS:cssv("--mut")||"#6b7280",fg:cssv("--fg")||"#111"}}
+// cool below the mean of a scale, warm above, grey at the mean (full colour at ±2.5 stdev); null = no score
+function devColor(v,s,P){if(v==null)return null;const t=Math.max(-1,Math.min(1,(v-s.m)/s.sd/2.5));return mixc(P.mut,t>0?P.warm:P.cool,Math.abs(t))}
+const matColor=(o,P)=>devColor(o.f_maturity,FEELSTAT.maturity,P);
+const jit=(o,i)=>{let h=Math.imul(o._ix+1,374761393)+Math.imul(i+1,668265263)|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296-0.5}; // fixed per song and axis (and independent between axes), in -0.5..0.5
+function cubeModel(){return{kind:"cube",n:3,colorName:"maturity",lo:CUBE.lo,hi:CUBE.hi,box:cubeRange,
+ ax:CUBE.ax.map(a=>({name:a.name,lowT:a.low,highT:a.high,ls:a.low.split(" · ")[0],hs:a.high.split(" · ")[0]})),
+ has:o=>!!o.cx,val:(o,i)=>o.cx[i],pos:(o,i)=>o.cx[i]+o.cj[i],color:matColor,
+ stats:()=>[...CUBE.ax.map((a,i)=>({name:a.name,get:o=>o.cx?o.cx[i]:null,m:CUBE.mean[i],sd:CUBE.sd[i],dp:2})),{name:"Maturity",get:o=>o.f_maturity,m:FEELSTAT.maturity.m,sd:FEELSTAT.maturity.sd,dp:1}]}}
+function feelModel(){const dims=feelOrder.slice(0,4),axd=dims.slice(0,3),cd=dims.length>3?dims[3]:null;
+ return{kind:"feel",n:axd.length,dims,colorName:cd==null?null:FEEL[cd][1],lo:axd.map(()=>-0.6),hi:axd.map(()=>10.6),
+  box:axd.map(i=>[feelRange[i][0]-0.5,feelRange[i][1]+0.5]), // scores are whole numbers: the box wraps the first and last one
+  ax:axd.map(i=>({name:FEEL[i][1],lowT:"0",highT:FEEL[i][1]+" 10",ls:"0",hs:"10"})),
+  has:o=>!!o.feel&&axd.every(i=>o.feel[i]!=null),val:(o,i)=>o.feel[axd[i]],pos:(o,i)=>o.feel[axd[i]]+jit(o,i)*0.5,
+  color:cd==null?(o,P)=>`rgb(${P.mut.join(",")})`:(o,P)=>devColor(o.feel[cd],FEELSTAT[FEEL[cd][0]],P),
+  stats:()=>(dims.length?dims:FEEL.map((_,i)=>i)).map(i=>({name:FEEL[i][1],get:o=>o.feel?o.feel[i]:null,m:FEELSTAT[FEEL[i][0]].m,sd:FEELSTAT[FEEL[i][0]].sd,dp:1}))}}
+const plotOn=()=>cubeMode||graphOn();
+const curModel=()=>cubeMode?(CUBE?cubeModel():null):graphOn()?feelModel():null;
+const rot3=()=>{const M=curModel();return !!M&&M.n>=3};
+const dotsOf=M=>{const bright=[],dim=[];for(const o of D.itunes)if(M.has(o))(cubeSel.has(o._ix)?bright:dim).push(o);return[bright,dim]};
+const NOWRING="#00b4ff"; // bright blue ring around the song that is playing (even if the filters dim it)
+function ring(g,x,y,r){const R=r+4.5; // a page-colored halo under the ring and a soft glow set it apart from the dots around it
+ g.beginPath();g.arc(x,y,R,0,6.2832);g.strokeStyle=cssv("--bg")||"#fff";g.lineWidth=4.5;g.stroke();
+ g.save();g.shadowColor=NOWRING;g.shadowBlur=7;g.strokeStyle=NOWRING;g.lineWidth=1.8;g.beginPath();g.arc(x,y,R,0,6.2832);g.stroke();g.restore()}
+function drawCube(){if(!plotOn())return;const M=curModel();if(!M)return;
+ cubeSel=new Set(res.map(o=>o._ix));
+ $("cubecount").textContent=res.length.toLocaleString()+" songs lit";
+ document.querySelectorAll("#cubebar button[data-v]").forEach(b=>b.hidden=!cubeMode); // Cube / Flat only on the Feel Axes tab
+ $("cvreset").hidden=M.n<3;$("cv").style.cursor=M.n>=3?"":"default";
+ $("cv").hidden=cubeMode&&cubeView!=="cube";$("flatwrap").hidden=!(cubeMode&&cubeView==="flat");
+ drawStats(M);drawLegend(M);paint()}
+function paint(){const M=curModel();if(!M)return;
+ if(M.n>=3)cubeMode&&cubeView==="flat"?drawFlat(M):draw3D(M);
+ else if(M.n>0)cubeProj=plot2D($("cv"),M,0,M.n>1?1:null);
+ else{cubeProj=[];plotHint()}}
+function plotHint(){const P=palette(),[W,H,g]=sizeCanvas($("cv"));g.clearRect(0,0,W,H);
+ g.fillStyle=P.mutS;g.font="14px system-ui,sans-serif";g.textAlign="center";g.textBaseline="middle";
+ g.fillText("Narrow a slider to plot it:",W/2,H/2-12);g.fillText("the first four you narrow make the graph.",W/2,H/2+12)}
+// ---- what the selection looks like: mean of the songs in the list against the mean of all rated songs, per scale of the graph ----
+function drawStats(M){const el=$("cubestats");
+ const rows=M.stats().map(r=>{const v=res.map(r.get).filter(x=>x!=null),n=v.length,mean=n?v.reduce((a,b)=>a+b,0)/n:null,d=n?mean-r.m:null,z=n&&r.sd?d/r.sd:0;return{...r,n,mean,d,z}});
+ const sg=(x,dp)=>{const t=Math.abs(x).toFixed(dp);return(x<0&&+t?"−":"+")+t},num=(x,dp)=>{const t=x.toFixed(dp);return+t?t:(0).toFixed(dp)},esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+ const extra=M.kind==="feel"&&feelOrder.length>4?" · also filtering, not plotted: "+feelOrder.slice(4).map(i=>FEEL[i][1]).join(", "):"";
+ if(!res.length){el.innerHTML=`<div class="sth">No songs in the selection.${esc(extra)}</div>`;return}
+ el.innerHTML=`<div class="sth">The ${res.length.toLocaleString()} songs in the list: mean, and distance from the mean of all rated songs${esc(extra)}</div><div class="sg">`
+  +rows.map(r=>{if(!r.n)return `<span class="sc"><b>${esc(r.name.split(" ")[0])}</b> no scores</span>`;
+   const pct=Math.round(Math.min(1,Math.abs(r.z)/2.5)*55),bg=pct<3?"":` style="background:color-mix(in srgb,var(${r.z>0?"--warm":"--cool"}) ${pct}%,transparent)"`,
+    tip=`${r.name}: mean ${num(r.mean,2)} over ${r.n.toLocaleString()} songs in the list · all rated songs ${num(r.m,2)} · ${sg(r.d,2)} (${sg(r.z,2)} stdev)`;
+   return `<span class="sc" data-tip="${esc(tip)}"${bg}><b>${esc(r.name.split(" ")[0])}</b> ${num(r.mean,r.dp>1?r.dp:1)} <span>${sg(r.d,r.dp)}</span> <small>${sg(r.z,1)} sd</small></span>`}).join("")+"</div>"}
+function drawLegend(M){const s=[];
+ if(M.colorName)s.push(`<span>Dot color = ${M.colorName.toLowerCase()}</span><span class="lg"></span><span>cooler = below the average song · warmer = above${M.kind==="cube"?" · hollow = no score (instrumental)":""} · faded = outside your filters</span>`);
+ else s.push(`<span>One dot color until a 4th slider is narrowed (it then colors the dots) · faded = outside your filters</span>`);
+ if(M.kind==="feel"&&M.n)s.push(`<span>Scores are whole numbers, so dots are nudged slightly apart</span>`);
+ s.push(M.n>=3?`<span>Drag to rotate · wheel to zoom · double-click resets · click a dot to play it</span>`:M.n?`<span>Click a dot to play it</span>`:"");
+ $("cubelegend").innerHTML=s.join("")}
+function draw3D(M){const cv=$("cv"),[W,H,g]=sizeCanvas(cv),P=palette();g.clearRect(0,0,W,H);
+ const R=Math.min(W,H)*0.2*cubeCam.zoom,F=3.4,cyaw=Math.cos(cubeCam.yaw),syaw=Math.sin(cubeCam.yaw),cp=Math.cos(cubeCam.pitch),sp=Math.sin(cubeCam.pitch);
+ // centre the cube's outline (not its origin: perspective and tilt push the outline down) in the display area
+ let ax0=1e9,ax1=-1e9,ay0=1e9,ay1=-1e9;for(const x of[-1,1])for(const y of[-1,1])for(const z of[-1,1]){const x1=x*cyaw+z*syaw,z1=-x*syaw+z*cyaw,y1=y*cp-z1*sp,s=F/(F-(y*sp+z1*cp)*0.9);
+  ax0=Math.min(ax0,x1*s);ax1=Math.max(ax1,x1*s);ay0=Math.min(ay0,y1*s);ay1=Math.max(ay1,y1*s)}
+ const cx=W/2-(ax0+ax1)/2*R,cy=H/2+(ay0+ay1)/2*R;
+ const pr=(x,y,z)=>{const x1=x*cyaw+z*syaw,z1=-x*syaw+z*cyaw,y1=y*cp-z1*sp,z2=y*sp+z1*cp,s=F/(F-z2*0.9);return[cx+x1*s*R,cy-y1*s*R,z2,s]};
+ const nm=(v,i)=>(v-(M.lo[i]+M.hi[i])/2)/((M.hi[i]-M.lo[i])/2),q=o=>pr(nm(M.pos(o,0),0),nm(M.pos(o,1),1),nm(M.pos(o,2),2));
+ const corners=b=>[[b[0][0],b[1][0],b[2][0]],[b[0][1],b[1][0],b[2][0]],[b[0][1],b[1][1],b[2][0]],[b[0][0],b[1][1],b[2][0]],[b[0][0],b[1][0],b[2][1]],[b[0][1],b[1][0],b[2][1]],[b[0][1],b[1][1],b[2][1]],[b[0][0],b[1][1],b[2][1]]].map(c=>pr(...c));
+ const EDGES=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],FACES=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[3,2,6,7],[0,3,7,4],[1,2,6,5]];
+ const edges=(c,style,w)=>{g.strokeStyle=style;g.lineWidth=w;g.beginPath();for(const[a,b]of EDGES){g.moveTo(c[a][0],c[a][1]);g.lineTo(c[b][0],c[b][1])}g.stroke()};
+ const outer=corners([[-1,1],[-1,1],[-1,1]]);edges(outer,P.line,1);
+ const box=[0,1,2].map(i=>[nm(M.box[i][0],i),nm(M.box[i][1],i)]),bc=corners(box);
+ g.fillStyle=P.acc;g.globalAlpha=0.07;for(const f of FACES){g.beginPath();f.forEach((k,j)=>j?g.lineTo(bc[k][0],bc[k][1]):g.moveTo(bc[k][0],bc[k][1]));g.closePath();g.fill()}g.globalAlpha=1;
+ const[bright,dim]=dotsOf(M);
+ g.fillStyle=`rgba(${P.mut.join(",")},0.2)`;for(const o of dim){const p=q(o);g.fillRect(p[0]-1,p[1]-1,2,2)}
+ const pts=bright.map(o=>{const p=q(o);return[p[0],p[1],p[2],p[3],o]}).sort((a,b)=>a[2]-b[2]);
+ cubeProj=[];for(const[x,y,z,s,o]of pts){const r=Math.max(1.8,2.9*s*Math.min(1.4,cubeCam.zoom)),col=M.color(o,P);
+  g.beginPath();g.arc(x,y,r,0,6.2832);if(col){g.fillStyle=col;g.fill()}else{g.strokeStyle=P.mutS;g.lineWidth=1;g.stroke()}cubeProj.push([x,y,r,o])}
+ edges(bc,P.acc,1.6);
+ if(cur&&M.has(cur)){const p=q(cur);ring(g,p[0],p[1],Math.max(1.8,2.9*p[3]*Math.min(1.4,cubeCam.zoom)))}
+ // axis lines and their end labels
+ const lab=(p,t,al)=>{g.fillStyle=P.mutS;g.textAlign=al||"center";g.fillText(t,p[0],p[1])};g.font="12px system-ui,sans-serif";g.textBaseline="middle";
+ M.ax.forEach((a,i)=>{const e=(t)=>[i===0?t:-1,i===1?t:-1,i===2?t:-1],p0=pr(...e(-1)),p1=pr(...e(1));
+  g.strokeStyle=P.mutS;g.lineWidth=1.4;g.beginPath();g.moveTo(p0[0],p0[1]);g.lineTo(p1[0],p1[1]);g.stroke();
+  lab(pr(...e(1.22)),a.highT);lab(pr(...e(-1.22)),a.lowT)})}
+// one or two scales: a line (a strip, dots nudged vertically) or a quadrant, on the main canvas; returns the dots for picking
+function plot2D(cv,M,a,b){const P=palette(),[W,H,g]=sizeCanvas(cv),pad=34,line=b==null;g.clearRect(0,0,W,H);
+ const hh=Math.min((H-2*pad)/2,70),top=line?H/2-hh:pad,bot=line?H/2+hh:H-pad;
+ const X=v=>pad+(v-M.lo[a])/(M.hi[a]-M.lo[a])*(W-2*pad),Y=v=>bot-(v-M.lo[b])/(M.hi[b]-M.lo[b])*(bot-top);
+ const py=o=>line?H/2+jit(o,7)*2*hh*0.9:Y(M.pos(o,b));
+ g.strokeStyle=P.line;g.lineWidth=1;g.strokeRect(pad,top,W-2*pad,bot-top);
+ const bx0=X(M.box[a][0]),bx1=X(M.box[a][1]),by0=line?top:Y(M.box[b][1]),by1=line?bot:Y(M.box[b][0]);
+ g.fillStyle=P.acc;g.globalAlpha=0.08;g.fillRect(bx0,by0,bx1-bx0,by1-by0);g.globalAlpha=1;
+ const[bright,dim]=dotsOf(M);g.fillStyle=`rgba(${P.mut.join(",")},0.2)`;for(const o of dim)g.fillRect(X(M.pos(o,a))-1,py(o)-1,2,2);
+ const out=[];for(const o of bright){const x=X(M.pos(o,a)),y=py(o),col=M.color(o,P);g.beginPath();g.arc(x,y,3,0,6.2832);
+  if(col){g.fillStyle=col;g.fill()}else{g.strokeStyle=P.mutS;g.lineWidth=1;g.stroke()}out.push([x,y,3,o])}
+ if(cur&&M.has(cur))ring(g,X(M.pos(cur,a)),py(cur),3);
+ g.strokeStyle=P.acc;g.lineWidth=1.5;g.strokeRect(bx0,by0,bx1-bx0,by1-by0);
+ g.font="11px system-ui,sans-serif";g.fillStyle=P.mutS;g.textBaseline="middle";
+ g.textAlign="left";g.fillText("◂ "+M.ax[a].ls,pad,bot+16);g.textAlign="right";g.fillText(M.ax[a].hs+" ▸",W-pad,bot+16);
+ g.textAlign="center";g.fillText(M.ax[a].name+(line?"":"  ×  "+M.ax[b].name),W/2,top-16);
+ if(!line){g.save();g.translate(pad/2,bot);g.rotate(-Math.PI/2);g.textAlign="left";g.fillText("◂ "+M.ax[b].ls,0,0);g.textAlign="right";g.fillText(M.ax[b].hs+" ▸",bot-top,0);g.restore()}
+ return out}
+function drawFlat(M){const P=palette(),PAIRS=[[0,1],[0,2],[1,2]];
+ PAIRS.forEach(([a,b],k)=>{const cv=$("fc"+k),[W,H,g]=sizeCanvas(cv),pad=30;g.clearRect(0,0,W,H);
+  const X=v=>pad+(v-M.lo[a])/(M.hi[a]-M.lo[a])*(W-2*pad),Y=v=>H-pad-(v-M.lo[b])/(M.hi[b]-M.lo[b])*(H-2*pad);
+  g.strokeStyle=P.line;g.lineWidth=1;g.strokeRect(pad,pad,W-2*pad,H-2*pad);
+  g.fillStyle=P.acc;g.globalAlpha=0.08;g.fillRect(X(M.box[a][0]),Y(M.box[b][1]),X(M.box[a][1])-X(M.box[a][0]),Y(M.box[b][0])-Y(M.box[b][1]));g.globalAlpha=1;
+  const[bright,dim]=dotsOf(M);g.fillStyle=`rgba(${P.mut.join(",")},0.2)`;for(const o of dim)g.fillRect(X(M.pos(o,a))-1,Y(M.pos(o,b))-1,2,2);
+  flatProj[k]=[];for(const o of bright){const x=X(M.pos(o,a)),y=Y(M.pos(o,b)),col=M.color(o,P);g.beginPath();g.arc(x,y,2.6,0,6.2832);
+   if(col){g.fillStyle=col;g.fill()}else{g.strokeStyle=P.mutS;g.lineWidth=1;g.stroke()}flatProj[k].push([x,y,2.6,o])}
+  if(cur&&M.has(cur))ring(g,X(M.pos(cur,a)),Y(M.pos(cur,b)),2.6);
+  g.strokeStyle=P.acc;g.lineWidth=1.5;g.strokeRect(X(M.box[a][0]),Y(M.box[b][1]),X(M.box[a][1])-X(M.box[a][0]),Y(M.box[b][0])-Y(M.box[b][1]));
+  g.font="10px system-ui,sans-serif";g.fillStyle=P.mutS;g.textBaseline="middle";
+  g.textAlign="left";g.fillText("◂ "+M.ax[a].ls,pad,H-pad/2);g.textAlign="right";g.fillText(M.ax[a].hs+" ▸",W-pad,H-pad/2);
+  g.textAlign="center";g.fillText(M.ax[a].name+"  ×  "+M.ax[b].name,W/2,pad/2);
+  g.save();g.translate(pad/2,H-pad);g.rotate(-Math.PI/2);g.textAlign="left";g.fillText("◂ "+M.ax[b].ls,0,0);g.textAlign="right";g.fillText(M.ax[b].hs+" ▸",H-2*pad,0);g.restore()})}
+// ---- interaction: drag = rotate (3 scales or more), wheel = zoom, double-click = reset view, hover = which song, click = play it ----
+function pickAt(list,e,cv){const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+ let best=null,bd=1e9;for(let i=list.length-1;i>=0;i--){const[x,y,rad,o]=list[i],d=(x-mx)**2+(y-my)**2;if(d<=(rad+4)**2&&d<bd){bd=d;best=o}}return best} // nearest dot wins
+function dotTip(o){const M=curModel();if(M&&M.kind==="feel")return o.artist+" — "+o.name+"   ("+M.dims.map(i=>FEEL[i][1]+" "+(o.feel[i]??"n/a")).join(" · ")+")";
+ return o.artist+" — "+o.name+"   (maturity "+(o.f_maturity??"n/a")+")"}
+function playDot(o){const i=res.indexOf(o);if(i>=0){startQueue(i);showNow()}}
+let cubeDrag=null;
+$("cv").onmousedown=e=>{cubeDrag={x:e.clientX,y:e.clientY,moved:false};hideTip()};
+addEventListener("mousemove",e=>{if(!cubeDrag)return;const dx=e.clientX-cubeDrag.x,dy=e.clientY-cubeDrag.y;
+ if(Math.abs(dx)+Math.abs(dy)>3)cubeDrag.moved=true;if(!cubeDrag.moved||!rot3())return;
+ cubeCam.yaw+=dx*0.008;cubeCam.pitch=Math.max(-1.5,Math.min(1.5,cubeCam.pitch+dy*0.008));cubeDrag.x=e.clientX;cubeDrag.y=e.clientY;paint()});
+addEventListener("mouseup",e=>{if(!cubeDrag)return;const was=cubeDrag;cubeDrag=null;
+ if(!was.moved&&e.target===$("cv")){const o=pickAt(cubeProj,e,$("cv"));if(o)playDot(o)}});
+$("cv").onmousemove=e=>{if(cubeDrag&&cubeDrag.moved)return;const o=pickAt(cubeProj,e,$("cv"));if(o)tipNow(e,dotTip(o));else hideTip()};
+$("cv").onmouseleave=hideTip;
+$("cv").onwheel=e=>{if(!rot3())return;e.preventDefault();cubeCam.zoom=Math.max(0.5,Math.min(3,cubeCam.zoom*(1-e.deltaY*0.0012)));paint()};
+$("cv").ondblclick=()=>{if(!rot3())return;cubeCam={...CAM0};paint()};
+[0,1,2].forEach(k=>{const cv=$("fc"+k);
+ cv.onmousemove=e=>{const o=pickAt(flatProj[k],e,cv);if(o)tipNow(e,dotTip(o));else hideTip()};
+ cv.onmouseleave=hideTip;cv.onclick=e=>{const o=pickAt(flatProj[k],e,cv);if(o)playDot(o)}});
+document.querySelectorAll("#cubebar button[data-v]").forEach(b=>b.onclick=()=>{cubeView=b.dataset.v;
+ document.querySelectorAll("#cubebar button[data-v]").forEach(x=>x.classList.toggle("on",x===b));hideTip();drawCube()});
+$("cvreset").onclick=()=>{cubeCam={...CAM0};drawCube()};
+new ResizeObserver(()=>{if(plotOn())drawCube()}).observe($("cubestage")); // the stage also changes size when the statistics block grows or shrinks
+buildCube();
+// --- Presets: saved views (tab, filters, chips, Feel sliders, 3D box, sort). Stored by the helper in presets.json (so they survive a
+// port change or a cleared browser); without the helper they fall back to this browser's localStorage. Applying one replaces the
+// current view and can be undone with "← back". ---
+let presets=[];
+const TABLABEL={itunes:"iTunes",feel:"Raw Feel",cube:"Feel Axes",archive:"Archive"};
+async function loadPresets(){try{
+  if(served){const r=await fetch("/presets");presets=(await r.json()).presets||[]}
+  else presets=JSON.parse(localStorage.getItem("ls_presets")||"[]")}catch(e){presets=[]}
+ if(!Array.isArray(presets))presets=[];drawPresetMenu()}
+async function savePresets(){try{
+  if(served){const r=await fetch("/presets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({presets})});if(!r.ok)throw new Error(r.status)}
+  else localStorage.setItem("ls_presets",JSON.stringify(presets))}catch(e){flash("Couldn't save the presets")}}
+function drawPresetMenu(){const m=$("presetmenu"),esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+ m.innerHTML=`<div class="pm-save"><input id="pm_name" placeholder="Name for the current view" maxlength="60" autocomplete="off"><button id="pm_save" data-tip="Save the current tab, filters, sliders, 3D box and sort. Using an existing name updates that preset.">Save</button></div>`
+  +(presets.length?presets.map((p,i)=>`<div class="pm-row"><button class="nm" data-i="${i}" data-a="apply" data-tip="Apply (← back undoes it)">${esc(p.name)} <small>${TABLABEL[p.state.tab]||""}</small></button><button data-i="${i}" data-a="update" data-tip="Replace this preset with the current view">⟳</button><button data-i="${i}" data-a="rename" data-tip="Rename">✎</button><button data-i="${i}" data-a="del" data-tip="Delete">✕</button></div>`).join(""):`<div class="pm-empty">No presets yet. Set up a view, name it above, and press Save.</div>`)}
+function showPresetMenu(){const m=$("presetmenu"),r=$("presetbtn").getBoundingClientRect();drawPresetMenu();m.hidden=false;
+ m.style.top=r.bottom+6+"px";m.style.left=Math.max(8,Math.min(r.left,innerWidth-m.offsetWidth-8))+"px";$("pm_name").focus()}
+const hidePresetMenu=()=>{$("presetmenu").hidden=true};
+$("presetbtn").onclick=()=>{$("presetmenu").hidden?showPresetMenu():hidePresetMenu()};
+document.addEventListener("mousedown",e=>{if(!$("presetmenu").hidden&&!$("presetmenu").contains(e.target)&&e.target!==$("presetbtn"))hidePresetMenu()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hidePresetMenu()});
+function saveCurrent(name){name=name.trim();if(!name)return false;
+ const state=captureState(),at=presets.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
+ if(at>=0)presets[at]={name:presets[at].name,state};else presets.push({name,state});
+ presets.sort((a,b)=>a.name.localeCompare(b.name));savePresets();drawPresetMenu();flash((at>=0?"Updated: ":"Saved: ")+name);return true}
+$("presetmenu").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.id==="pm_save"){if(saveCurrent($("pm_name").value))$("pm_name").value="";return}
+ const i=+b.dataset.i,p=presets[i];if(!p)return;
+ if(b.dataset.a==="apply"){hidePresetMenu();applyState(p.state,true);flash("Applied: "+p.name)}
+ else if(b.dataset.a==="update"){p.state=captureState();savePresets();flash("Updated: "+p.name)}
+ else if(b.dataset.a==="rename"){const n=prompt("New name for this preset",p.name);if(n&&n.trim()){p.name=n.trim();presets.sort((a,b)=>a.name.localeCompare(b.name));savePresets();drawPresetMenu()}}
+ else if(b.dataset.a==="del"){if(confirm('Delete the preset "'+p.name+'"?')){presets.splice(i,1);savePresets();drawPresetMenu()}}};
+$("presetmenu").onkeydown=e=>{if(e.key==="Enter"&&e.target.id==="pm_name"){e.preventDefault();if(saveCurrent(e.target.value))e.target.value=""}};
+loadPresets();
+// --- remember the session: tab, search, filters, sort, shuffle and the song with its position ---------------------
+// Saved in this browser (localStorage) as the page is used and when it is closed; restored here when it opens.
+// The song comes back paused at its position (a page must not start playing by itself); press play to resume.
+let sessionReady=false,lastSave=0,restoring=false;
+const SESSION_FIELDS=["q","pl","stars","starsmax","dec","cty","cat","inits","fl_conf","fl_color",...FEEL.flatMap(([k])=>["fl_"+k+"_lo","fl_"+k+"_hi"])];
+function saveSession(){if(!sessionReady)return;
+ try{localStorage.setItem("ls_session",JSON.stringify({src,feel:feelMode,cube:cubeMode,facet,sort,shuf,loved:$("loved").checked,g:$("fl_graph").checked,fo:feelOrder,
+  f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),
+  song:cur?{path:cur.path,t:Math.floor(audio.currentTime||0)}:null}))}catch(e){}}
+function restoreSession(){
+ let s=null;try{s=JSON.parse(localStorage.getItem("ls_session")||"null")}catch(e){}
+ if(s&&typeof s==="object"){
+  try{
+   if(s.src==="archive")document.querySelector("#tabs [data-s=archive]").click();
+   else if(s.cube)document.querySelector("#tabs [data-cube]").click();
+   else if(s.feel)document.querySelector("#tabs [data-feel]").click();
+   for(const id of SESSION_FIELDS){const v=s.f&&s.f[id];if(v==null)continue;const el=$(id);
+    if(el.tagName==="SELECT"&&![...el.options].some(o=>o.value===String(v)))continue; // e.g. a playlist that no longer exists
+    el.value=v}
+   $("loved").checked=!!s.loved;$("fl_graph").checked=!!s.g;feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];layout();picker();readFeel();
+   if(s.sort&&s.sort.k&&COLS[ck()].some(c=>c[0]===s.sort.k))sort={k:s.sort.k,d:s.sort.d?1:0};
+   if(s.facet)facet={artist:s.facet.artist||null,album:s.facet.album||null,volume:s.facet.volume??null};chips();
+   shuf=!!s.shuf;$("pshuf").classList.toggle("on",shuf);
+  }catch(e){}
+ }
+ run();
+ if(s&&s.song&&s.song.path){const o=D.itunes.find(x=>x.path===s.song.path),t=+s.song.t||0;
+  if(o){cur=o;restoring=true;stale=false;
+   if(src==="itunes"){Q=res.slice();setOrder(Q.findIndex(x=>x.path===o.path))}
+   audio.preload="metadata";audio.src=fileUrl(o.path);
+   audio.addEventListener("loadedmetadata",()=>{if(t>0&&t<audio.duration-1)audio.currentTime=t},{once:true});
+   $("pnow").textContent="⏸ "+o.name+" — "+o.artist+(t>0?"  (resume at "+mmss(t)+")":"");$("pnow").dataset.tip=o.path;mark()}}
+}
+addEventListener("pagehide",saveSession);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveSession()});
+picker();restoreSession();sessionReady=true;saveSession();
+// --- Installed app window: a manifest cannot set a window size, so on opening, an app window on a desktop that is narrower than MIN_W (the
+// width that keeps the Raw Feel controls beside the sliders) or shorter than MIN_H grows to it, once. Dragging it smaller afterwards is
+// left alone. A normal browser tab, a phone and a screen smaller than the size are untouched. ---
+{const MIN_W=1090,MIN_H=600,asApp=["standalone","minimal-ui","window-controls-overlay"].some(m=>matchMedia(`(display-mode: ${m})`).matches);
+ if(asApp&&matchMedia("(pointer: fine)").matches){
+  const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
+  if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
+</script></body></html>

@@ -1,0 +1,30 @@
+# Machine-specific settings (copy config.example.json to config.json)
+config.json
+
+# Built from your own library; regenerate with the scripts
+tools/music-hub/data.js
+tools/music-hub/presets.json
+tools/release-years/release_years.csv
+tools/artist-genres/artist_genres.csv
+tools/bpm/bpm.csv
+
+# Your own ratings and lookup caches stay on your machine
+tools/emotions/gems.json
+tools/emotions/axes.json
+tools/emotions/poc_songs.csv
+tools/emotions/batches/
+tools/emotions/stats.md
+tools/emotions/correlations.md
+tools/release-years/mb_cache.json
+tools/artist-genres/artist_cache.json
+tools/artist-genres/mb_genres.txt
+tools/bpm/bpm_cache.json
+
+# Playlists the tools write and your own library exports
+playlists/
+exports/
+
+# Scratch
+*.tmp
+__pycache__/
+.idea/

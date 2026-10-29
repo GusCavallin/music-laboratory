@@ -1,0 +1,6 @@
+# iTunes is byte-sensitive (BOM, CRLF, UTF-16): never let git convert these
+*.m3u   -text
+*.m3u8  -text
+playlists/*.txt  -text
+exports/*.txt    -text
+*.xml   -text
