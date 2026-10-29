@@ -312,7 +312,7 @@ const TABSEL={itunes:"#tabs [data-s=itunes]:not([data-feel]):not([data-cube])",a
 const tabName=()=>cubeMode?"cube":feelMode?"feel":src;
 function captureState(){const cx={};if(CUBE)for(const k of["0","1","2","m"])cx[k]=[$("cx"+k+"_lo").value,$("cx"+k+"_hi").value];
  return{tab:tabName(),f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),loved:$("loved").checked,facet:{...facet},cx,g:$("fl_graph").checked,fo:[...feelOrder],sort:{...sort}}}
-function applyState(s,push){if(push){hist.push(captureState());if(hist.length>20)hist.shift()}
+function applyState(s,push){if(push){hist.push(captureState());fwd.length=0;if(hist.length>20)hist.shift()}
  const want=TABSEL[s.tab]?s.tab:"itunes";if(want!==tabName())document.querySelector(TABSEL[want]).click();
  if(want==="feel")$("fl_graph").checked=!!s.g; // the graph switch belongs to the Feel tab; other presets leave it as it is
  feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];layout();picker();
@@ -322,7 +322,11 @@ function applyState(s,push){if(push){hist.push(captureState());if(hist.length>20
  sort=s.sort&&s.sort.k&&COLS[ck()].some(c=>c[0]===s.sort.k)?{k:s.sort.k,d:s.sort.d?1:0}:{k:null,d:0};
  readFeel();readCube();chips();run()}
 const snap=captureState,restoreSnap=s=>applyState(s,false);
-function pickFacet(kind,value,keep){hist.push(snap());if(hist.length>20)hist.shift();
+// Back and forward through the filter views: hist = what "← back" returns to, fwd = what a Back just undid (cleared by any new artist/album click or preset).
+const fwd=[];
+function goBack(){if(!hist.length)return false;fwd.push(snap());restoreSnap(hist.pop());return true}
+function goForward(){if(!fwd.length)return false;hist.push(snap());restoreSnap(fwd.pop());return true}
+function pickFacet(kind,value,keep){hist.push(snap());fwd.length=0;if(hist.length>20)hist.shift();
  if(!keep){resetFilters();facet=noFacet()}
  facet[kind]=value;readFeel();chips();run()}
 function chips(){const c=$("fchips"),esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
@@ -331,7 +335,7 @@ function chips(){const c=$("fchips"),esc=s=>String(s).replace(/&/g,"&amp;").repl
   +(facet.album?`<span class="chip on">Album: ${esc(facet.album)} <b data-x="album" data-tip="Remove this filter">×</b></span>`:"")
   +(facet.volume!=null?`<span class="chip on">Volume: ${esc(facet.volume)} <b data-x="volume" data-tip="Remove this filter">×</b></span>`:"")}
 $("fchips").onclick=e=>{const x=e.target.dataset.x;if(!x)return;
- if(x==="back"){restoreSnap(hist.pop());return}
+ if(x==="back"){goBack();return}
  facet[x]=null;chips();run()};
 $("q").oninput=run;
 $("qclear").onclick=()=>{$("q").value="";$("q").focus();run()}; // the × shows only while there is text (CSS :placeholder-shown)$("more").onclick=()=>{shown+=PAGE;render()};
@@ -394,14 +398,9 @@ $("fl_graph").onchange=()=>{if(sort.k&&!COLS[ck()].some(c=>c[0]===sort.k))sort={
 $("fl_color").onchange=()=>{render();saveSession()};
 const feelReset=()=>{for(const [k] of FEEL){$("fl_"+k+"_lo").value=0;$("fl_"+k+"_hi").value=10}$("fl_conf").value="all";readFeel()};
 $("fl_reset").onclick=()=>{feelReset();run()};readFeel();
-// Back button (mouse button 4, Alt+Left): each tab switch is a history entry, so Back returns to the tab you came from.
-let histNav=false,booted=false;
-const tabKey=()=>feelMode?"feel":cubeMode?"cube":src;
-const histPush=()=>{if(histNav)return;const k=tabKey();if(!booted){history.replaceState({tab:k},"");return}if(!history.state||history.state.tab!==k)history.pushState({tab:k},"")};
 document.querySelectorAll("#tabs button[data-s]").forEach(b=>b.onclick=()=>{src=b.dataset.s;feelMode=b.dataset.feel==="1";cubeMode=b.dataset.cube==="1";if(src!=="archive"&&facet.volume!=null){facet.volume=null;chips()}sort={k:null,d:0};
  document.querySelectorAll("#tabs button[data-s]").forEach(x=>x.classList.toggle("on",x===b));
- picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run();histPush()});
-addEventListener("popstate",e=>{const t=e.state&&e.state.tab;if(!t||!TABSEL[t]||t===tabKey())return;histNav=true;try{document.querySelector(TABSEL[t]).click()}finally{histNav=false}});
+ picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run()});
 // --- Feel Axes tab (internal id "cube"): every rated song is a dot; the three axes are independent principal components of the nine GEMS scales
 // (tools/emotions/axes.py); dot colour = maturity (cool = below the average song, warm = above, hollow = no score).
 // The slider box picks the songs: dots inside stay bright, the list on the left shows exactly those. Plain canvas, no library. ---
@@ -665,5 +664,11 @@ picker();restoreSession();sessionReady=true;saveSession();
  if(asApp&&matchMedia("(pointer: fine)").matches){
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
-booted=true;history.replaceState({tab:tabKey()},"");
+// --- Mouse Back / Forward buttons (and Alt+Left / Alt+Right): undo and redo the filter views, like the "← back" chip. ---
+// The page parks itself on the middle of three history entries (b, m, f). Back lands on b and Forward on f; the handler does the undo or
+// redo and steps back to m, so the buttons never leave the page and keep working. A reload keeps the entries, so they are only made once.
+if(!(history.state&&history.state.hub==="m")){history.replaceState({hub:"b"},"");history.pushState({hub:"m"},"");history.pushState({hub:"f"},"");history.back()}
+addEventListener("popstate",e=>{const h=e.state&&e.state.hub;
+ if(h==="b"){if(!goBack())flash("Nothing to go back to");history.forward()}
+ else if(h==="f"){if(!goForward())flash("Nothing to go forward to");history.back()}});
 </script></body></html>

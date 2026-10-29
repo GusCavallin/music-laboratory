@@ -47,8 +47,9 @@ Without the helper you can still double-click `index.html`: search, filters and 
 The top row has the title, the tab strip and, at the right, **⟳ Refresh data** with its status message. Right under it are the search box (an **×** at its right end clears the text when
 there is some), the result count, **★ Presets** and **✕ Clear filters**.
 
-**Back button.** Each tab switch is a history entry, so the mouse's Back button (or Alt+Left) returns to the tab you came from, and Forward
-goes the other way. It steps through tabs only; filters and searches are not part of the history.
+**Back and Forward.** The mouse's Back and Forward buttons (or Alt+Left and Alt+Right) undo and redo the filter views, exactly like the
+**← back** chip: clicking an artist or album, or applying a preset, can be stepped back and then forward again (up to 20 steps; a new click
+clears the Forward steps). They never leave the page. Typing in the search box and moving the sliders are not steps.
 
 ## Searching, filtering and sorting
 
