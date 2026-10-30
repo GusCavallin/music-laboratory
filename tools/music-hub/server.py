@@ -25,7 +25,15 @@ from urllib.parse import parse_qs, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build_data  # noqa: E402
-PORT = 9123  # preferred; if it is busy, main() reuses our own server there or takes the next free port
+
+
+def name_and_version():
+    """"Music Hub 0.1.0", from the VERSION file at the repo root; plain "Music Hub" before the first release."""
+    v = build_data.VERSION.read_text(encoding="utf-8").strip() if build_data.VERSION.exists() else ""
+    return f"Music Hub {v}" if v else "Music Hub"
+
+
+PORT = 9123 # preferred; if it is busy, main() reuses our own server there or takes the next free port
 SIGNATURE = "music-library-search"
 HOSTS = {f"127.0.0.1:{PORT}", f"localhost:{PORT}"}
 HTML, JS = "text/html; charset=utf-8", "text/javascript; charset=utf-8"
@@ -322,7 +330,7 @@ def main():
         except OSError:
             if is_ours(port):  # already running: just show the window again
                 url = f"http://127.0.0.1:{port}/"
-                print(f"Music Hub is already running at {url}")
+                print(f"{name_and_version()} is already running at {url}")
                 if not quiet:
                     open_window(url)
                 return
@@ -335,7 +343,7 @@ def main():
     load_allowed()
     threading.Thread(target=watchdog, daemon=True).start()
     url = f"http://127.0.0.1:{PORT}/"
-    print(f"Music Hub running at {url}")
+    print(f"{name_and_version()} running at {url}")
     print("Closing the app window stops it" + (" (disabled: --keep-alive)." if KEEP_ALIVE else ".") + " Ctrl+C also stops it.")
     if not quiet:
         threading.Timer(0.5, lambda: open_window(url)).start()
