@@ -351,9 +351,16 @@ let tipTimer;
 const hideTip=()=>{clearTimeout(tipTimer);tip.style.display="none"};
 function placeTip(e){const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8),y=e.clientY+20;
  tip.style.left=Math.max(4,x)+"px";tip.style.top=(y+tip.offsetHeight>innerHeight?Math.max(4,e.clientY-tip.offsetHeight-12):y)+"px"}
+// the playlists a song is in: the ones made by hand or by an agent, never the rule-driven (smart) ones. Looked up when the tooltip opens, so it follows Refresh data and removals
+const PL_TIP_MAX=15;
+function playlistsOf(o){const names=(LIB.playlists||[]).filter(p=>!p[2]&&p[1].includes(o._ix)).map(p=>p[0]);
+ return names.length>PL_TIP_MAX?names.slice(0,PL_TIP_MAX).concat("… and "+(names.length-PL_TIP_MAX)+" more"):names}
 document.addEventListener("mouseover",e=>{hideTip();const el=e.target.closest&&e.target.closest("[data-tip]");if(!el)return;
- if(el.tagName==="TD"&&el.scrollWidth<=el.clientWidth&&!el.classList.contains("fv"))return; // cell text fully visible: nothing to add (except Feel scores: their tooltip is the distribution)
- tipTimer=setTimeout(()=>{tip.textContent=el.dataset.tip;tip.style.display="block";placeTip(e)},TIP_DELAY)});
+ let txt=el.dataset.tip,pls=false;
+ if(el.tagName==="TD"&&el.dataset.k==="name"&&src==="itunes"){const o=res[+el.parentNode.dataset.i],ps=o?playlistsOf(o):[];
+  if(ps.length){txt+="\n\nIn playlists:\n"+ps.map(n=>"• "+n).join("\n");pls=true}}
+ if(el.tagName==="TD"&&!pls&&el.scrollWidth<=el.clientWidth&&!el.classList.contains("fv"))return; // cell text fully visible: nothing to add (except Feel scores: their tooltip is the distribution; and a song's playlists)
+ tipTimer=setTimeout(()=>{tip.textContent=txt;tip.style.display="block";placeTip(e)},TIP_DELAY)});
 document.addEventListener("mousemove",e=>{if(tip.style.display==="block")placeTip(e)});
 for(const ev of["mousedown","wheel","dragstart","keydown"])document.addEventListener(ev,hideTip,true);
 document.querySelector("main").addEventListener("scroll",()=>{hideTip();hideColMenu()});

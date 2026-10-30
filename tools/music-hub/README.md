@@ -96,6 +96,8 @@ top right says why and nothing changes.
 - **Hearts ("Loved") can't be set** from here: iTunes does not expose them to scripts. Set them in iTunes or on the iPhone.
 - **`[To Rate]` playlists:** if a playlist whose name contains `[To Rate]` is selected in the Playlist box, rating a song also removes it from that
   playlist (the row turns green, then slides out). Only the playlist entry goes: the song stays in the library. Only plain playlists are touched, never smart ones.
+- **Playlists of a song:** hover a song's name in the iTunes tab to see the playlists it is in (up to 15, then "and N more"): the ones made by hand
+  or by an agent, never the rule-driven (smart) ones. It needs the playlist data in `data.js`, so click **⟳ Refresh data** once after updating.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
 
 ## Raw Feel and Feel Axes

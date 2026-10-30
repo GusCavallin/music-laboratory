@@ -72,7 +72,7 @@ def itunes_rows():
 
 
 def playlists(lib, by_id):
-    """User playlists (smart ones too: their current members are listed) as [name, [row index, ...]]."""
+    """User playlists (smart ones too: their current members are listed) as [name, [row index, ...], smart (0/1)]."""
     by_pid = {p["Playlist Persistent ID"]: p for p in lib["Playlists"]}
 
     def full_name(p):
@@ -84,7 +84,7 @@ def playlists(lib, by_id):
             continue
         ids = [by_id[i["Track ID"]] for i in p.get("Playlist Items", []) if i["Track ID"] in by_id]
         if ids:
-            out.append([full_name(p), ids])
+            out.append([full_name(p), ids, int("Smart Info" in p or "Smart Criteria" in p)])
     return sorted(out, key=lambda x: x[0].lower())
 
 
