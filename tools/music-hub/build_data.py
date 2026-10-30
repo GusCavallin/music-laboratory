@@ -18,6 +18,7 @@ GENRES = HERE.parent / "artist-genres" / "artist_genres.csv"
 AXES = HERE.parent / "emotions" / "axes.json"   # optional: the three independent axes of the Feel Axes tab (tools/emotions/axes.py)
 GEMS = HERE.parent / "emotions" / "gems.json"   # optional: emotional-tone ratings (tools/emotions)
 BPM = HERE.parent / "bpm" / "bpm.csv"   # optional: tempo from AcousticBrainz (tools/bpm/update_bpm.py)
+VERSION = HERE.parents[1] / "VERSION"   # one line at the repo root, written by a release (see CONVENTIONS.md, Versioning)
 
 
 def norm(s):
@@ -161,6 +162,7 @@ def main():
         "archive": arch,
         "axes": json.load(open(AXES, encoding="utf-8")) if AXES.exists() else None,
         "built": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "version": VERSION.read_text(encoding="utf-8").strip() if VERSION.exists() else "",   # shown in the About box; empty until the first release
     }
     out = HERE / "data.js"
     out.write_text("window.LIB = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")

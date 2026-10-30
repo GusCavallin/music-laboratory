@@ -98,7 +98,7 @@ top right says why and nothing changes.
   playlist (the row turns green, then slides out). Only the playlist entry goes: the song stays in the library. Only plain playlists are touched, never smart ones.
 - **Playlists of a song:** hover a song's name in the iTunes tab to see the playlists it is in (up to 15, then "and N more"): the ones made by hand
   or by an agent, never the rule-driven (smart) ones. It needs the playlist data in `data.js`, so click **⟳ Refresh data** once after updating.
-- **ⓘ About** (top right) opens a small box: what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
+- **ⓘ About** (top right) opens a small box: the version (read from the `VERSION` file at the repo root when the data is built; "Not released yet" until the first release), what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
 
 ## Raw Feel and Feel Axes

@@ -84,6 +84,7 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
 </section></div>
 <dialog id="about" aria-labelledby="about_h">
  <h2 id="about_h">Music Hub</h2>
+ <p class="mut" id="about_v"></p>
  <p>Search, explore and play your iTunes library, with Feel ratings and a map of how songs feel.</p>
  <p class="mut">It reads your iTunes library file and never changes it. The one exception is clicking stars, which sets that rating in iTunes (it needs the helper, <code>serve.bat</code>).</p>
  <p>Made by Gustavo Cavallin, with Claude (Anthropic).</p>
@@ -683,7 +684,7 @@ picker();restoreSession();sessionReady=true;saveSession();
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
 // --- About: a small dialog (Esc, the Close button or a click outside closes it) ---
-{const ab=$("about");$("aboutbtn").onclick=()=>{hideTip();ab.showModal()};$("about_close").onclick=()=>ab.close();
+{const ab=$("about");$("aboutbtn").onclick=()=>{hideTip();$("about_v").textContent=LIB.version?"Version "+LIB.version:"Not released yet";ab.showModal()}; // LIB.version comes from the VERSION file at the repo root$("about_close").onclick=()=>ab.close();
  ab.addEventListener("click",e=>{if(e.target===ab)ab.close()})} // a click on the backdrop lands on the dialog element itself
 // --- Mouse Back / Forward buttons (and Alt+Left / Alt+Right): undo and redo the filter views, like the "← back" chip. ---
 // The page parks itself on the middle of three history entries (b, m, f). Back lands on b and Forward on f; the handler does the undo or
