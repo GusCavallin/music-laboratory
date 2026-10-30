@@ -39,6 +39,7 @@ tr.rated{background:#2ea04333}tr.out td{opacity:0;transition:opacity .4s}tr.rate
 #cubestats .sc{display:flex;gap:6px;align-items:baseline;padding:1px 6px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums}#cubestats .sc small{color:var(--mut)}
 #cubesep{margin:6px 22px 0;border-top:1px solid var(--line)} /* a thin rule that stops short of both edges */
 #cubelegend{padding:6px 10px 8px;color:var(--mut);font-size:12px;display:flex;gap:4px 10px;align-items:center;flex-wrap:wrap}#cubelegend .lg{width:70px}
+#about{width:min(92vw,460px);padding:20px 22px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);box-shadow:0 8px 28px rgba(0,0,0,.35)}#about::backdrop{background:rgba(0,0,0,.45)}#about h2{margin:0 0 6px;font-size:18px}#about p{margin:8px 0}#about .mut{color:var(--mut)}#about a{color:var(--acc)}#about .x{display:flex;justify-content:flex-end;margin-top:14px}
 #presetmenu{position:fixed;z-index:30;min-width:300px;max-width:400px;max-height:70vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:8px}#presetmenu[hidden]{display:none}
 .pm-save{display:flex;gap:6px;margin-bottom:6px}.pm-save input{flex:1;min-width:0;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
 .pm-row{display:flex;gap:4px;margin-top:4px}.pm-row .nm{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pm-row .nm small{color:var(--mut);margin-left:6px}.pm-empty{color:var(--mut);padding:6px 4px;font-size:13px}
@@ -50,7 +51,7 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
 <header>
  <div id="top"><h1>Music Hub</h1>
   <div id="tabs" role="tablist"><button data-s="itunes" class="on">iTunes Library</button><button data-s="itunes" data-feel="1" data-tip="Find songs by emotional tone (nine GEMS scales + maturity). Only songs that have been rated for feeling.">Raw Feel</button><button data-s="itunes" data-cube="1" data-tip="Every rated song as a dot in a cube of three independent feelings (Calm, Ease, Awe), colored by maturity; the box you size picks the songs in the list">Feel Axes</button><button data-s="archive">MP3 Archive (CDs)</button></div>
-  <div id="acts"><span id="rmsg"></span><button id="refresh" data-tip="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)">⟳ Refresh data</button></div></div>
+  <div id="acts"><span id="rmsg"></span><button id="refresh" data-tip="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)">⟳ Refresh data</button><button id="aboutbtn" data-tip="About Music Hub">ⓘ About</button></div></div>
  <div id="qrow"><span id="qwrap"><input id="q" placeholder="Search name, artist, album, composer, genre… (all words must match; accents ignored)" autofocus><button id="qclear" type="button" aria-label="Clear the search text" data-tip="Clear the search text">×</button></span>
   <span id="count"></span><span id="fchips"></span><button id="presetbtn" data-tip="Saved views: tab, filters, sliders, 3D box and sort">★ Presets ▾</button><button id="clearf" data-tip="Reset the search box and all filters (keeps sort and columns)">✕ Clear filters</button></div>
 <div class="row" id="feel" hidden></div>
@@ -81,6 +82,16 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
  <div id="cubestats"></div><div id="cubesep"></div>
  <div id="cubelegend"></div>
 </section></div>
+<dialog id="about" aria-labelledby="about_h">
+ <h2 id="about_h">Music Hub</h2>
+ <p>Search, explore and play your iTunes library, with Feel ratings and a map of how songs feel.</p>
+ <p class="mut">It reads your iTunes library file and never changes it. The one exception is clicking stars, which sets that rating in iTunes (it needs the helper, <code>serve.bat</code>).</p>
+ <p>Made by Gustavo Cavallin, with Claude (Anthropic).</p>
+ <p>License: <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/" target="_blank" rel="noopener noreferrer">PolyForm Noncommercial 1.0.0</a>: free for personal and other noncommercial use.</p>
+ <p>Source: <a href="https://github.com/GusCavallin/music-laboratory" target="_blank" rel="noopener noreferrer">github.com/GusCavallin/music-laboratory</a><br>
+ Support: <a href="https://ko-fi.com/gustavocavallin" target="_blank" rel="noopener noreferrer">ko-fi.com/gustavocavallin</a></p>
+ <div class="x"><button id="about_close" type="button">Close</button></div>
+</dialog>
 <script src="data.js"></script>
 <script>
 const $=id=>document.getElementById(id), PAGE=300;
@@ -671,6 +682,9 @@ picker();restoreSession();sessionReady=true;saveSession();
  if(asApp&&matchMedia("(pointer: fine)").matches){
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
+// --- About: a small dialog (Esc, the Close button or a click outside closes it) ---
+{const ab=$("about");$("aboutbtn").onclick=()=>{hideTip();ab.showModal()};$("about_close").onclick=()=>ab.close();
+ ab.addEventListener("click",e=>{if(e.target===ab)ab.close()})} // a click on the backdrop lands on the dialog element itself
 // --- Mouse Back / Forward buttons (and Alt+Left / Alt+Right): undo and redo the filter views, like the "← back" chip. ---
 // The page parks itself on the middle of three history entries (b, m, f). Back lands on b and Forward on f; the handler does the undo or
 // redo and steps back to m, so the buttons never leave the page and keep working. A reload keeps the entries, so they are only made once.
