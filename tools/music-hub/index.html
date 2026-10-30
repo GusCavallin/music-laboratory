@@ -684,8 +684,11 @@ picker();restoreSession();sessionReady=true;saveSession();
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
 // --- About: a small dialog (Esc, the Close button or a click outside closes it) ---
-{const ab=$("about");$("aboutbtn").onclick=()=>{hideTip();$("about_v").textContent=LIB.version?"Version "+LIB.version:"Not released yet";ab.showModal()}; // LIB.version comes from the VERSION file at the repo root$("about_close").onclick=()=>ab.close();
- ab.addEventListener("click",e=>{if(e.target===ab)ab.close()})} // a click on the backdrop lands on the dialog element itself
+// LIB.version comes from the VERSION file at the repo root (empty until the first release); a click on the backdrop lands on the dialog element itself
+{const ab=$("about");
+ $("aboutbtn").onclick=()=>{hideTip();$("about_v").textContent=LIB.version?"Version "+LIB.version:"Not released yet";ab.showModal()};
+ $("about_close").onclick=()=>ab.close();
+ ab.addEventListener("click",e=>{if(e.target===ab)ab.close()})}
 // --- Mouse Back / Forward buttons (and Alt+Left / Alt+Right): undo and redo the filter views, like the "← back" chip. ---
 // The page parks itself on the middle of three history entries (b, m, f). Back lands on b and Forward on f; the handler does the undo or
 // redo and steps back to m, so the buttons never leave the page and keep working. A reload keeps the entries, so they are only made once.
