@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 780" width="1250" height="780" role="img" aria-labelledby="t d">
+  <title id="t">Music Laboratory: how the parts work together</title>
+  <desc id="d">The tools read the iTunes library file, read-only. The index tools ask MusicBrainz and AcousticBrainz for release years, genres and tempo and keep caches. The emotions tool merges Feel ratings. build_data.py collects all of it, plus the CD archive index, into data.js. The helper server.py serves the Music Hub page. A star click goes through the helper and the itunes-com scripts to the running iTunes, which rewrites the library file; Refresh data reads it again.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#3e4c59"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2933; }
+      .h1 { font-size: 20px; font-weight: 600; }
+      .sub { font-size: 12.5px; fill: #52606d; }
+      .name { font-size: 14px; font-weight: 600; }
+      .t { font-size: 11.5px; }
+      .s { font-size: 11.5px; fill: #52606d; }
+      .xs { font-size: 10.5px; fill: #52606d; }
+      .code { font-family: Consolas, "Courier New", monospace; font-size: 11px; }
+      .lbl { font-size: 11.5px; fill: #3e4c59; }
+      .lc { fill: #e8f1fd; stroke: #3b7dd8; stroke-width: 1.5; }
+      .tp { fill: #fdf0dc; stroke: #d08a1e; stroke-width: 1.5; }
+      .tpi { fill: #ffffff; stroke: #d08a1e; stroke-width: 1; }
+      .ut { fill: #e6f6ea; stroke: #3c9a5f; stroke-width: 1.5; }
+      .ex { fill: #f3f4f6; stroke: #8a8f98; stroke-width: 1.5; stroke-dasharray: 5 4; }
+      .a { fill: none; stroke: #3e4c59; stroke-width: 1.5; marker-end: url(#arrow); }
+      .ad { fill: none; stroke: #3e4c59; stroke-width: 1.5; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+      .ln { fill: none; stroke: #3e4c59; stroke-width: 1.5; }
+      .badge { fill: #1f2933; }
+      .bt { font-size: 11px; font-weight: 600; fill: #ffffff; text-anchor: middle; }
+      .lb { font-size: 10px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="1249" height="779" rx="10" fill="#ffffff" stroke="#d9dde3"/>
+
+  <text x="40" y="46" class="h1">Music Laboratory: how the parts work together</text>
+  <text x="40" y="68" class="sub">Follow the numbers 1 to 6: from your iTunes library to the Music Hub page, and back again when you rate a song. Step 6 feeds step 1.</text>
+
+  <!-- ===== Column A: web services and settings ===== -->
+  <rect x="40" y="100" width="210" height="215" rx="6" class="ex"/>
+  <text x="54" y="124" class="name">MusicBrainz</text>
+  <text x="54" y="144" class="s">web service</text>
+  <text x="54" y="168" class="s">release dates and</text>
+  <text x="54" y="185" class="s">recording IDs, genres</text>
+  <text x="54" y="202" class="s">and countries of artists</text>
+
+  <rect x="40" y="340" width="210" height="125" rx="6" class="ex"/>
+  <text x="54" y="364" class="name">AcousticBrainz</text>
+  <text x="54" y="384" class="s">web service</text>
+  <text x="54" y="408" class="s">tempo and danceability,</text>
+  <text x="54" y="425" class="s">asked by recording ID</text>
+
+  <rect x="40" y="500" width="210" height="95" rx="6" class="ex"/>
+  <text x="54" y="524" class="code">config.json</text>
+  <text x="54" y="545" class="s">your paths and settings,</text>
+  <text x="54" y="562" class="s">read by every tool through</text>
+  <text x="54" y="579" class="code">musiclab_config.py</text>
+
+  <!-- ===== Column B: the tools that build an index ===== -->
+  <rect x="330" y="100" width="290" height="100" rx="6" class="lc"/>
+  <text x="346" y="124" class="name">release-years</text>
+  <text x="346" y="143" class="s">the original release year of each song</text>
+  <text x="346" y="166" class="code">update_index.py → release_years.csv</text>
+  <text x="346" y="184" class="code">cache: mb_cache.json</text>
+
+  <rect x="330" y="220" width="290" height="95" rx="6" class="lc"/>
+  <text x="346" y="244" class="name">artist-genres</text>
+  <text x="346" y="263" class="s">genres and country of each artist</text>
+  <text x="346" y="286" class="code">update_genres.py → artist_genres.csv</text>
+  <text x="346" y="304" class="code">cache: artist_cache.json</text>
+
+  <rect x="330" y="340" width="290" height="125" rx="6" class="lc"/>
+  <text x="346" y="364" class="name">bpm</text>
+  <text x="346" y="383" class="s">tempo, danceability and how busy a song is</text>
+  <text x="346" y="406" class="code">update_bpm.py → bpm.csv</text>
+  <text x="346" y="423" class="code">workout_playlist.py → [Gen] *.m3u8</text>
+  <text x="346" y="448" class="s">uses the recording IDs of release-years</text>
+
+  <rect x="330" y="490" width="290" height="150" rx="6" class="lc"/>
+  <text x="346" y="514" class="name">emotions</text>
+  <text x="346" y="533" class="s">how songs feel: nine scales plus maturity</text>
+  <text x="346" y="556" class="code">add_set.py       queues songs to rate</text>
+  <text x="346" y="573" class="code">batches/*.csv    the ratings</text>
+  <text x="346" y="590" class="code">merge.py         → gems.json</text>
+  <text x="346" y="607" class="code">axes.py          → axes.json</text>
+  <text x="346" y="624" class="code">stats.py · correlations.py → reports</text>
+
+  <!-- L badges: tools that also read the library file -->
+  <circle cx="602" cy="116" r="8" class="badge"/><text x="602" y="120" class="lb">L</text>
+  <circle cx="602" cy="236" r="8" class="badge"/><text x="602" y="240" class="lb">L</text>
+  <circle cx="602" cy="356" r="8" class="badge"/><text x="602" y="360" class="lb">L</text>
+  <circle cx="602" cy="506" r="8" class="badge"/><text x="602" y="510" class="lb">L</text>
+
+  <!-- 2: the index tools ask the web services -->
+  <path d="M250 150 H330" class="a"/>
+  <circle cx="270" cy="134" r="9" class="badge"/><text x="270" y="138" class="bt">2</text>
+  <text x="284" y="138" class="lbl">asks</text>
+  <path d="M250 267 H330" class="a"/>
+  <text x="290" y="259" class="lbl" text-anchor="middle">asks</text>
+  <path d="M250 402 H330" class="a"/>
+  <text x="290" y="394" class="lbl" text-anchor="middle">asks</text>
+
+  <!-- 3: the files the tools write flow into build_data -->
+  <path d="M620 150 H700" class="a"/>
+  <path d="M620 267 H660 V150" class="ln"/>
+  <path d="M620 402 H660" class="ln"/>
+  <path d="M620 565 H660 V150" class="ln"/>
+  <circle cx="640" cy="549" r="9" class="badge"/><text x="640" y="553" class="bt">3</text>
+  <text transform="translate(678 455) rotate(-90)" class="lbl" text-anchor="middle">the files they write</text>
+
+  <!-- ===== Column C: Music Hub ===== -->
+  <rect x="700" y="100" width="260" height="135" rx="6" class="tp"/>
+  <text x="716" y="124" class="name">build_data.py</text>
+  <text x="716" y="143" class="s">in tools/music-hub</text>
+  <text x="716" y="166" class="t">collects the songs and playlists,</text>
+  <text x="716" y="183" class="t">the years, genres, tempo, Feel</text>
+  <text x="716" y="200" class="t">ratings and the CD index into</text>
+  <text x="716" y="217" class="t">one file</text>
+
+  <rect x="700" y="260" width="260" height="50" rx="6" class="tpi"/>
+  <text x="716" y="282" class="code">data.js</text>
+  <text x="716" y="299" class="xs">generated, not committed</text>
+
+  <path d="M830 235 V260" class="a"/>
+  <circle cx="850" cy="247" r="9" class="badge"/><text x="850" y="251" class="bt">4</text>
+  <text x="864" y="251" class="lbl">writes</text>
+
+  <path d="M830 310 V335" class="a"/>
+  <text x="842" y="327" class="lbl">read by</text>
+
+  <rect x="700" y="335" width="260" height="150" rx="6" class="tp"/>
+  <text x="716" y="359" class="name">server.py</text>
+  <text x="716" y="378" class="s">the helper · port 9123</text>
+  <text x="716" y="402" class="code">/         the page and data.js</text>
+  <text x="716" y="419" class="code">/audio    plays a song</text>
+  <text x="716" y="436" class="code">/rebuild  runs build_data</text>
+  <text x="716" y="453" class="code">/rate     sets one song's stars</text>
+  <text x="716" y="470" class="code">/presets  saved views</text>
+
+  <rect x="700" y="530" width="260" height="125" rx="6" class="ut"/>
+  <text x="716" y="554" class="name">itunes-com</text>
+  <text x="716" y="573" class="s">PowerShell · desktop iTunes only</text>
+  <text x="716" y="596" class="code">rate_file.ps1     one song's stars</text>
+  <text x="716" y="613" class="code">rate.ps1          list or set stars</text>
+  <text x="716" y="630" class="code">remove_rated.ps1  [To Rate] lists</text>
+
+  <path d="M830 485 V530" class="a"/>
+  <circle cx="850" cy="507" r="9" class="badge"/><text x="850" y="511" class="bt">6</text>
+  <text x="864" y="511" class="lbl">POST /rate</text>
+
+  <!-- ===== Column D: your files, the page, iTunes ===== -->
+  <rect x="1030" y="100" width="180" height="80" rx="6" class="ex"/>
+  <text x="1044" y="124" class="name">iTunes library</text>
+  <text x="1044" y="143" class="s">iTunes Music Library.xml</text>
+  <text x="1044" y="160" class="s">read-only for every tool</text>
+
+  <rect x="1030" y="195" width="180" height="75" rx="6" class="ex"/>
+  <text x="1044" y="219" class="name">CD archive index</text>
+  <text x="1044" y="238" class="s">an .xlsx of burned CDs</text>
+  <text x="1044" y="255" class="s">optional, read-only</text>
+
+  <path d="M1030 130 H960" class="a"/>
+  <circle cx="975" cy="114" r="9" class="badge"/><text x="975" y="118" class="bt">1</text>
+  <text x="988" y="118" class="lbl">reads</text>
+  <path d="M1030 215 H960" class="a"/>
+
+  <rect x="1030" y="335" width="180" height="150" rx="6" class="tp"/>
+  <text x="1044" y="359" class="name">Music Hub page</text>
+  <text x="1044" y="378" class="s">index.html in a browser</text>
+  <text x="1044" y="402" class="t">tabs: iTunes Library,</text>
+  <text x="1044" y="419" class="t">Raw Feel, Feel Axes,</text>
+  <text x="1044" y="436" class="t">MP3 Archive (CDs)</text>
+  <text x="1044" y="457" class="t">search · filters · player</text>
+
+  <path d="M960 375 H1030" class="a"/>
+  <circle cx="975" cy="359" r="9" class="badge"/><text x="975" y="363" class="bt">5</text>
+  <text x="988" y="363" class="lbl">page</text>
+  <path d="M1030 450 H960" class="ad"/>
+  <text x="995" y="442" class="lbl" text-anchor="middle">clicks</text>
+
+  <rect x="1030" y="530" width="180" height="125" rx="6" class="ex"/>
+  <text x="1044" y="554" class="name">iTunes (desktop)</text>
+  <text x="1044" y="573" class="s">has to be running</text>
+  <text x="1044" y="594" class="s">the only change Music</text>
+  <text x="1044" y="611" class="s">Hub makes is a song's</text>
+  <text x="1044" y="628" class="s">star rating</text>
+
+  <path d="M960 592 H1030" class="a"/>
+  <text x="995" y="584" class="lbl" text-anchor="middle">COM</text>
+
+  <!-- iTunes rewrites the library file: back to step 1 -->
+  <path d="M1210 592 H1222 V140 H1210" class="ad"/>
+  <text transform="translate(1241 366) rotate(-90)" class="lbl" text-anchor="middle">iTunes rewrites the library file; Refresh data reads it again</text>
+
+  <!-- ===== Legend ===== -->
+  <path d="M40 690 H1210" stroke="#d9dde3" stroke-width="1"/>
+  <rect x="40" y="704" width="14" height="14" rx="3" class="lc"/>
+  <text x="61" y="716" class="s">tools that build an index or ratings</text>
+  <rect x="290" y="704" width="14" height="14" rx="3" class="tp"/>
+  <text x="311" y="716" class="s">Music Hub</text>
+  <rect x="395" y="704" width="14" height="14" rx="3" class="ut"/>
+  <text x="416" y="716" class="s">talks to iTunes</text>
+  <rect x="530" y="704" width="14" height="14" rx="3" class="ex"/>
+  <text x="551" y="716" class="s">outside the program</text>
+
+  <circle cx="702" cy="711" r="8" class="badge"/><text x="702" y="715" class="lb">L</text>
+  <text x="716" y="716" class="s">also reads the iTunes library file</text>
+
+  <path d="M40 748 H80" class="a"/>
+  <text x="88" y="753" class="s">writes a file, calls or hands over</text>
+  <path d="M330 748 H370" class="ad"/>
+  <text x="378" y="753" class="s">returns or reports back</text>
+  <text x="560" y="753" class="s">Generated files (CSV, JSON, data.js) stay on your computer and are not committed.</text>
+</svg>

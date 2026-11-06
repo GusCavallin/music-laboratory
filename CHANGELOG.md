@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- `docs/architecture.svg`: a diagram of how the parts fit together, from the iTunes library file through the index tools and Music Hub to the running iTunes.
+
 ## 0.1.0 - 2026-10-30
 
 The first numbered release: the public tools plus the changes below.
