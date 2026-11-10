@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.2.0 - 2026-11-09
+
+New in Music Hub: saving a filtered list as a playlist, a Track column, and linked Feel sliders. After updating, restart the helper and click **Refresh data**.
+
 ### Added
 
 - Music Hub: a **Track** column on the iTunes tab (`5/13`, or `2-5/12` for a multi-disc album), and sorting by Album now keeps each album together in disc and
