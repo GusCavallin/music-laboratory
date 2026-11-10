@@ -66,6 +66,7 @@ def itunes_rows():
             t.get("Total Time", 0) // 1000, t["Date Added"].strftime("%Y-%m-%d") if "Date Added" in t else "",
             int(round(bpm.get(t["Persistent ID"], 0))),  # 0 = no tempo known
             int(bool(t.get("Protected"))),                # 1 = copy-protected purchase (.m4p): a browser cannot play it
+            t.get("Track Number", 0), t.get("Track Count", 0), t.get("Disc Number", 0), t.get("Disc Count", 0),  # 0 = not set; Track Count is per disc
             ([g[s] for s in scales] + [g["confidence"]]) if (g := gems.get(t["Persistent ID"])) else None,  # 10 scores (0-10, None = n/a) + confidence 1-3
             path,
         ])
@@ -155,7 +156,7 @@ def main():
                      int(d["A"]) if d.get("A", "").isdigit() else 0, int(key in have), d.get("J", "")])
     data = {
         "itunes_cols": ["name", "artist", "album", "composer", "genres", "country", "year", "stars", "loved",
-                        "plays", "last_played", "secs", "added", "bpm", "protected", "feel", "path"],
+                        "plays", "last_played", "secs", "added", "bpm", "protected", "track", "tracks", "disc", "discs", "feel", "path"],
         "itunes": it,
         "playlists": pls,
         "archive_cols": ["name", "artist", "album", "category", "volume", "track", "in_itunes", "path"],

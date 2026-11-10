@@ -76,6 +76,10 @@ first; for every other column the first click goes A to Z / low to high.
 **Columns.** Right-click any header for the column menu (show/hide, **Reset order**); drag a header onto another to move it. The iTunes, Raw Feel, Feel Axes and archive
 tabs each keep their own columns. The Path column is hidden by default; click it to copy a song's file path.
 
+**Track column (iTunes tab).** Shows the track number and how many tracks the album has, as iTunes has them tagged: `5/13`, or `2-5/12` (disc 2, track 5 of 12 on that disc) on a
+multi-disc album. Blank when the tags are empty. To look for missing tracks, sort by **Album**: each album stays together in disc and track order, so a gap in the numbers (3, 5) or a
+count above the number of songs you have means a track is missing. It needs **⟳ Refresh data** once after updating, so the page learns the track numbers. It is hidden by default on the Raw Feel and Feel Axes tabs.
+
 ## Playing music
 
 Click a song to play the current results; ⏮ ⏹ ⏯ ⏭ and 🔀 (shuffle) work on the results as filtered and sorted when playback started. **Space** plays/pauses, and the media keys work too.
@@ -116,6 +120,13 @@ choice, repair, acceptance, honest loss; empty for instrumentals). Each is 0 to 
 > partly the rating process. Details and numbers: `tools/emotions/README.md`, `stats.md`, `correlations.md`.
 
 **Raw Feel tab.** Ten min/max sliders (two knobs each) narrow the list; a song is listed only if every scale is inside its range. **Confidence** (All, Low, Medium, High) lists only the songs rated at that confidence, so Low is the list to take with a grain of salt. **Reset sliders**, Show graph, Confidence and the color choice sit right after the sliders (beside them on a wide window, on one line below them on a narrow one).
+
+**Paired sliders and links.** The ten sliders are stacked in five pairs of scales that move together in the ratings: Awe (wonder, transcendence), Calm (peacefulness, tenderness),
+Light and dark (joyful, sadness, opposites), Edge (power, tension) and Depth (nostalgia, maturity). The correlations behind the first three are strong (r of 0.8 or more);
+the last two are weak (about 0.4) and drawn with a dashed pill, grouped by meaning only (`tools/emotions/correlations.md` has the numbers; the ones in the page are a note and may drift). The pill between the two sliders
+(🔗 Calm) is a **link toggle**, off at first. With a link on, moving either slider moves its partner: same range for the first four pairs, the mirror image for Light and dark
+(joyful 0 to 4 shows sadness 6 to 10). Turning a link on makes the narrowed slider lead (the upper one if both are narrowed). Two linked sliders count as one for the graph (only the one narrowed first becomes an axis; the other still filters).
+The link states are kept with the session and in presets (a preset saved before links existed leaves them as they are).
 The score columns are colored by distance from the average song: **cool = below the mean, warm = above, full color at ±2.5 standard deviations** (the **Color** menu switches to a plain
 darker-is-higher heat map). Hover a score to see the scale's mean and standard deviation over all rated songs and how far this song is from them, in points and in standard deviations.
 

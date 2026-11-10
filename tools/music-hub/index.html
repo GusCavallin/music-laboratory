@@ -23,7 +23,7 @@ td.n{text-align:right}th[data-k=loved],td[data-k=loved],th[data-k=in_itunes],td[
 #colbox{position:fixed;z-index:30;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:4px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.35);max-height:calc(100vh - 16px);overflow:auto}#colbox[hidden]{display:none}#colbox .mh{font-weight:600;color:var(--mut);margin-bottom:2px}#colbox .mh small{font-weight:400}
 #more{margin:12px 0}
 #tip{position:fixed;z-index:20;display:none;max-width:min(70vw,640px);padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:13px;line-height:1.35;pointer-events:none;white-space:pre-wrap;overflow-wrap:anywhere}
-tr.rated{background:#2ea04333}tr.out td{opacity:0;transition:opacity .4s}tr.rated td{transition:background .3s}td.st{letter-spacing:1px}td.st span{color:var(--mut);cursor:pointer}td.st span.on{color:#e8a317}td.st span:hover{color:#e8a317;transform:scale(1.25);display:inline-block}#feel[hidden]{display:none}.lg{height:10px;width:128px;border-radius:5px;background:linear-gradient(to right,color-mix(in srgb,var(--cool) 55%,transparent),transparent 50%,color-mix(in srgb,var(--warm) 55%,transparent));border:1px solid var(--line)}#fsl{flex:1 1 100%;display:grid;grid-template-columns:repeat(auto-fill,128px);gap:6px 16px;align-items:end}@media (min-width:760px){#fsl{grid-template-columns:repeat(5,128px)}}@media (min-width:1000px){#feel{flex-wrap:nowrap;align-items:flex-start;gap:24px}#feel #fsl{flex:0 0 auto}#feel #fopts{flex:0 1 340px;align-content:flex-start;gap:8px 12px}}#fopts{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}#fopts select{width:auto}.fo{display:inline-flex;align-items:center;gap:6px}#feel{gap:6px 16px;align-items:flex-end}.fbox{display:flex;flex-direction:column;gap:1px;min-width:128px}.fbox b{font-size:12px}.fbox small{color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums}.fbox select{width:128px}
+tr.rated{background:#2ea04333}tr.out td{opacity:0;transition:opacity .4s}tr.rated td{transition:background .3s}td.st{letter-spacing:1px}td.st span{color:var(--mut);cursor:pointer}td.st span.on{color:#e8a317}td.st span:hover{color:#e8a317;transform:scale(1.25);display:inline-block}#feel[hidden]{display:none}.lg{height:10px;width:128px;border-radius:5px;background:linear-gradient(to right,color-mix(in srgb,var(--cool) 55%,transparent),transparent 50%,color-mix(in srgb,var(--warm) 55%,transparent));border:1px solid var(--line)}#fsl{flex:1 1 100%;display:grid;grid-template-columns:repeat(auto-fill,128px);gap:6px 16px;align-items:end}@media (min-width:760px){#fsl{grid-template-columns:repeat(5,128px)}}@media (min-width:1000px){#feel{flex-wrap:nowrap;align-items:flex-start;gap:24px}#feel #fsl{flex:0 0 auto}#feel #fopts{flex:0 1 340px;align-content:flex-start;gap:8px 12px}}#fopts{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}#fopts select{width:auto}.fo{display:inline-flex;align-items:center;gap:6px}#feel{gap:6px 16px;align-items:flex-end}.fbox{display:flex;flex-direction:column;gap:1px;min-width:128px}.fbox b{font-size:12px}.fbox small{color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums}.fbox select{width:128px}.fpair{display:flex;flex-direction:column;gap:1px;min-width:128px}.flk{font:inherit;font-size:11px;line-height:1;height:17px;margin:3px 0 4px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--mut);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;filter:grayscale(1)}.flk.weak{border-style:dashed}.flk:hover{border-color:var(--acc);color:var(--fg)}.flk.on{background:var(--acc);border-color:var(--acc);color:#fff;filter:none}
 .dual{position:relative;height:22px;width:128px}.dual .tr{position:absolute;top:9px;left:7px;right:7px;height:4px;border-radius:2px;background:var(--line)}
 #cubectl .dual{width:230px}
 .dual .fill{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--acc)}
@@ -123,13 +123,13 @@ D.itunes.forEach((o,i)=>{o._ix=i;const f=o.feel;FEEL.forEach((s,j)=>o["f_"+s[0]]
  for(const o of D.archive)index(o,["name","artist","album","category","volume"])}
 build();
 const COLS={
- itunes:[["name","Name"],["artist","Artist"],["album","Album"],["year","Year",1],["loved","❤️",1],["stars","Rating"],["plays","Plays",1],["last_played","Last played"],["genres","Genres"],["country","Ctry"],["composer","Composer"],["secs","Time",1],["path","Path"]],
+ itunes:[["name","Name"],["artist","Artist"],["album","Album"],["track","Track",1],["year","Year",1],["loved","❤️",1],["stars","Rating"],["plays","Plays",1],["last_played","Last played"],["genres","Genres"],["country","Ctry"],["composer","Composer"],["secs","Time",1],["path","Path"]],
  archive:[["name","Name"],["artist","Artist"],["album","Album"],["category","Category"],["volume","Volume"],["in_itunes","In iTunes",1],["path","Path"]]};
 // the Feel tab has its own column set (same song columns plus the scores), with its own hidden/order settings
 {const it=k=>COLS.itunes.find(c=>c[0]===k);COLS.feel=[it("name"),it("artist"),it("stars"),...FEELCOLS,...COLS.itunes.filter(c=>!["name","artist","stars"].includes(c[0]))];
  COLS.cube=[it("name"),it("artist"),it("stars"),FEELCOLS.find(c=>c[0]==="f_maturity"),...COLS.itunes.filter(c=>!["name","artist","stars"].includes(c[0]))]}
 let hidden={itunes:new Set(),archive:new Set(),feel:new Set(),cube:new Set()};
-const HIDE_BY_DEFAULT={itunes:["path"],archive:[],feel:["year","loved","plays","last_played","genres","country","composer","secs","path"],cube:["year","loved","last_played","genres","country","composer","secs","path"]},allKeys=()=>({itunes:COLS.itunes.map(c=>c[0]),archive:COLS.archive.map(c=>c[0]),feel:COLS.feel.map(c=>c[0]),cube:COLS.cube.map(c=>c[0])});
+const HIDE_BY_DEFAULT={itunes:["path"],archive:[],feel:["track","year","loved","plays","last_played","genres","country","composer","secs","path"],cube:["track","year","loved","last_played","genres","country","composer","secs","path"]},allKeys=()=>({itunes:COLS.itunes.map(c=>c[0]),archive:COLS.archive.map(c=>c[0]),feel:COLS.feel.map(c=>c[0]),cube:COLS.cube.map(c=>c[0])});
 const graphOn=()=>feelMode&&!!$("fl_graph")&&$("fl_graph").checked; // Feel tab with its graph switched on
 const ck=()=>cubeMode||graphOn()?"cube":feelMode?"feel":src; // which column group is on screen (the graph hides the score columns, like Feel Axes)
 try{const h=JSON.parse(localStorage.getItem("ls_hidden")||"{}"),seen=h.seen||{};
@@ -171,7 +171,8 @@ function fillFilters(){
  for(const [n,ids] of LIB.playlists||[]){const o=document.createElement("option");o.value=n;o.label=ids.length.toLocaleString()+" songs";dl.appendChild(o)}
  if(pl.value&&!(LIB.playlists||[]).some(p=>p[0]===pl.value))pl.value=""}
 fillFilters();
-function fmt(k,v){if(k==="secs")return Math.floor(v/60)+":"+String(v%60).padStart(2,"0");
+function fmt(k,v,o){if(k==="track"){if(!v)return"";return (o&&o.discs>1?o.disc+"-":"")+v+(o&&o.tracks?"/"+o.tracks:"")} // "5/13" (disc-track/tracks on that disc: "2-5/12")
+ if(k==="secs")return Math.floor(v/60)+":"+String(v%60).padStart(2,"0");
  if(k==="stars")return v?"⭐".repeat(v):"";if(k==="loved")return v?"❤️":"";if(k==="year"&&!v)return"";if(k==="in_itunes")return v?"✔":"";return v}
 function run(keep){
  if(keep!==true&&Q.length){stale=true;if(cur)$("pnow").textContent=nowText()} // a filter/search/sort change drops what comes next, not the song playing now
@@ -196,7 +197,8 @@ function run(keep){
   }else{ if(cat&&o.category!==cat)return false; const it=$("inits").value;if(it==="in"&&!o.in_itunes)return false;if(it==="out"&&o.in_itunes)return false; }
   return true});
  if(rank&&!sort.k)res.sort((x,y)=>rank.get(x._ix)-rank.get(y._ix)); // no sort chosen: playlist order
- if(sort.k){const k=sort.k;res.sort((x,y)=>(x[k]>y[k]?1:x[k]<y[k]?-1:0)*(sort.d?-1:1))}
+ if(sort.k){const k=sort.k,ks=k==="album"&&src==="itunes"?["album","artist","disc","track"]:[k]; // an album sort keeps each album together, in disc and track order
+  res.sort((x,y)=>{for(const c of ks){if(x[c]!==y[c])return(x[c]>y[c]?1:-1)*(sort.d?-1:1)}return 0})}
  shown=PAGE;document.querySelector("main").scrollTop=0;render();saveSession()}
 const W={f_wonder:74,f_transcendence:96,f_tenderness:86,f_nostalgia:84,f_peacefulness:96,f_power:66,f_joyful:112,f_tension:74,f_sadness:76,f_maturity:80,f_conf:60,year:64,loved:48,stars:120,plays:64,secs:64,country:56,in_itunes:84,last_played:110,track:56,genres:240,path:520,volume:90,category:140,composer:180};
 function render(){
@@ -206,7 +208,7 @@ function render(){
  $("th").innerHTML="<tr>"+vis().map(([k,l,n])=>`<th data-k="${k}" draggable="true" data-tip="Click to sort, drag to move, right-click for columns" class="${sort.k===k?"s"+(sort.d?" d":""):""}">${l}</th>`).join("")+"</tr>";
  $("tb").innerHTML=res.slice(0,shown).map((o,i)=>`<tr data-i="${i}"${cur&&o.path===cur.path?' class="now"':""}>`+vis().map(([k,,n])=>{
   if(k==="stars"&&src==="itunes")return `<td class="st" data-k="stars">`+[1,2,3,4,5].map(n=>`<span data-n="${n}" class="${n<=o.stars?"on":""}">${n<=o.stars?"★":"☆"}</span>`).join("")+"</td>";
-  const v=((k==="name"&&o.protected?"🔒 ":"")+String(fmt(k,o[k])??"")).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const v=((k==="name"&&o.protected?"🔒 ":"")+String(fmt(k,o[k],o)??"")).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   const fv=k.startsWith("f_")&&k!=="f_conf"&&o[k]!=null?(colorDev()?devStyle(k,o[k]):` style="background:hsl(205 80% 50% / ${o[k]*0.06})"`):"";
   return `<td class="${n?(k.startsWith("f_")?"fv":"n"):""}" data-k="${k}" data-tip="${k.startsWith("f_")?feelTip(k,o):v}"${fv}>${v}</td>`}).join("")+"</tr>").join("");
  $("count").textContent=res.length.toLocaleString()+" of "+((feelMode||cubeMode)?D.itunes.filter(o=>o.feel).length:D[src].length).toLocaleString()+((feelMode||cubeMode)?" with feel ratings":"");
@@ -323,11 +325,12 @@ $("clearf").onclick=()=>{facet=noFacet();resetFilters();chips();run()};
 const TABSEL={itunes:"#tabs [data-s=itunes]:not([data-feel]):not([data-cube])",archive:"#tabs [data-s=archive]",feel:"#tabs [data-feel]",cube:"#tabs [data-cube]"};
 const tabName=()=>cubeMode?"cube":feelMode?"feel":src;
 function captureState(){const cx={};if(CUBE)for(const k of["0","1","2","m"])cx[k]=[$("cx"+k+"_lo").value,$("cx"+k+"_hi").value];
- return{tab:tabName(),f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),loved:$("loved").checked,facet:{...facet},cx,g:$("fl_graph").checked,fo:[...feelOrder],sort:{...sort}}}
+ return{tab:tabName(),f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),loved:$("loved").checked,facet:{...facet},cx,g:$("fl_graph").checked,fo:[...feelOrder],lk:[...linked],sort:{...sort}}}
 function applyState(s,push){if(push){hist.push(captureState());fwd.length=0;if(hist.length>20)hist.shift()}
  const want=TABSEL[s.tab]?s.tab:"itunes";if(want!==tabName())document.querySelector(TABSEL[want]).click();
  if(want==="feel")$("fl_graph").checked=!!s.g; // the graph switch belongs to the Feel tab; other presets leave it as it is
- feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];layout();picker();
+ feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];if(Array.isArray(s.lk))linked=new Set(s.lk.filter(n=>PAIRS.some(p=>p.name===n))); // a view saved before the links existed leaves them as they are
+ layout();picker();
  for(const id of SESSION_FIELDS)if(s.f&&s.f[id]!=null&&$(id))$(id).value=s.f[id];
  $("loved").checked=!!s.loved;facet={...noFacet(),...(s.facet||{})};
  if(CUBE&&s.cx)for(const k in s.cx)if($("cx"+k+"_lo")){$("cx"+k+"_lo").value=s.cx[k][0];$("cx"+k+"_hi").value=s.cx[k][1]}
@@ -399,19 +402,38 @@ $("th").ondragend=clearDrag;
 const DESC_FIRST=new Set(["stars","plays","loved",...FEEL.map(s=>"f_"+s[0])]); // columns whose first click sorts high to low: rating, plays, the ten Feel scores (maturity included)
 $("th").onclick=e=>{const k=e.target.dataset.k;if(!k)return;sort={k,d:sort.k===k?(sort.d?0:1):(DESC_FIRST.has(k)?1:0)};run()};
 // --- Feel: one min/max slider pair per scale (0-10). A song stays only if every scale is inside its range. ---
-$("feel").innerHTML='<div id="fsl">'+FEEL.map(([k,l,tip])=>`<div class="fbox" data-tip="${tip}"><b>${l} <small id="fv_${k}">0–10</small></b><div class="dual"><div class="tr"></div><div class="fill" id="ff_${k}"></div><input type="range" id="fl_${k}_lo" min="0" max="10" value="0"><input type="range" id="fl_${k}_hi" min="0" max="10" value="10"></div></div>`).join("")+"</div>"
+// The ten scales are stacked in five pairs of scales that move together in the ratings (r from tools/emotions/correlations.md; a note, it may drift as ratings change).
+// A pair's link toggle makes the two sliders follow each other; sign -1 = opposite scales (joyful/sadness), linked as a mirror image (0-4 on one is 6-10 on the other).
+const PAIRS=[["Awe","wonder","transcendence",1,0.93],["Calm","peacefulness","tenderness",1,0.82],["Light and dark","joyful","sadness",-1,-0.84],["Edge","power","tension",1,0.41],["Depth","nostalgia","maturity",1,0.40]]
+ .map(([name,a,b,sign,r])=>({name,a:FEEL.findIndex(s=>s[0]===a),b:FEEL.findIndex(s=>s[0]===b),sign,r,weak:Math.abs(r)<0.6}));
+let linked=new Set(); // names of the pairs whose link is on (off at first; kept in the session and in presets)
+const fbox=([k,l,tip])=>`<div class="fbox" data-tip="${tip}"><b>${l} <small id="fv_${k}">0–10</small></b><div class="dual"><div class="tr"></div><div class="fill" id="ff_${k}"></div><input type="range" id="fl_${k}_lo" min="0" max="10" value="0"><input type="range" id="fl_${k}_hi" min="0" max="10" value="10"></div></div>`;
+const pairTip=p=>`${FEEL[p.a][1]} and ${FEEL[p.b][1]}: ${p.weak?"weakly":"strongly"} linked in your ratings (r ${p.r>0?"+":"−"}${Math.abs(p.r).toFixed(2)}). Click to link the two sliders${p.sign<0?" as a mirror image (opposite scales)":""}: moving one moves the other. When you link them, the narrowed one leads (the upper one if both are).`;
+$("feel").innerHTML='<div id="fsl">'+PAIRS.map((p,i)=>`<div class="fpair">${fbox(FEEL[p.a])}<button class="flk${p.weak?" weak":""}" data-p="${i}" data-tip="${pairTip(p)}">🔗 ${p.name}</button>${fbox(FEEL[p.b])}</div>`).join("")+"</div>"
  +`<div id="fopts"><button id="fl_reset" data-tip="All scales back to 0–10">Reset sliders</button><label class="fo" data-tip="Plot the songs: the first four scales you narrow become the graph (a line, a quadrant, a cube, then a fourth color). The score columns are hidden while it is on."><input type="checkbox" id="fl_graph"> Show graph</label><label class="fo" data-tip="How sure Claude was when rating the song: show only the songs rated with that confidence (Low = the ones to take with a grain of salt)">Confidence <select id="fl_conf"><option value="all">All</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label><label class="fo">Color <select id="fl_color" data-tip="vs. mean: cool = below the average song, warm = above (all rated songs, capped at ±2.5 stdev). Raw: darker = higher score."><option value="dev">vs. the mean</option><option value="raw">raw score</option></select></label></div>`;
 const CONF={all:0,low:1,medium:2,high:3};let feelRange=[],feelConf=0,feelOrder=[]; // feelOrder: the scales whose slider is narrowed, in the order they were narrowed (the first four make the graph)
 const layout=()=>{$("cubebox").hidden=!plotOn()};
 function readFeel(){feelRange=FEEL.map(([k])=>[+$("fl_"+k+"_lo").value,+$("fl_"+k+"_hi").value]);{const c=$("fl_conf");if(c.selectedIndex<0)c.selectedIndex=0;feelConf=CONF[c.value]||0} // a value saved by an older version (1, 2, 3) matches no option: back to All
  
  const nar=i=>feelRange[i][0]>0||feelRange[i][1]<10;feelOrder=feelOrder.filter(nar);FEEL.forEach((_,i)=>{if(nar(i)&&!feelOrder.includes(i))feelOrder.push(i)});
+ // two linked sliders are one idea: only the one narrowed first counts toward the graph (the other still filters)
+ for(const p of PAIRS)if(linked.has(p.name)&&feelOrder.includes(p.a)&&feelOrder.includes(p.b))feelOrder.splice(feelOrder.indexOf(feelOrder.indexOf(p.a)>feelOrder.indexOf(p.b)?p.a:p.b),1);
+ document.querySelectorAll(".flk").forEach(b=>b.classList.toggle("on",linked.has(PAIRS[+b.dataset.p].name)));
  FEEL.forEach(([k],i)=>{const [lo,hi]=feelRange[i];$("fv_"+k).textContent=lo+"–"+hi;
   const f=$("ff_"+k);f.style.left=`calc(7px + (100% - 14px) * ${lo/10})`;f.style.width=`calc((100% - 14px) * ${(hi-lo)/10})`;
   $("fl_"+k+"_lo").style.zIndex=lo>=5?1:3;$("fl_"+k+"_hi").style.zIndex=lo>=5?3:1})}
 function feelOk(o){const f=o.feel;if(!f||(feelConf&&f[10]!==feelConf))return false;
  for(let i=0;i<10;i++){const [lo,hi]=feelRange[i],v=f[i];if(v==null){if(lo>0||hi<10)return false;continue}if(v<lo||v>hi)return false}return true}
-$("feel").oninput=e=>{const t=e.target;if(t.type==="range"){const m=t.id.match(/^fl_(.+)_(lo|hi)$/);if(m){const lo=$("fl_"+m[1]+"_lo"),hi=$("fl_"+m[1]+"_hi");if(+lo.value>+hi.value){if(m[2]==="lo")hi.value=lo.value;else lo.value=hi.value}}}readFeel();run()};
+$("feel").oninput=e=>{const t=e.target;if(t.type==="range"){const m=t.id.match(/^fl_(.+)_(lo|hi)$/);if(m){const lo=$("fl_"+m[1]+"_lo"),hi=$("fl_"+m[1]+"_hi");if(+lo.value>+hi.value){if(m[2]==="lo")hi.value=lo.value;else lo.value=hi.value}
+ const p=PAIRS.find(p=>linked.has(p.name)&&(FEEL[p.a][0]===m[1]||FEEL[p.b][0]===m[1]));if(p)syncPair(p,FEEL[p.a][0]===m[1]?"a":"b")}}readFeel();run()};
+// Linked pair: the partner takes the same range (or the mirror image for opposite scales). The mirror is its own inverse, so it works from either slider.
+const rng=i=>[+$("fl_"+FEEL[i][0]+"_lo").value,+$("fl_"+FEEL[i][0]+"_hi").value];
+function syncPair(p,from){const [x,y]=from==="b"?[p.b,p.a]:[p.a,p.b],[lo,hi]=rng(x),[l2,h2]=p.sign<0?[10-hi,10-lo]:[lo,hi];
+ $("fl_"+FEEL[y][0]+"_lo").value=l2;$("fl_"+FEEL[y][0]+"_hi").value=h2}
+$("feel").onclick=e=>{const b=e.target.closest(".flk");if(!b)return;const p=PAIRS[+b.dataset.p];
+ if(linked.has(p.name))linked.delete(p.name);
+ else{linked.add(p.name);const nar=i=>{const [lo,hi]=rng(i);return lo>0||hi<10};syncPair(p,nar(p.a)||!nar(p.b)?"a":"b")} // the narrowed slider leads; if both are narrowed, the upper one
+ readFeel();run()};
 $("fl_conf").onchange=()=>{readFeel();run()};
 $("fl_graph").onchange=()=>{if(sort.k&&!COLS[ck()].some(c=>c[0]===sort.k))sort={k:null,d:0};layout();picker();run()};
 $("fl_color").onchange=()=>{render();saveSession()};
@@ -661,7 +683,7 @@ loadPresets();
 let sessionReady=false,lastSave=0,restoring=false;
 const SESSION_FIELDS=["q","pl","stars","starsmax","dec","cty","cat","inits","fl_conf","fl_color",...FEEL.flatMap(([k])=>["fl_"+k+"_lo","fl_"+k+"_hi"])];
 function saveSession(){if(!sessionReady)return;
- try{localStorage.setItem("ls_session",JSON.stringify({src,feel:feelMode,cube:cubeMode,facet,sort,shuf,loved:$("loved").checked,g:$("fl_graph").checked,fo:feelOrder,
+ try{localStorage.setItem("ls_session",JSON.stringify({src,feel:feelMode,cube:cubeMode,facet,sort,shuf,loved:$("loved").checked,g:$("fl_graph").checked,fo:feelOrder,lk:[...linked],
   f:Object.fromEntries(SESSION_FIELDS.map(id=>[id,$(id).value])),
   song:cur?{path:cur.path,t:Math.floor(audio.currentTime||0)}:null}))}catch(e){}}
 function restoreSession(){
@@ -674,7 +696,7 @@ function restoreSession(){
    for(const id of SESSION_FIELDS){const v=s.f&&s.f[id];if(v==null)continue;const el=$(id);
     if(el.tagName==="SELECT"&&![...el.options].some(o=>o.value===String(v)))continue; // e.g. a playlist that no longer exists
     el.value=v}
-   $("loved").checked=!!s.loved;$("fl_graph").checked=!!s.g;feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];layout();picker();readFeel();
+   $("loved").checked=!!s.loved;$("fl_graph").checked=!!s.g;feelOrder=Array.isArray(s.fo)?s.fo.filter(Number.isInteger):[];if(Array.isArray(s.lk))linked=new Set(s.lk.filter(n=>PAIRS.some(p=>p.name===n)));layout();picker();readFeel();
    if(s.sort&&s.sort.k&&COLS[ck()].some(c=>c[0]===s.sort.k))sort={k:s.sort.k,d:s.sort.d?1:0};
    if(s.facet)facet={artist:s.facet.artist||null,album:s.facet.album||null,volume:s.facet.volume??null};chips();
    shuf=!!s.shuf;$("pshuf").classList.toggle("on",shuf);
