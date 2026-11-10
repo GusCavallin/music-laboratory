@@ -13,11 +13,13 @@ takes the next free one; if our own helper is already there it just opens the wi
     GET/POST /presets saved views (presets.json): the page reads the list and writes it back whole
     POST /rate        sets one song's star rating in the running iTunes (tools/itunes-com/rate_file.ps1); for a [To Rate] playlist it also
                       removes the song from that playlist. Only songs listed in data.js are accepted.
+    POST /playlist    writes the songs the page shows as "[Gen] <name>.m3u8" in the repo's playlists folder (Save as playlist); the user imports it
     /audio?p=<path>   streams a song (with Range, so seeking works). Only files whose path is listed in
                       data.js are served, so nothing else on the disk is reachable.
-Read-only on the iTunes library file and the media files; the only changes it makes in iTunes are the ones /rate does.
+Read-only on the iTunes library file and the media files; the only changes it makes in iTunes are the ones /rate does
+(/playlist only writes a file in this repo).
 """
-import contextlib, http.client, io, json, mimetypes, os, select, socket, subprocess, sys, threading, time, webbrowser
+import contextlib, http.client, io, json, mimetypes, os, re, select, socket, subprocess, sys, threading, time, webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
@@ -43,6 +45,8 @@ STATIC = {"/": ("index.html", HTML), "/index.html": ("index.html", HTML), "/data
 rebuild_lock = threading.Lock()
 PRESETS = os.path.join(HERE, "presets.json")  # saved views of the page (Presets menu)
 TAG = "[To Rate]"  # rating a song while a playlist with this tag in its name is selected also removes it from that playlist
+PLAYLISTS = os.path.normpath(os.path.join(HERE, "..", "..", "playlists"))  # where /playlist writes; the user imports the file into iTunes
+GEN = "[Gen] "  # prefix of every generated playlist (agents/WRITING-PLAYLISTS.md)
 
 # --- presence: each open page holds one /presence stream; when the last stream drops (window closed or crashed)
 # the helper stops, unless --keep-alive. The browser itself closes the stream, so no unload events or timers needed. ---
@@ -134,6 +138,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.rate()
         if url.path == "/presets":
             return self.presets_save()
+        if url.path == "/playlist":
+            return self.playlist_save()
         if url.path != "/rebuild":
             return self.send_text(HTTPStatus.NOT_FOUND, "not found")
         if not rebuild_lock.acquire(blocking=False):
@@ -177,6 +183,48 @@ class Handler(BaseHTTPRequestHandler):
             json.dump({"presets": items}, f, ensure_ascii=False, indent=1)
         os.replace(tmp, PRESETS)
         self.send_text(HTTPStatus.OK, json.dumps({"ok": True, "count": len(items)}), "application/json")
+
+    def playlist_save(self):
+        """Write the songs the page is showing as "[Gen] <name>.m3u8" in the repo's playlists folder (UTF-8, CRLF, as in
+        agents/WRITING-PLAYLISTS.md). Only songs listed in data.js are accepted. Nothing is touched in iTunes: the user imports the file.
+        Refuses a name that was already imported (playlists/bak); an unimported file of the same name needs overwrite=true."""
+        def fail(status, error, **extra):
+            return self.send_text(status, json.dumps({"ok": False, "error": error, **extra}), "application/json")
+        try:
+            n = int(self.headers.get("Content-Length", 0))
+            if n > 8_000_000:
+                raise ValueError("too large")
+            req = json.loads(self.rfile.read(n) or b"{}")
+            songs, overwrite = req["songs"], bool(req.get("overwrite"))
+            name = re.sub(r'[\\/*?"<>|\x00-\x1f]', "", str(req["name"]).replace(":", " -"))
+            name = re.sub(r"\s+", " ", name).strip(" .")
+            if name.lower().startswith(GEN.lower()):
+                name = name[len(GEN):].strip()
+            if not name or len(name) > 80:
+                raise ValueError("give the playlist a name (up to 80 characters)")
+            if not isinstance(songs, list) or not songs or len(songs) > 20000:
+                raise ValueError("no songs to save")
+            lines = ["#EXTM3U"]
+            for s in songs:
+                path = s["path"]
+                if os.path.normcase(path) not in allowed:
+                    raise ValueError("a song is not in the library data; click Refresh data and try again")
+                label = " - ".join(x for x in (str(s.get("artist", "")), str(s["name"])) if x).replace("\r", " ").replace("\n", " ")
+                lines += [f"#EXTINF:{int(s.get('secs', 0))},{label}", path]
+        except (ValueError, KeyError, TypeError) as e:
+            return fail(HTTPStatus.BAD_REQUEST, str(e))
+        fname = f"{GEN}{name}.m3u8"
+        out = os.path.join(PLAYLISTS, fname)
+        if os.path.exists(os.path.join(PLAYLISTS, "bak", fname)):
+            return fail(HTTPStatus.CONFLICT, f'"{GEN}{name}" was already imported (it is in playlists/bak); choose another name', exists="imported")
+        if os.path.exists(out) and not overwrite:
+            return fail(HTTPStatus.CONFLICT, f'"{fname}" is already in the playlists folder, waiting to be imported', exists="pending")
+        os.makedirs(PLAYLISTS, exist_ok=True)
+        tmp = out + ".tmp"
+        with open(tmp, "wb") as f:
+            f.write(("\r\n".join(lines) + "\r\n").encode("utf-8"))
+        os.replace(tmp, out)
+        self.send_text(HTTPStatus.OK, json.dumps({"ok": True, "file": fname, "count": len(songs), "dir": PLAYLISTS}), "application/json")
 
     def rate(self):
         """Set one song's star rating in the running iTunes (COM, tools/itunes-com/rate_file.ps1). Only listed songs."""

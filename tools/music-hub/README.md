@@ -98,6 +98,11 @@ top right says why and nothing changes.
   playlist (the row turns green, then slides out). Only the playlist entry goes: the song stays in the library. Only plain playlists are touched, never smart ones.
 - **Playlists of a song:** hover a song's name in the iTunes tab to see the playlists it is in (up to 15, then "and N more"): the ones made by hand
   or by an agent, never the rule-driven (smart) ones. It needs the playlist data in `data.js`, so click **⟳ Refresh data** once after updating.
+- **💾 Save as playlist** (next to Presets, iTunes tab, needs the helper): writes the songs now in the list, in the order shown, as
+  `[Gen] <name>.m3u8` in the repo's `playlists\` folder (UTF-8, CRLF). Filter first (Raw Feel, Feel Axes box, stars, anything), then save. Music Hub
+  never touches iTunes for this: import the file yourself (*File → Library → Import Playlist…*), then check it. It refuses a name that is already in
+  `playlists\bak` (already imported) and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
+  warned: importing the same name only adds the songs iTunes doesn't have, it never replaces the old list (delete the old playlist in iTunes first).
 - **ⓘ About** (top right) opens a small box: the version (read from the `VERSION` file at the repo root when the data is built; "Not released yet" until the first release), what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
 
@@ -200,7 +205,7 @@ width that keeps the Raw Feel controls beside the sliders. You can still drag th
 | `data.js` | The built data (git-ignored). |
 | `presets.json` | Your saved views (created on the first Save; plain JSON, safe to commit or back up). |
 | `build_data.py` / `build_data.sh` | Builds `data.js`. |
-| `server.py` | The local helper: static files, audio streaming, `/rebuild`, `/rate`, `/presets`, `/presence`. Standard library only. |
+| `server.py` | The local helper: static files, audio streaming, `/rebuild`, `/rate`, `/presets`, `/playlist`, `/presence`. Standard library only. |
 | `serve.bat` / `serve.sh` | Start the helper. |
 | `mojibake_fixes.json` | Spelling repairs for the CD index. |
 | `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `make_icons.py` | The installable-app pieces. |

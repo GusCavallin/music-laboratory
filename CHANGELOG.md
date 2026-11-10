@@ -7,6 +7,8 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ### Added
 
+- Music Hub: **Save as playlist** writes the songs in the current list (any filter, in the order shown) as a `[Gen] <name>.m3u8` file in the
+  `playlists` folder, ready to import into iTunes. Restart the helper after updating.
 - `docs/architecture.svg`: a diagram of how the parts fit together, from the iTunes library file through the index tools and Music Hub to the running iTunes.
 
 ## 0.1.0 - 2026-10-30
