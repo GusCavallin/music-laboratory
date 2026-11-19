@@ -12,6 +12,7 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
   - `react-slice-1`: the data layer (loading `data.js`, search, filters, sorting, the Feel scales), with tests.
   - `react-slice-2`: the table, search box, filters and sorting on screen, with windowed rows, for the iTunes and MP3 archive tabs.
   - `react-slice-3`: the Feel tabs. Raw Feel (ten sliders in five linked pairs, a graph of the first four narrowed scales) and Feel Axes (every rated song in a 3D cube you can turn, with a box that picks the list, and a flat view).
+  - `react-slice-4`: everything that goes through the Python helper. The player (click a row or a dot to play, shuffle, seeking, volume, the media keys), rating by clicking stars (including taking a song off a `[To Rate]` playlist), Save as playlist and Refresh data. It says so when the helper is not running.
 
 ## 0.2.0 - 2026-11-09
 
