@@ -42,7 +42,16 @@ export const fixtureLibrary = (): RawLibrary => ({
     ["Song Y", "Other", "Album Y", "Rock", "Mp3_2D", 1, 0, "$DL\\b.mp3"],
     ["Song Z", "Someone", "Album X", "Kids", "Mp3_1S", 4, 0, "$DL\\c.mp3"],
   ],
-  axes: null,
+  // invented: nine means and spreads and three axes (loadings in the order of the nine scales, wonder .. sadness)
+  axes: {
+    mean: [3, 3, 3, 4, 4, 4, 4, 3, 3],
+    sd: [2, 2, 2, 2, 2, 2, 2, 2, 2],
+    axes: [
+      { name: "Calm", low: "Bright · strong", high: "Calm · tender", loadings: [0, 0, 0.5, 0.2, 0.5, -0.4, -0.2, 0, 0], eigenvalue: 4 },
+      { name: "Ease", low: "Demanding · intense", high: "Easy · cheerful", loadings: [0, 0, 0, 0, 0, 0, 0.5, -0.5, -0.5], eigenvalue: 1 },
+      { name: "Awe", low: "Everyday", high: "Awe · grandeur", loadings: [0.5, 0.5, 0, 0, 0, 0.3, 0, 0, 0], eigenvalue: 1 },
+    ],
+  },
   built: "2026-11-19 10:00",
   version: "0.2.0",
 });

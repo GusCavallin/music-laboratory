@@ -1,3 +1,4 @@
+import { passesCube, type Cube, type CubeBox } from "../feel/cube";
 import { feelColumnIndex, fullFeelRanges, passesFeel, type FeelRanges } from "./feel";
 import { fold, matchesTerms, parseTerms } from "./text";
 import type { ArchiveRow, Dataset, Song } from "./types";
@@ -32,6 +33,8 @@ export interface SongFilter {
   facet: Facet;
   /** the Raw Feel view: null = off (every song is a candidate) */
   feel: { ranges: FeelRanges; confidence: number } | null;
+  /** the Feel Axes view: the cube and the box you sized (null = off). Without a cube (no axes data) nothing passes. */
+  cube: { cube: Cube | null; box: CubeBox } | null;
 }
 
 export const defaultSongFilter = (): SongFilter => ({
@@ -43,6 +46,7 @@ export const defaultSongFilter = (): SongFilter => ({
   playlist: "",
   facet: noFacet(),
   feel: null,
+  cube: null,
 });
 
 /** Everything the MP3 archive tab filters by. */
@@ -74,6 +78,7 @@ export function filterSongs(ds: Dataset, f: SongFilter, sort: SortSpec = noSort(
     if (artist !== null && s.artistFold !== artist) return false;
     if (album !== null && s.albumFold !== album) return false;
     if (f.feel && !passesFeel(s, f.feel.ranges, f.feel.confidence)) return false;
+    if (f.cube && !(f.cube.cube && passesCube(f.cube.cube, s, f.cube.box))) return false;
     if (s.stars < minStars || s.stars > maxStars || (f.lovedOnly && !s.loved)) return false;
     if (f.decade && `${Math.floor(s.year / 10) * 10}s` !== f.decade) return false;
     if (f.country && s.country !== f.country) return false;

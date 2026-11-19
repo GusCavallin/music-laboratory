@@ -1,3 +1,21 @@
+/** One of the three independent axes of the Feel Axes tab (tools/emotions/axes.py): a principal component of the nine GEMS scales. */
+export interface RawAxis {
+  name: string;
+  /** the two ends, "Calm · tender": the part before " · " is the short label */
+  low: string;
+  high: string;
+  /** one weight per GEMS scale (the nine, not maturity) */
+  loadings: number[];
+  eigenvalue: number;
+}
+
+/** What axes.json holds: the mean and spread of each of the nine scales over all rated songs, and the axes. */
+export interface RawAxes {
+  mean: number[];
+  sd: number[];
+  axes: RawAxis[];
+}
+
 /** What build_data.py writes into data.js (window.LIB = {...}). Rows are arrays; the *_cols lists name their positions. */
 export interface RawLibrary {
   itunes_cols: string[];
@@ -6,7 +24,8 @@ export interface RawLibrary {
   playlists: [string, number[], number][];
   archive_cols: string[];
   archive: unknown[][];
-  axes: unknown;
+  /** null until tools/emotions/axes.py has been run */
+  axes: RawAxes | null;
   built: string;
   version: string;
 }
@@ -89,6 +108,8 @@ export interface Dataset {
   archive: ArchiveRow[];
   playlists: Playlist[];
   feelStats: Record<string, FeelStat>;
+  /** the Feel Axes definition, or null */
+  axes: RawAxes | null;
   built: string;
   version: string;
 }

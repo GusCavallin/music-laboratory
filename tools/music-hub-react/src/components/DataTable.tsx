@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { Column } from "../columns";
 import type { SortSpec } from "../data/filter";
 
@@ -17,13 +17,15 @@ interface Props<R extends { ix: number }> {
   onCellClick?: (row: R, column: Column, event: MouseEvent) => void;
   /** a hover text for a cell, if it is worth one */
   cellTitle?: (row: R, column: Column) => string | undefined;
+  /** a style for a cell (the tint of a Feel score) */
+  cellStyle?: (row: R, column: Column) => CSSProperties | undefined;
   emptyMessage?: string;
   /** cell keys that can be clicked to pick something (the pointer shows it) */
   clickableKeys?: ReadonlySet<string>;
 }
 
 export function DataTable<R extends { ix: number }>({
-  rows, columns, sort, onSort, renderCell, onCellClick, cellTitle, emptyMessage = "Nothing matches.", clickableKeys,
+  rows, columns, sort, onSort, renderCell, onCellClick, cellTitle, cellStyle, emptyMessage = "Nothing matches.", clickableKeys,
 }: Props<R>) {
   const scroller = useRef<HTMLDivElement>(null);
   const byKey = useMemo(() => new Map(columns.map((c) => [c.key, c] as const)), [columns]);
@@ -70,7 +72,7 @@ export function DataTable<R extends { ix: number }>({
               return (
                 <th
                   key={c.key}
-                  className={c.numeric ? "n" : undefined}
+                  className={c.center ? "fv" : c.numeric ? "n" : undefined}
                   aria-sort={sorted ? (sort.desc ? "descending" : "ascending") : undefined}
                 >
                   <button type="button" className={sorted ? (sort.desc ? "sorted desc" : "sorted") : undefined} onClick={() => onSort(c.key)} title="Click to sort">
@@ -92,8 +94,9 @@ export function DataTable<R extends { ix: number }>({
                   <td
                     key={c.key}
                     data-k={c.key}
-                    className={[c.numeric ? "n" : "", clickableKeys?.has(c.key) ? "pick" : ""].join(" ").trim() || undefined}
+                    className={[c.center ? "fv" : c.numeric ? "n" : "", clickableKeys?.has(c.key) ? "pick" : ""].join(" ").trim() || undefined}
                     title={cellTitle?.(row, c)}
+                    style={cellStyle?.(row, c)}
                   >
                     {renderCell(row, c)}
                   </td>

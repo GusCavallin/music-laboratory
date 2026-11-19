@@ -77,6 +77,7 @@ export function buildDataset(raw: RawLibrary): Dataset {
     archive,
     playlists,
     feelStats: computeFeelStats(songs),
+    axes: raw.axes ?? null,
     built: raw.built ?? "",
     version: raw.version ?? "",
   };

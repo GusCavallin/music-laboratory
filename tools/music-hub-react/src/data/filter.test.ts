@@ -5,6 +5,7 @@ import {
 } from "./filter";
 import { FEEL_SCALES } from "./feel";
 import { fixtureLibrary } from "./fixture";
+import { buildCube, fullBox } from "../feel/cube";
 import { buildDataset } from "./load";
 
 const ds = buildDataset(fixtureLibrary());
@@ -143,5 +144,21 @@ describe("filterArchive", () => {
   it("sorts by a column", () => {
     expect(arch({}, { key: "in_itunes", desc: true })).toEqual([0, 1, 2]);
     expect(arch({}, { key: "track", desc: false })).toEqual([1, 0, 2]);
+  });
+});
+
+describe("Feel Axes (the cube box)", () => {
+  const cube = buildCube(ds.songs, ds.axes)!;
+  it("the whole cube holds the rated songs", () => {
+    expect(songs({ cube: { cube, box: fullBox(cube) } })).toEqual([0, 1, 2, 3]);
+  });
+  it("narrowing maturity leaves out songs without it", () => {
+    expect(songs({ cube: { cube, box: { ...fullBox(cube), maturity: [5, 10] } } })).toEqual([0]);
+  });
+  it("combines with the other filters", () => {
+    expect(songs({ cube: { cube, box: fullBox(cube) }, lovedOnly: true })).toEqual([0, 2]);
+  });
+  it("without axes data nothing passes", () => {
+    expect(songs({ cube: { cube: null, box: { ranges: [], maturity: [0, 10] } } })).toEqual([]);
   });
 });

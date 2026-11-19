@@ -7,6 +7,8 @@ interface Props {
   /** rows shown and rows on this tab */
   count: number;
   total: number;
+  /** after the numbers, such as " with feel ratings" */
+  countNote?: string;
   facet: Facet;
   onRemoveFacet: (kind: keyof Facet) => void;
   onClear: () => void;
@@ -18,7 +20,7 @@ const CHIPS: readonly { kind: keyof Facet; label: string }[] = [
   { kind: "volume", label: "Volume" },
 ];
 
-export function SearchBar({ query, onQuery, count, total, facet, onRemoveFacet, onClear }: Props) {
+export function SearchBar({ query, onQuery, count, total, countNote = "", facet, onRemoveFacet, onClear }: Props) {
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="qrow">
@@ -51,7 +53,7 @@ export function SearchBar({ query, onQuery, count, total, facet, onRemoveFacet, 
         )}
       </span>
       <span className="count" aria-live="polite">
-        {count.toLocaleString()} of {total.toLocaleString()}
+        {count.toLocaleString()} of {total.toLocaleString()}{countNote}
       </span>
       <span className="chips">
         {CHIPS.map(({ kind, label }) => {

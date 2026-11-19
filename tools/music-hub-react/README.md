@@ -13,7 +13,7 @@ will call the same endpoints.
 |---|---|---|
 | 1 | Data layer: types, loading `data.js`, search text, Feel scales, filters, sorting, formatters, with tests | done |
 | 2 | The table, search box, filters and sorting on screen (windowed rows), iTunes and archive tabs | done |
-| 3 | The Feel tabs: paired sliders with links, the graph and the cube | |
+| 3 | The Feel tabs: Raw Feel (paired sliders with links, the graph) and Feel Axes (the 3D cube, the flat plots) | done |
 | 4 | The player, star rating, Save as playlist | |
 | 5 | Presets, session, filter history, column menu, tooltips | |
 | 6 | PWA, serving from the helper, public export, docs | |
@@ -29,11 +29,17 @@ npm run dev            # the app at http://localhost:5173, reading ..\music-hub\
 ```
 
 `npm run dev` serves the `data.js` of the `music-hub` folder at `/data.js`. To try another library (for example an invented one), set
-`$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first. In slice 2 the app only reads: rating, playing and Save as playlist need the helper and come in slice 4.
+`$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first. The app only reads for now: rating, playing and Save as playlist need the helper and come in slice 4.
 
-What slice 2 does (the same as the current page, unless noted): search and filters on both tabs, sorting (first click direction per column), a click on an
-artist, album or CD cell picks a chip (Ctrl-click keeps the other filters), a click on a path copies it, **Clear filters**, and a windowed table (only the rows
-on screen are in the page, so 20,000 rows are fine). Not yet: Raw Feel, Feel Axes, the player, rating, presets, the column menu, tooltips, the history chip.
+What it does so far (the same as the current page, unless noted):
+- **Slice 2:** search and filters on the iTunes and archive tabs, sorting (first click direction per column), a click on an artist, album or CD cell picks a chip
+  (Ctrl-click keeps the other filters), a click on a path copies it, **Clear filters**, and a windowed table (only the rows on screen are in the page, so 20,000 rows are fine).
+- **Slice 3, Raw Feel:** ten min/max sliders in five stacked pairs, each pair with a link toggle (the second slider follows the first, a mirror image for joyful and
+  sadness), a Confidence menu, a Color menu, and score cells tinted against the mean. **Show graph** plots the first four narrowed scales (a line, a quadrant, a cube,
+  then a fourth color) beside the list, with the statistics of the songs in it.
+- **Slice 3, Feel Axes:** every rated song as a dot in a cube of three independent feelings (Calm, Ease, Awe), colored by maturity; the sliders size a box that picks the songs
+  in the list. Drag to turn the cube, the wheel zooms, a double-click resets the view, **Flat** shows the three 2D plots, and hovering a dot names the song.
+- Not yet: the player (and clicking a dot to play it), rating, presets, the column menu, tooltips (hover text is the browser's own for now), the history chip.
 
 To check the data layer against your real library (read-only; it asserts no numbers, it compares each filter with a second, naive count from the raw rows):
 
@@ -58,6 +64,14 @@ $env:MUSICLAB_DATA_JS = "C:\path\to\music-lab\tools\music-hub\data.js"; npm test
 | the search row, chips and filter row | `src/components/SearchBar.tsx`, `FilterRow.tsx`, `Tabs.tsx` |
 | the `data.js` script tag | `src/hooks/useLibrary.ts` |
 | `flash()` | `src/hooks/useFlash.ts` |
+| `PAIRS`, `syncPair`, the link toggles, `feelOrder`, `readFeel` | `src/feel/pairs.ts`, `src/feel/feelState.ts` (state rules) and `src/components/FeelPanel.tsx` |
+| the `.dual` slider | `src/components/DualRange.tsx` |
+| `buildCube`, `cubeOk`, `readCube` | `src/feel/cube.ts` and `src/components/CubeControls.tsx` |
+| `cubeModel`, `feelModel`, `devColor`, `jit`, the statistics numbers | `src/feel/model.ts` |
+| the camera and the 3D projection | `src/feel/project.ts` |
+| `draw3D`, `plot2D`, `drawFlat`, `pickAt` (canvas drawing) | `src/feel/draw.ts` |
+| the graph panel, its statistics block and legend, drag/wheel/hover | `src/components/GraphPanel.tsx` |
+| `devStyle`, `feelTip` (the tinted score cells and their hover text) | `src/columns.ts` (`scoreBackground`, `feelTip`) |
 
 ## Rules for this folder
 

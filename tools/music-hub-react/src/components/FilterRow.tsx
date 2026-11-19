@@ -11,9 +11,9 @@ interface Props {
 
 const STAR_CHOICES = [0, 1, 2, 3, 4, 5];
 
-/** The filters under the search box: those of the iTunes tab, or those of the archive tab. */
+/** The filters under the search box: those of the iTunes songs (the three song tabs share them), or those of the archive tab. */
 export function FilterRow({ dataset, state, dispatch }: Props) {
-  return state.tab === "itunes" ? <SongFilters dataset={dataset} state={state} dispatch={dispatch} /> : <ArchiveFilters dataset={dataset} state={state} dispatch={dispatch} />;
+  return state.tab === "archive" ? <ArchiveFilters dataset={dataset} state={state} dispatch={dispatch} /> : <SongFilters dataset={dataset} state={state} dispatch={dispatch} />;
 }
 
 function SongFilters({ dataset, state, dispatch }: Props) {
