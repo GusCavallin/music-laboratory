@@ -45,7 +45,7 @@ export function App() {
   if (state.status === "error") {
     return (
       <p className="status">
-        Couldn't load data.js ({state.message}). Build it with <code>py -3 tools\music-hub\build_data.py</code>, or point
+        Couldn't load data.js ({state.message}). Build it with <code>py -3 tools\music-hub-core\build_data.py</code>, or point
         <code> MUSICLAB_DATA_JS </code> at it.
       </p>
     );

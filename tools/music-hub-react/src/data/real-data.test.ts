@@ -2,7 +2,7 @@
  * Opt-in check against a real data.js (read-only). It asserts no numbers of its own: every expectation is computed a second,
  * naive way straight from the raw rows, so it works on any library and keeps nothing personal in the repo.
  *
- *   PowerShell:  $env:MUSICLAB_DATA_JS = "C:\path\to\tools\music-hub\data.js"; npm test
+ *   PowerShell:  $env:MUSICLAB_DATA_JS = "C:\path\to\tools\music-hub-core\data.js"; npm test
  *
  * Without the variable the whole file is skipped.
  */

@@ -8,7 +8,7 @@ export type LibraryState =
   | { status: "ready"; dataset: Dataset };
 
 /**
- * Loads data.js (the helper serves it at /data.js; the dev server serves it from the music-hub folder) and builds the dataset.
+ * Loads data.js (the helper serves it at /data.js; the dev server serves it from the music-hub-core folder) and builds the dataset.
  * `reload` fetches it again without clearing what is on screen, and returns the new data (null if it could not be loaded).
  */
 export function useLibrary(url = "/data.js"): { state: LibraryState; reload: () => Promise<Dataset | null> } {

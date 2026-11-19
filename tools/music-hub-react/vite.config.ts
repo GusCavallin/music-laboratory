@@ -8,11 +8,11 @@ import { defineConfig } from "vitest/config";
 const here = fileURLToPath(new URL(".", import.meta.url));
 
 /**
- * Dev only: serves the music-hub folder's data.js at /data.js (read-only), so `npm run dev` works without the Python helper.
+ * Dev only: serves the music-hub-core folder's data.js at /data.js (read-only), so `npm run dev` works without the Python helper.
  * Point MUSICLAB_DATA_JS at another data.js to use a different library.
  */
 function serveDataJs(): Plugin {
-  const file = process.env.MUSICLAB_DATA_JS ?? resolve(here, "../music-hub/data.js");
+  const file = process.env.MUSICLAB_DATA_JS ?? resolve(here, "../music-hub-core/data.js");
   return {
     name: "serve-music-hub-data",
     configureServer(server) {
@@ -31,7 +31,7 @@ function serveDataJs(): Plugin {
 }
 
 /**
- * Dev only: the Python helper (tools/music-hub/server.py, started with serve.bat) streams the audio and talks to iTunes. The dev server hands its
+ * Dev only: the Python helper (tools/music-hub-core/helper.py, started with a page's serve.bat) streams the audio and talks to iTunes. The dev server hands its
  * routes on to it, so the app works the same as when the helper serves it. MUSICLAB_HELPER names another helper (default http://127.0.0.1:9123).
  * The helper only accepts requests that name itself as their origin, so the Origin header is rewritten.
  */

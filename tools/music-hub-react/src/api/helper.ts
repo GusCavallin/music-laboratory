@@ -1,5 +1,5 @@
 /**
- * The Python helper (tools/music-hub/server.py): it streams songs, sets ratings in the running iTunes, writes playlist files and rebuilds data.js.
+ * The Python helper (tools/music-hub-core/helper.py): it streams songs, sets ratings in the running iTunes, writes playlist files and rebuilds data.js.
  * Every function takes the fetch to use, so tests can stand in for the helper.
  */
 export type Fetch = typeof fetch;

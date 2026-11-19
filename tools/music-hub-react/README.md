@@ -1,7 +1,7 @@
 # Music Hub in React and TypeScript
 
 A rebuild of Music Hub (`..\music-hub`, vanilla JavaScript) in React and TypeScript, done slice by slice. The current page stays the one to use
-every day until this one matches it. The Python helper (`..\music-hub\server.py`) and `data.js` are not changed: this app reads the same data and
+every day until this one matches it. The Python helper (`..\music-hub-core\helper.py`, shared by both pages) and `data.js` are not changed: this app reads the same data and
 will call the same endpoints.
 
 **Preview, still being built.** This is a rebuild of Music Hub in React and TypeScript, added one slice at a time. Each slice is a tagged commit
@@ -27,13 +27,13 @@ npm install            # once
 npm test               # the tests (invented library only)
 npm run typecheck      # TypeScript, strict
 npm run build          # type check, then a production build in dist\
-npm run dev            # the app at http://127.0.0.1:5273 (the dev server alone, no helper), reading ..\music-hub\data.js (read-only); the helper is needed only to play, rate and save
+npm run dev            # the app at http://127.0.0.1:5273 (the dev server alone, no helper), reading ..\music-hub-core\data.js (read-only); the helper is needed only to play, rate and save
 ```
 
-`npm run dev` serves the `data.js` of the `music-hub` folder at `/data.js`. To try another library (for example an invented one), set
+`npm run dev` serves the `data.js` of the `music-hub-core` folder at `/data.js`. To try another library (for example an invented one), set
 `$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
 
-**The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub\server.py`, started with `serve.bat`).
+**The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub-core\helper.py`; for now it is started with the current page's `serve.bat`).
 `npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`, `/presets`) on to it at `http://127.0.0.1:9123`; set `MUSICLAB_HELPER` to use another. The helper only accepts
 requests that name itself as their origin, so the dev server rewrites that header. **Without the helper** everything else works: the header says "⚠ helper not running", and playing or rating says
 that it needs the helper (instead of every song failing to load and being skipped). The page asks again when you click and when you come back to the window, so starting `serve.bat` is enough, with no reload.
@@ -67,7 +67,7 @@ What it does so far (the same as the current page, unless noted):
 To check the data layer against your real library (read-only; it asserts no numbers, it compares each filter with a second, naive count from the raw rows):
 
 ```
-$env:MUSICLAB_DATA_JS = "C:\path\to\music-lab\tools\music-hub\data.js"; npm test
+$env:MUSICLAB_DATA_JS = "C:\path\to\music-lab\tools\music-hub-core\data.js"; npm test
 ```
 
 ## Where the old code went
