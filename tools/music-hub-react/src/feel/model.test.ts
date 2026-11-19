@@ -8,7 +8,7 @@ import { cubeModel, devColor, feelModel, jit, mixColor, plain, selectionStats, s
 const ds = buildDataset(fixtureLibrary());
 const cube = buildCube(ds.songs, ds.axes)!;
 const idx = (key: string) => FEEL_SCALES.findIndex((s) => s.key === key);
-const P: Palette = { mut: [100, 100, 100], cool: [0, 0, 255], warm: [255, 128, 0], acc: "#00f", line: "#ccc", mutS: "#888", fg: "#111" };
+const P: Palette = { mut: [100, 100, 100], cool: [0, 0, 255], warm: [255, 128, 0], acc: "#00f", line: "#ccc", mutS: "#888", fg: "#111", bg: "#fff" };
 const stat = { mean: 5, sd: 2 };
 
 describe("devColor", () => {

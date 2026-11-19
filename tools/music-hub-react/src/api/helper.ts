@@ -1,0 +1,84 @@
+/**
+ * The Python helper (tools/music-hub/server.py): it streams songs, sets ratings in the running iTunes, writes playlist files and rebuilds data.js.
+ * Every function takes the fetch to use, so tests can stand in for the helper.
+ */
+export type Fetch = typeof fetch;
+
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+/** The address that streams a song. Files only the helper can reach are asked for by path; the helper serves only paths listed in data.js. */
+export const audioUrl = (path: string): string => `/audio?p=${encodeURIComponent(path)}`;
+
+/** Is the helper there? It answers /ping with its name (so a second launch can recognise a running one). */
+export async function ping(fetcher: Fetch = fetch): Promise<boolean> {
+  try {
+    const r = await fetcher("/ping", { cache: "no-store" });
+    return r.ok && (await r.text()).trim() === "music-library-search";
+  } catch {
+    return false;
+  }
+}
+
+export interface RateRequest {
+  path: string;
+  name: string;
+  /** 0 to 5; 0 clears the rating */
+  stars: number;
+  /** a "[To Rate]" playlist the song is being rated from: the helper also takes it off that playlist */
+  from_playlist: string;
+}
+
+export type RateResult =
+  | { ok: true; stars: number; removed: boolean }
+  | { ok: false; error: string };
+
+/** Sets one song's star rating in iTunes itself. Never throws: a helper that can't be reached is a result like any other. */
+export async function rateSong(req: RateRequest, fetcher: Fetch = fetch): Promise<RateResult> {
+  try {
+    const r = await fetcher("/rate", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(req) });
+    const j = (await r.json()) as { ok?: boolean; stars?: number; removed?: boolean; error?: string };
+    return j.ok ? { ok: true, stars: Number(j.stars ?? req.stars), removed: !!j.removed } : { ok: false, error: j.error || `${r.status}` };
+  } catch {
+    return { ok: false, error: "Can't reach the helper" };
+  }
+}
+
+export interface PlaylistSong {
+  path: string;
+  name: string;
+  artist: string;
+  secs: number;
+}
+
+export type PlaylistResult =
+  | { ok: true; file: string; count: number }
+  /** `exists`: the name is taken, either by a file still waiting to be imported ("pending") or by one already imported */
+  | { ok: false; error: string; exists?: "pending" | "imported" };
+
+/** Writes "[Gen] <name>.m3u8" in the playlists folder. Nothing is touched in iTunes: the user imports the file. */
+export async function savePlaylist(
+  req: { name: string; songs: readonly PlaylistSong[]; overwrite: boolean },
+  fetcher: Fetch = fetch,
+): Promise<PlaylistResult> {
+  try {
+    const r = await fetcher("/playlist", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify(req) });
+    const j = (await r.json()) as { ok?: boolean; file?: string; count?: number; error?: string; exists?: "pending" | "imported" };
+    if (j.ok) return { ok: true, file: String(j.file), count: Number(j.count) };
+    return { ok: false, error: j.error || `${r.status}`, ...(j.exists ? { exists: j.exists } : {}) };
+  } catch {
+    return { ok: false, error: "Couldn't reach the helper, nothing saved" };
+  }
+}
+
+export type RebuildResult = { ok: true } | { ok: false; error: string };
+
+/** Asks the helper to rebuild data.js from the iTunes library file. */
+export async function rebuild(fetcher: Fetch = fetch): Promise<RebuildResult> {
+  try {
+    const r = await fetcher("/rebuild", { method: "POST" });
+    const j = (await r.json()) as { ok?: boolean; error?: string; output?: string };
+    return j.ok ? { ok: true } : { ok: false, error: j.error || j.output || String(r.status) };
+  } catch {
+    return { ok: false, error: "Can't reach the helper (is its window still open?)" };
+  }
+}

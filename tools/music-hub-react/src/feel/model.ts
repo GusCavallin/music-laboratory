@@ -14,6 +14,8 @@ export interface Palette {
   line: string;
   mutS: string;
   fg: string;
+  /** the page background (a halo under the ring around the playing song) */
+  bg: string;
 }
 
 export const mixColor = (a: Rgb, b: Rgb, t: number): string => `rgb(${[0, 1, 2].map((i) => Math.round(a[i]! + (b[i]! - a[i]!) * t)).join(",")})`;

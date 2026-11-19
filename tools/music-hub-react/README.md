@@ -14,7 +14,7 @@ will call the same endpoints.
 | 1 | Data layer: types, loading `data.js`, search text, Feel scales, filters, sorting, formatters, with tests | done |
 | 2 | The table, search box, filters and sorting on screen (windowed rows), iTunes and archive tabs | done |
 | 3 | The Feel tabs: Raw Feel (paired sliders with links, the graph) and Feel Axes (the 3D cube, the flat plots) | done |
-| 4 | The player, star rating, Save as playlist | |
+| 4 | The player, star rating, Save as playlist, Refresh data (through the helper) | done |
 | 5 | Presets, session, filter history, column menu, tooltips | |
 | 6 | PWA, serving from the helper, public export, docs | |
 
@@ -25,11 +25,16 @@ npm install            # once
 npm test               # the tests (invented library only)
 npm run typecheck      # TypeScript, strict
 npm run build          # type check, then a production build in dist\
-npm run dev            # the app at http://localhost:5173, reading ..\music-hub\data.js (read-only); needs no Python helper
+npm run dev            # the app at http://localhost:5173, reading ..\music-hub\data.js (read-only); the helper is needed only to play, rate and save
 ```
 
 `npm run dev` serves the `data.js` of the `music-hub` folder at `/data.js`. To try another library (for example an invented one), set
-`$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first. The app only reads for now: rating, playing and Save as playlist need the helper and come in slice 4.
+`$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
+
+**The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub\server.py`, started with `serve.bat`).
+`npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`) on to it at `http://127.0.0.1:9123`; set `MUSICLAB_HELPER` to use another. The helper only accepts
+requests that name itself as their origin, so the dev server rewrites that header. **Without the helper** everything else works: the header says "⚠ helper not running", and playing or rating says
+that it needs the helper (instead of every song failing to load and being skipped). The page asks again when you click and when you come back to the window, so starting `serve.bat` is enough, with no reload.
 
 What it does so far (the same as the current page, unless noted):
 - **Slice 2:** search and filters on the iTunes and archive tabs, sorting (first click direction per column), a click on an artist, album or CD cell picks a chip
@@ -39,7 +44,13 @@ What it does so far (the same as the current page, unless noted):
   then a fourth color) beside the list, with the statistics of the songs in it.
 - **Slice 3, Feel Axes:** every rated song as a dot in a cube of three independent feelings (Calm, Ease, Awe), colored by maturity; the sliders size a box that picks the songs
   in the list. Drag to turn the cube, the wheel zooms, a double-click resets the view, **Flat** shows the three 2D plots, and hovering a dot names the song.
-- Not yet: the player (and clicking a dot to play it), rating, presets, the column menu, tooltips (hover text is the browser's own for now), the history chip.
+- **Slice 4, the player:** click a row (or a dot in a graph) to play the list from there; previous, stop, play/pause, next, shuffle, a seek bar and a volume (remembered; the wheel over
+  either skips 5 s or changes the volume by 5%); the space bar plays and pauses; the media keys work. Changing a filter never interrupts the song: the next one comes from the new list.
+  A protected iTunes purchase can't play in a browser, so it is skipped with a note. A song that fails to load is skipped, and playback stops after five failures in a row.
+  The playing song is highlighted, ringed in the graphs, and a click on the "now playing" text scrolls the list to it.
+- **Slice 4, rating:** click a star to set that rating in iTunes itself (click the current rating to clear it). Rating from a `[To Rate]` playlist also takes the song off it:
+  the row turns green and slides out. **Save as playlist** writes the list, in order, as `[Gen] <name>.m3u8` for you to import. **Refresh data** rebuilds from the iTunes library file and reloads.
+- Not yet: presets, the session (what you were looking at and playing), the column menu, tooltips (hover text is the browser's own for now), the history chip, the About box.
 
 To check the data layer against your real library (read-only; it asserts no numbers, it compares each filter with a second, naive count from the raw rows):
 
@@ -64,6 +75,11 @@ $env:MUSICLAB_DATA_JS = "C:\path\to\music-lab\tools\music-hub\data.js"; npm test
 | the search row, chips and filter row | `src/components/SearchBar.tsx`, `FilterRow.tsx`, `Tabs.tsx` |
 | the `data.js` script tag | `src/hooks/useLibrary.ts` |
 | `flash()` | `src/hooks/useFlash.ts` |
+| `Q`, `order`, `pos`, `startQueue`, `playAt`, `next`, `prev`, shuffle, `stale` | `src/player/queue.ts` (a reducer) and `src/player/useAudioPlayer.ts` (the audio element) |
+| `applyVolume`, `wheelSteps`, `mmss` | `src/player/volume.ts`, `src/player/useVolume.ts` |
+| the player bar | `src/components/PlayerBar.tsx` |
+| `rateSong`, the `[To Rate]` removal | `src/rating.ts`, `src/data/mutate.ts`, `src/components/Stars.tsx` and `App.tsx` |
+| Save as playlist, Refresh data, the helper's routes | `src/playlist/saveFlow.ts`, `src/api/helper.ts`, `src/hooks/useHelper.ts` |
 | `PAIRS`, `syncPair`, the link toggles, `feelOrder`, `readFeel` | `src/feel/pairs.ts`, `src/feel/feelState.ts` (state rules) and `src/components/FeelPanel.tsx` |
 | the `.dual` slider | `src/components/DualRange.tsx` |
 | `buildCube`, `cubeOk`, `readCube` | `src/feel/cube.ts` and `src/components/CubeControls.tsx` |

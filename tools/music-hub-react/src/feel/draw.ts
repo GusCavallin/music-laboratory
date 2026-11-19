@@ -30,6 +30,7 @@ export function readPalette(el: Element = document.documentElement): Palette {
     line: v("--line", "#e3e5e8"),
     mutS: v("--mut", "#6b7280"),
     fg: v("--fg", "#111"),
+    bg: v("--bg", "#fff"),
   };
 }
 
@@ -74,6 +75,26 @@ export function pickDot(dots: readonly Dot[], x: number, y: number): Song | null
 
 const dimFill = (P: Palette) => `rgba(${P.mut.join(",")},0.2)`;
 
+/** The bright blue ring around the song that is playing (even when the filters dim it): a page-colored halo under it, and a soft glow. */
+const NOW_RING = "#00b4ff";
+function ring(g: CanvasRenderingContext2D, x: number, y: number, r: number, P: Palette) {
+  const R = r + 4.5;
+  g.beginPath();
+  g.arc(x, y, R, 0, TAU);
+  g.strokeStyle = P.bg;
+  g.lineWidth = 4.5;
+  g.stroke();
+  g.save();
+  g.shadowColor = NOW_RING;
+  g.shadowBlur = 7;
+  g.strokeStyle = NOW_RING;
+  g.lineWidth = 1.8;
+  g.beginPath();
+  g.arc(x, y, R, 0, TAU);
+  g.stroke();
+  g.restore();
+}
+
 function dot(g: CanvasRenderingContext2D, x: number, y: number, r: number, color: string | null, P: Palette) {
   g.beginPath();
   g.arc(x, y, r, 0, TAU);
@@ -106,7 +127,7 @@ const EDGES: [number, number][] = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6
 const FACES: number[][] = [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [3, 2, 6, 7], [0, 3, 7, 4], [1, 2, 6, 5]];
 
 /** Three axes: the cube, turned by the camera. Returns the bright dots for hovering. */
-export function draw3D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly Song[], dim: readonly Song[], cam: Camera, P: Palette): Dot[] {
+export function draw3D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly Song[], dim: readonly Song[], cam: Camera, P: Palette, now: Song | null = null): Dot[] {
   const c = sizeCanvas(cv);
   if (!c) return [];
   const { w, h, g } = c;
@@ -156,6 +177,10 @@ export function draw3D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly So
     dots.push({ x: p[0], y: p[1], r, song: s });
   }
   edges(bc, P.acc, 1.6);
+  if (now && M.has(now)) {
+    const p = q(now);
+    ring(g, p[0], p[1], Math.max(1.8, 2.9 * p[3] * Math.min(1.4, cam.zoom)), P);
+  }
 
   // axis lines and their end labels
   g.font = "12px system-ui,sans-serif";
@@ -182,7 +207,7 @@ export function draw3D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly So
 }
 
 /** One or two scales: a line (a strip, dots nudged vertically) or a quadrant. Returns the dots for hovering. */
-export function plot2D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly Song[], dim: readonly Song[], a: number, b: number | null, P: Palette): Dot[] {
+export function plot2D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly Song[], dim: readonly Song[], a: number, b: number | null, P: Palette, now: Song | null = null): Dot[] {
   const c = sizeCanvas(cv);
   if (!c) return [];
   const { w, h, g } = c;
@@ -215,6 +240,7 @@ export function plot2D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly So
     dot(g, x, y, 3, M.color(s, P), P);
     dots.push({ x, y, r: 3, song: s });
   }
+  if (now && M.has(now)) ring(g, X(M.pos(now, a)), py(now), 3, P);
   g.strokeStyle = P.acc;
   g.lineWidth = 1.5;
   g.strokeRect(bx0, by0, bx1 - bx0, by1 - by0);
@@ -241,7 +267,7 @@ export function plot2D(cv: HTMLCanvasElement, M: GraphModel, bright: readonly So
 }
 
 /** The three 2D views of the Feel Axes cube side by side (axes 0 and 1, 0 and 2, 1 and 2). Returns each one's dots. */
-export function drawFlat(cvs: readonly (HTMLCanvasElement | null)[], M: GraphModel, bright: readonly Song[], dim: readonly Song[], P: Palette): Dot[][] {
+export function drawFlat(cvs: readonly (HTMLCanvasElement | null)[], M: GraphModel, bright: readonly Song[], dim: readonly Song[], P: Palette, now: Song | null = null): Dot[][] {
   const views: [number, number][] = [[0, 1], [0, 2], [1, 2]];
   return views.map(([a, b], k) => {
     const cv = cvs[k];
@@ -272,6 +298,7 @@ export function drawFlat(cvs: readonly (HTMLCanvasElement | null)[], M: GraphMod
       dot(g, x, y, 2.6, M.color(s, P), P);
       dots.push({ x, y, r: 2.6, song: s });
     }
+    if (now && M.has(now)) ring(g, X(M.pos(now, a)), Y(M.pos(now, b)), 2.6, P);
     g.strokeStyle = P.acc;
     g.lineWidth = 1.5;
     g.strokeRect(bx0, by0, bx1 - bx0, by1 - by0);

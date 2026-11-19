@@ -1,10 +1,16 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useMemo, useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, type CSSProperties, type MouseEvent, type ReactNode, type Ref } from "react";
 import type { Column } from "../columns";
 import type { SortSpec } from "../data/filter";
 
 /** Every row is this tall, so the list can be windowed: only the rows on screen (plus a few) are in the page. */
 export const ROW_HEIGHT = 30;
+
+/** What a parent can ask the table to do. */
+export interface DataTableHandle {
+  /** scroll so that this row (an index into `rows`) is in the middle of the list, even if it is far off screen */
+  scrollToIndex: (index: number) => void;
+}
 
 interface Props<R extends { ix: number }> {
   rows: readonly R[];
@@ -13,8 +19,13 @@ interface Props<R extends { ix: number }> {
   onSort: (key: string) => void;
   /** what a cell shows */
   renderCell: (row: R, column: Column) => ReactNode;
-  /** a click on a cell (not on the header) */
-  onCellClick?: (row: R, column: Column, event: MouseEvent) => void;
+  /** a click on a cell (not on the header); `index` is the row's place in `rows` */
+  onCellClick?: (row: R, column: Column, event: MouseEvent, index: number) => void;
+  /** extra classes for a row (the playing song, a row that was just rated) */
+  rowClass?: (row: R) => string | undefined;
+  handle?: Ref<DataTableHandle>;
+  /** the list goes back to the top when this changes (default: when `rows` does); a refresh of the data keeps the place */
+  scrollResetKey?: unknown;
   /** a hover text for a cell, if it is worth one */
   cellTitle?: (row: R, column: Column) => string | undefined;
   /** a style for a cell (the tint of a Feel score) */
@@ -25,7 +36,7 @@ interface Props<R extends { ix: number }> {
 }
 
 export function DataTable<R extends { ix: number }>({
-  rows, columns, sort, onSort, renderCell, onCellClick, cellTitle, cellStyle, emptyMessage = "Nothing matches.", clickableKeys,
+  rows, columns, sort, onSort, renderCell, onCellClick, rowClass, handle, scrollResetKey, cellTitle, cellStyle, emptyMessage = "Nothing matches.", clickableKeys,
 }: Props<R>) {
   const scroller = useRef<HTMLDivElement>(null);
   const byKey = useMemo(() => new Map(columns.map((c) => [c.key, c] as const)), [columns]);
@@ -39,9 +50,12 @@ export function DataTable<R extends { ix: number }>({
   });
 
   // a new list (a filter, a search or a sort changed) starts at the top
+  const resetKey = scrollResetKey === undefined ? rows : scrollResetKey;
   useEffect(() => {
     if (scroller.current) scroller.current.scrollTop = 0;
-  }, [rows]);
+  }, [resetKey]);
+
+  useImperativeHandle(handle, () => ({ scrollToIndex: (index: number) => virtual.scrollToIndex(index, { align: "center" }) }), [virtual]);
 
   const items = virtual.getVirtualItems();
   const padTop = items.length ? items[0]!.start : 0;
@@ -56,7 +70,7 @@ export function DataTable<R extends { ix: number }>({
     if (!key || index === undefined) return;
     const row = rows[Number(index)];
     const column = byKey.get(key);
-    if (row && column) onCellClick(row, column, e);
+    if (row && column) onCellClick(row, column, e, Number(index));
   };
 
   return (
@@ -89,7 +103,7 @@ export function DataTable<R extends { ix: number }>({
             const row = rows[item.index];
             if (!row) return null;
             return (
-              <tr key={row.ix} data-i={item.index} style={{ height: ROW_HEIGHT }}>
+              <tr key={row.ix} data-i={item.index} className={rowClass?.(row)} style={{ height: ROW_HEIGHT }}>
                 {columns.map((c) => (
                   <td
                     key={c.key}

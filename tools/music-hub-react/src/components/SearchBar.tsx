@@ -12,6 +12,8 @@ interface Props {
   facet: Facet;
   onRemoveFacet: (kind: keyof Facet) => void;
   onClear: () => void;
+  /** the Save as playlist button (shown only when given: it needs the helper, and a list of iTunes songs) */
+  onSavePlaylist?: () => void;
 }
 
 const CHIPS: readonly { kind: keyof Facet; label: string }[] = [
@@ -20,7 +22,7 @@ const CHIPS: readonly { kind: keyof Facet; label: string }[] = [
   { kind: "volume", label: "Volume" },
 ];
 
-export function SearchBar({ query, onQuery, count, total, countNote = "", facet, onRemoveFacet, onClear }: Props) {
+export function SearchBar({ query, onQuery, count, total, countNote = "", facet, onRemoveFacet, onClear, onSavePlaylist }: Props) {
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="qrow">
@@ -68,6 +70,15 @@ export function SearchBar({ query, onQuery, count, total, countNote = "", facet,
           );
         })}
       </span>
+      {onSavePlaylist && (
+        <button
+          type="button"
+          title={"Write the songs in the list, in this order, as a playlist file (\"[Gen] name.m3u8\" in the playlists folder). Then import it in iTunes: File → Library → Import Playlist."}
+          onClick={onSavePlaylist}
+        >
+          💾 Save as playlist
+        </button>
+      )}
       <button type="button" title="Reset the search box and all filters (keeps the sort)" onClick={onClear}>
         ✕ Clear filters
       </button>

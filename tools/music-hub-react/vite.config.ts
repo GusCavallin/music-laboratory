@@ -30,8 +30,28 @@ function serveDataJs(): Plugin {
   };
 }
 
+/**
+ * Dev only: the Python helper (tools/music-hub/server.py, started with serve.bat) streams the audio and talks to iTunes. The dev server hands its
+ * routes on to it, so the app works the same as when the helper serves it. MUSICLAB_HELPER names another helper (default http://127.0.0.1:9123).
+ * The helper only accepts requests that name itself as their origin, so the Origin header is rewritten.
+ */
+const helper = process.env.MUSICLAB_HELPER ?? "http://127.0.0.1:9123";
+const HELPER_ROUTES = ["/audio", "/rate", "/playlist", "/rebuild", "/presence", "/ping", "/presets"];
+const proxy = Object.fromEntries(
+  HELPER_ROUTES.map((route) => [
+    route,
+    {
+      target: helper,
+      changeOrigin: true,
+      configure: (p: { on: (event: string, cb: (req: { setHeader: (k: string, v: string) => void }) => void) => void }) =>
+        p.on("proxyReq", (req) => req.setHeader("origin", helper)),
+    },
+  ]),
+);
+
 export default defineConfig({
   plugins: [react(), serveDataJs()],
+  server: { proxy },
   test: {
     environment: "node", // a component test opts in to jsdom with a "@vitest-environment jsdom" comment at the top of the file
     include: ["src/**/*.test.{ts,tsx}"],

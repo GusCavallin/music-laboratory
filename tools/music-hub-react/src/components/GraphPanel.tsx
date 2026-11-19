@@ -15,10 +15,14 @@ interface Props {
   showViewChoice: boolean;
   view: "cube" | "flat";
   onView: (view: "cube" | "flat") => void;
+  /** the song that is playing: a ring is drawn around its dot */
+  nowSong?: Song | null;
+  /** a click on a dot: the song to play */
+  onDotClick?: (song: Song) => void;
 }
 
 /** The graph beside the list: a line, a quadrant or the 3D cube (or the three flat plots), the statistics of the selection, and a legend. */
-export function GraphPanel({ model, songs, rows, showViewChoice, view, onView }: Props) {
+export function GraphPanel({ model, songs, rows, showViewChoice, view, onView, nowSong = null, onDotClick }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const main = useRef<HTMLCanvasElement>(null);
   const flat = useRef<(HTMLCanvasElement | null)[]>([null, null, null]);
@@ -38,18 +42,18 @@ export function GraphPanel({ model, songs, rows, showViewChoice, view, onView }:
     const P = readPalette();
     const { bright, dim } = splitDots(songs, model, lit);
     if (showFlat) {
-      flatDots.current = drawFlat(flat.current, model, bright, dim, P);
+      flatDots.current = drawFlat(flat.current, model, bright, dim, P, nowSong);
       return;
     }
     const cv = main.current;
     if (!cv) return;
-    if (model.n >= 3) dots.current = draw3D(cv, model, bright, dim, cam, P);
-    else if (model.n > 0) dots.current = plot2D(cv, model, bright, dim, 0, model.n > 1 ? 1 : null, P);
+    if (model.n >= 3) dots.current = draw3D(cv, model, bright, dim, cam, P, nowSong);
+    else if (model.n > 0) dots.current = plot2D(cv, model, bright, dim, 0, model.n > 1 ? 1 : null, P, nowSong);
     else {
       dots.current = [];
       drawHint(cv, P);
     }
-  }, [model, songs, lit, cam, size.w, size.h, showFlat, themeVersion]);
+  }, [model, songs, lit, cam, size.w, size.h, showFlat, themeVersion, nowSong]);
 
   // the wheel zooms the cube; React's own wheel handler is passive and could not stop the page from scrolling
   useEffect(() => {
@@ -85,8 +89,15 @@ export function GraphPanel({ model, songs, rows, showViewChoice, view, onView }:
     d.y = e.clientY;
   };
   const onPointerUp = (e: ReactPointerEvent<HTMLCanvasElement>) => {
+    const d = drag.current;
     drag.current = null;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    if (d && !d.moved) pickAndClick(e.currentTarget, dots.current, e.clientX, e.clientY); // a click, not a drag
+  };
+  const pickAndClick = (cv: HTMLCanvasElement, list: readonly Dot[], clientX: number, clientY: number) => {
+    const box = cv.getBoundingClientRect();
+    const song = pickDot(list, clientX - box.left, clientY - box.top);
+    if (song) onDotClick?.(song);
   };
 
   return (
@@ -121,6 +132,7 @@ export function GraphPanel({ model, songs, rows, showViewChoice, view, onView }:
               aria-label={`Flat plot ${k + 1} of 3`}
               onPointerMove={(e) => hover(e.currentTarget, flatDots.current[k] ?? [], e.clientX, e.clientY)}
               onPointerLeave={(e) => (e.currentTarget.title = "")}
+              onClick={(e) => pickAndClick(e.currentTarget, flatDots.current[k] ?? [], e.clientX, e.clientY)}
             />
           ))}
         </div>
@@ -176,7 +188,7 @@ function Legend({ model }: { model: GraphModel }) {
         <span>One dot color until a 4th slider is narrowed (it then colors the dots) · faded = outside your filters</span>
       )}
       {model.kind === "feel" && model.n > 0 && <span>Scores are whole numbers, so dots are nudged slightly apart</span>}
-      <span>{model.n >= 3 ? "Drag to rotate · wheel to zoom · double-click resets" : ""}</span>
+      <span>{model.n >= 3 ? "Drag to rotate · wheel to zoom · double-click resets · click a dot to play it" : model.n ? "Click a dot to play it" : ""}</span>
     </div>
   );
 }

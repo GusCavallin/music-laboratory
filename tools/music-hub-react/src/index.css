@@ -64,6 +64,9 @@ td[data-k="loved"], th[data-k="loved"], td[data-k="in_itunes"] { text-align: cen
 td[data-k="in_itunes"] { color: #2ea043; font-weight: 700; }
 .stars { letter-spacing: 1px; color: var(--mut); }
 .stars .on { color: #e8a317; }
+.stars button { border: 0; background: transparent; padding: 0; font: inherit; color: var(--mut); cursor: pointer; letter-spacing: 0; }
+.stars button.on { color: #e8a317; background: transparent; border: 0; } /* beats the generic button.on (a selected button) */
+.stars button:hover { color: #e8a317; transform: scale(1.25); }
 .empty { padding: 24px 8px; color: var(--mut); }
 
 button.on { background: var(--acc); color: #fff; border-color: var(--acc); }
@@ -121,3 +124,25 @@ button.on { background: var(--acc); color: #fff; border-color: var(--acc); }
 .cubelegend { padding: 6px 10px 8px; color: var(--mut); font-size: 12px; display: flex; gap: 4px 10px; align-items: center; flex-wrap: wrap; }
 .cubelegend .lg { width: 70px; height: 10px; border-radius: 5px; border: 1px solid var(--line);
   background: linear-gradient(to right, color-mix(in srgb, var(--cool) 55%, transparent), transparent 50%, color-mix(in srgb, var(--warm) 55%, transparent)); }
+
+/* the player */
+.player { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.player button { min-width: 38px; font-size: 16px; }
+.player button.pnow { flex: 1; min-width: 0; font-size: inherit; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 0; background: transparent; padding: 4px 6px; color: inherit; cursor: pointer; }
+.player button.pnow:hover { color: var(--acc); }
+.zone { display: flex; align-items: center; gap: 10px; padding: 8px 8px; margin: -8px 0; border-radius: 8px; }
+.zone:hover { background: var(--chip); }
+.zone input[aria-label="Position in the song"] { flex: 0 1 260px; width: 260px; min-width: 60px; }
+.zone input[aria-label="Volume"] { flex: 0 0 90px; width: 90px; }
+.ptime { color: var(--mut); min-width: 84px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* rows: the song that is playing, a rated song leaving a To Rate list, and the flash when the list scrolls to the playing song */
+tbody tr { cursor: pointer; }
+tbody tr.now { background: var(--chip); color: var(--acc); font-weight: 600; }
+tr.rated { background: #2ea04333; }
+tr.rated td { transition: background .3s; }
+tr.out td { opacity: 0; transition: opacity .4s; }
+tr.ping td { animation: ping 1.4s ease-out; }
+@keyframes ping { 0%, 40% { background: #e8a31766; } 100% { background: transparent; } }
+
+.nohelper { padding: 0 8px; border: 1px solid #c9822b; border-radius: 10px; color: #c9822b; font-size: 12px; white-space: nowrap; cursor: help; }
