@@ -18,7 +18,7 @@ export function Stars({ n, onRate }: Props) {
             type="button"
             className={on ? "on" : undefined}
             aria-label={`${i} ${i === 1 ? "star" : "stars"}${i === n ? ", click again to clear" : ""}`}
-            title={i === n ? "Click again to clear the rating" : `Rate ${i} ${i === 1 ? "star" : "stars"} in iTunes`}
+            data-tip={i === n ? "Click again to clear the rating" : `Rate ${i} ${i === 1 ? "star" : "stars"} in iTunes`}
             onClick={(e) => {
               e.stopPropagation(); // not a click on the row (which would start the song)
               onRate(i);

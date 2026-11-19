@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { audioUrl, ping, rateSong, rebuild, savePlaylist, type Fetch } from "./helper";
+import { audioUrl, loadPresets, ping, rateSong, rebuild, savePlaylist, savePresetsToHelper, type Fetch } from "./helper";
 
 const reply = (body: unknown, init: ResponseInit = {}) => new Response(typeof body === "string" ? body : JSON.stringify(body), { status: 200, ...init });
 const fakeFetch = (impl: (url: string, init?: RequestInit) => Response | Promise<Response>) => vi.fn(impl as never) as unknown as Fetch & ReturnType<typeof vi.fn>;
@@ -81,5 +81,32 @@ describe("rebuild", () => {
   });
   it("says so when the helper cannot be reached", async () => {
     expect(await rebuild(down)).toEqual({ ok: false, error: "Can't reach the helper (is its window still open?)" });
+  });
+});
+
+describe("presets", () => {
+  it("loads the list the helper keeps", async () => {
+    const f = fakeFetch(() => reply({ presets: [{ name: "A", state: {} }] }));
+    expect(await loadPresets(f)).toEqual([{ name: "A", state: {} }]);
+    expect(f.mock.calls[0]![0]).toBe("/presets");
+  });
+  it("an empty answer is an empty list", async () => {
+    expect(await loadPresets(fakeFetch(() => reply({})))).toEqual([]);
+  });
+  it("null when the helper cannot be reached or refuses", async () => {
+    expect(await loadPresets(down)).toBeNull();
+    expect(await loadPresets(fakeFetch(() => reply("nope", { status: 502 })))).toBeNull();
+  });
+  it("writes the whole list as JSON", async () => {
+    const f = fakeFetch(() => reply({ ok: true, count: 1 }));
+    expect(await savePresetsToHelper([{ name: "A", state: {} }], f)).toBe(true);
+    const [url, init] = f.mock.calls[0]!;
+    expect(url).toBe("/presets");
+    expect(init).toMatchObject({ method: "POST" });
+    expect(JSON.parse(init!.body as string)).toEqual({ presets: [{ name: "A", state: {} }] });
+  });
+  it("false when it could not be written", async () => {
+    expect(await savePresetsToHelper([], fakeFetch(() => reply({ ok: false, error: "bad presets" }, { status: 400 })))).toBe(false);
+    expect(await savePresetsToHelper([], down)).toBe(false);
   });
 });

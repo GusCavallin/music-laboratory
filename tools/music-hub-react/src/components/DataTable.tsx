@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useImperativeHandle, useMemo, useRef, type CSSProperties, type MouseEvent, type ReactNode, type Ref } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode, type Ref } from "react";
 import type { Column } from "../columns";
 import type { SortSpec } from "../data/filter";
 
@@ -33,12 +33,18 @@ interface Props<R extends { ix: number }> {
   emptyMessage?: string;
   /** cell keys that can be clicked to pick something (the pointer shows it) */
   clickableKeys?: ReadonlySet<string>;
+  /** a right-click on the header row (the column menu) */
+  onHeaderContextMenu?: (event: MouseEvent) => void;
+  /** a header was dragged onto another: the first takes the place of the second (headers are draggable only when this is given) */
+  onMoveColumn?: (from: string, to: string) => void;
 }
 
 export function DataTable<R extends { ix: number }>({
   rows, columns, sort, onSort, renderCell, onCellClick, rowClass, handle, scrollResetKey, cellTitle, cellStyle, emptyMessage = "Nothing matches.", clickableKeys,
+  onHeaderContextMenu, onMoveColumn,
 }: Props<R>) {
   const scroller = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState<{ from: string; over: string | null } | null>(null);
   const byKey = useMemo(() => new Map(columns.map((c) => [c.key, c] as const)), [columns]);
   const totalWidth = columns.reduce((sum, c) => sum + c.width, 0);
 
@@ -79,17 +85,37 @@ export function DataTable<R extends { ix: number }>({
         <colgroup>
           {columns.map((c) => <col key={c.key} style={{ width: c.width }} />)}
         </colgroup>
-        <thead>
+        <thead onContextMenu={onHeaderContextMenu}>
           <tr>
             {columns.map((c) => {
               const sorted = sort.key === c.key;
               return (
                 <th
                   key={c.key}
-                  className={c.center ? "fv" : c.numeric ? "n" : undefined}
+                  data-k={c.key}
+                  className={[c.center ? "fv" : c.numeric ? "n" : "", drag?.from === c.key ? "dragging" : "", drag?.over === c.key ? "over" : ""].join(" ").trim() || undefined}
+                  draggable={onMoveColumn ? true : undefined}
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", c.key);
+                    setDrag({ from: c.key, over: null });
+                  }}
+                  onDragOver={(e) => {
+                    if (!drag) return;
+                    e.preventDefault();
+                    const over = c.key === drag.from ? null : c.key;
+                    if (over !== drag.over) setDrag({ ...drag, over });
+                  }}
+                  onDrop={(e) => {
+                    if (!drag) return;
+                    e.preventDefault();
+                    if (c.key !== drag.from) onMoveColumn?.(drag.from, c.key);
+                    setDrag(null);
+                  }}
+                  onDragEnd={() => setDrag(null)}
                   aria-sort={sorted ? (sort.desc ? "descending" : "ascending") : undefined}
                 >
-                  <button type="button" className={sorted ? (sort.desc ? "sorted desc" : "sorted") : undefined} onClick={() => onSort(c.key)} title="Click to sort">
+                  <button type="button" className={sorted ? (sort.desc ? "sorted desc" : "sorted") : undefined} onClick={() => onSort(c.key)} data-tip="Click to sort">
                     {c.label}
                   </button>
                 </th>
@@ -109,7 +135,7 @@ export function DataTable<R extends { ix: number }>({
                     key={c.key}
                     data-k={c.key}
                     className={[c.center ? "fv" : c.numeric ? "n" : "", clickableKeys?.has(c.key) ? "pick" : ""].join(" ").trim() || undefined}
-                    title={cellTitle?.(row, c)}
+                    data-tip={cellTitle?.(row, c)}
                     style={cellStyle?.(row, c)}
                   >
                     {renderCell(row, c)}

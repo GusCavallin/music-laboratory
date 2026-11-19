@@ -45,7 +45,7 @@ describe("PlayerBar now playing", () => {
     const p = setup({ text: "▶ Largo — Dvořák  (2/4)", path: "C:\\m\\Largo.mp3" });
     const now = document.querySelector(".pnow") as HTMLElement; // (Testing Library's text search collapses the double space in the line)
     expect(now.textContent).toBe("▶ Largo — Dvořák  (2/4)");
-    expect(now.title).toBe("C:\\m\\Largo.mp3");
+    expect(now.dataset.tip).toBe("C:\\m\\Largo.mp3");
     await userEvent.click(now);
     expect(p.onNow).toHaveBeenCalledTimes(1);
   });

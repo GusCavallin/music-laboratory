@@ -74,3 +74,37 @@ describe.skipIf(!file)("a real data.js", () => {
     expect(filterArchive(ds, { ...defaultArchiveFilter(), inItunes: "out" })).toHaveLength(raw.archive.filter((r) => !r[inIt]).length);
   });
 });
+
+/**
+ * The saved presets of the current page (presets.json), if MUSICLAB_PRESETS_JSON names it: each one must load into this app's state, and
+ * saving that state and loading it again must give the same view. Asserts no values of its own, so nothing personal is kept in the repo.
+ */
+import { legacyToView, viewToLegacy } from "../state/legacy";
+import { initialUiState } from "../state/uiState";
+
+const presetsFile = process.env.MUSICLAB_PRESETS_JSON;
+
+describe.skipIf(!presetsFile)("the real presets.json", () => {
+  const presets: { name: string; state: unknown }[] = presetsFile ? JSON.parse(readFileSync(presetsFile, "utf-8")).presets : [];
+  const bounds = [[-5, 5], [-5, 5], [-5, 5]] as const;
+
+  it("has presets to check", () => {
+    expect(presets.length).toBeGreaterThan(0);
+  });
+  it("every preset loads into a valid state", () => {
+    for (const p of presets) {
+      const ui = legacyToView(p.state, initialUiState(), bounds);
+      expect(["itunes", "feel", "cube", "archive"]).toContain(ui.tab);
+      expect(ui.stars[0]).toBeLessThanOrEqual(ui.stars[1]);
+      expect(ui.feel.ranges).toHaveLength(10);
+      for (const [lo, hi] of ui.feel.ranges) expect(lo >= 0 && hi <= 10 && lo <= hi).toBe(true);
+    }
+  });
+  it("saved and loaded again, every preset is the same view", () => {
+    for (const p of presets) {
+      const once = legacyToView(p.state, initialUiState(), bounds);
+      const twice = legacyToView(viewToLegacy(once, bounds), initialUiState(), bounds);
+      expect(twice).toEqual(once);
+    }
+  });
+});

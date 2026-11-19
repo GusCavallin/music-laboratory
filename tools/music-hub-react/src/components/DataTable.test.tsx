@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -124,5 +124,57 @@ describe("DataTable row hooks", () => {
     expect(scroller.scrollTop).toBe(500); // the data was refreshed: the place is kept
     rerender(<DataTable<Row> rows={makeRows(300)} columns={columns} sort={noSort()} onSort={() => {}} renderCell={(r, c) => String(r[c.key as keyof Row])} scrollResetKey="b" />);
     expect(scroller.scrollTop).toBe(0); // a filter changed: back to the top
+  });
+});
+
+describe("DataTable header menu and reordering", () => {
+  const header = (name: string) => screen.getByRole("button", { name }).closest("th") as HTMLElement;
+  const dt = () => ({ setData: vi.fn(), effectAllowed: "" });
+
+  it("a right-click on the header row is reported", () => {
+    const onHeaderContextMenu = vi.fn();
+    setup(makeRows(3), { onHeaderContextMenu });
+    fireEvent.contextMenu(header("Plays"));
+    expect(onHeaderContextMenu).toHaveBeenCalledTimes(1);
+  });
+  it("a right-click on a row is not", () => {
+    const onHeaderContextMenu = vi.fn();
+    setup(makeRows(3), { onHeaderContextMenu });
+    fireEvent.contextMenu(screen.getByText("Song 1"));
+    expect(onHeaderContextMenu).not.toHaveBeenCalled();
+  });
+  it("headers are draggable only when moving is possible", () => {
+    setup(makeRows(2));
+    expect(header("Name").draggable).toBe(false);
+    cleanup();
+    setup(makeRows(2), { onMoveColumn: vi.fn() });
+    expect(header("Name").draggable).toBe(true);
+  });
+  it("dragging one header onto another reports which moved where", () => {
+    const onMoveColumn = vi.fn();
+    setup(makeRows(2), { onMoveColumn });
+    fireEvent.dragStart(header("Plays"), { dataTransfer: dt() });
+    fireEvent.dragOver(header("Name"), { dataTransfer: dt() });
+    expect(header("Name").className).toContain("over");
+    expect(header("Plays").className).toContain("dragging");
+    fireEvent.drop(header("Name"), { dataTransfer: dt() });
+    expect(onMoveColumn).toHaveBeenCalledWith("plays", "name");
+    expect(header("Name").className).not.toContain("over");
+  });
+  it("dropping on itself, or a drag that ends elsewhere, moves nothing", () => {
+    const onMoveColumn = vi.fn();
+    setup(makeRows(2), { onMoveColumn });
+    fireEvent.dragStart(header("Plays"), { dataTransfer: dt() });
+    fireEvent.drop(header("Plays"), { dataTransfer: dt() });
+    fireEvent.dragStart(header("Plays"), { dataTransfer: dt() });
+    fireEvent.dragEnd(header("Plays"));
+    fireEvent.drop(header("Name"), { dataTransfer: dt() });
+    expect(onMoveColumn).not.toHaveBeenCalled();
+  });
+  it("dragging does not sort", () => {
+    const { onSort } = setup(makeRows(2), { onMoveColumn: vi.fn() });
+    fireEvent.dragStart(header("Plays"), { dataTransfer: dt() });
+    fireEvent.drop(header("Name"), { dataTransfer: dt() });
+    expect(onSort).not.toHaveBeenCalled();
   });
 });

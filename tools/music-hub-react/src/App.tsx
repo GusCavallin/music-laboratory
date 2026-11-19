@@ -1,32 +1,43 @@
-import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useReducer, useRef, useState, type MouseEvent } from "react";
 import * as helperApi from "./api/helper";
 import { copyText } from "./clipboard";
-import {
-  cellText, columnsOf, FACET_COLUMNS, feelTip, groupOf, HIDDEN_BY_DEFAULT, scoreBackground, type Column,
-} from "./columns";
+import { cellText, columnsOf, FACET_COLUMNS, feelTip, groupOf, scoreBackground, type Column } from "./columns";
+import { AboutDialog } from "./components/AboutDialog";
+import { ColumnMenu } from "./components/ColumnMenu";
 import { CubeControls } from "./components/CubeControls";
 import { DataTable, type DataTableHandle } from "./components/DataTable";
 import { FeelPanel } from "./components/FeelPanel";
 import { FilterRow } from "./components/FilterRow";
 import { GraphPanel } from "./components/GraphPanel";
 import { PlayerBar } from "./components/PlayerBar";
+import { PresetsControl } from "./components/PresetsControl";
 import { SearchBar } from "./components/SearchBar";
 import { Stars } from "./components/Stars";
 import { Tabs } from "./components/Tabs";
 import { feelColumnIndex } from "./data/feel";
 import { filterArchive, filterSongs } from "./data/filter";
 import { removeFromPlaylist, setSongStars } from "./data/mutate";
+import { categoryOptions, countryOptions, decadeOptions } from "./data/options";
 import type { ArchiveRow, Dataset, Song } from "./data/types";
 import { buildCube } from "./feel/cube";
 import { cubeModel, feelModel, type GraphModel } from "./feel/model";
 import { useFlash } from "./hooks/useFlash";
 import { useHelper } from "./hooks/useHelper";
+import { useHistoryButtons } from "./hooks/useHistoryButtons";
 import { useLibrary } from "./hooks/useLibrary";
 import { saveAsPlaylist } from "./playlist/saveFlow";
 import { useAudioPlayer } from "./player/useAudioPlayer";
 import { useVolume } from "./player/useVolume";
+import * as presetOps from "./presets/presets";
+import { usePresets } from "./presets/usePresets";
 import { playlistToRateFrom, starsAfterClick } from "./rating";
-import { archiveFilterOf, cubeBoxOf, initialUiState, isSongTab, reduce, songFilterOf } from "./state/uiState";
+import { loadPrefs, moveColumn, resetOrder, savePrefs, setColumnShown, visibleColumns } from "./state/columnPrefs";
+import { historyReducer, initialHistory } from "./state/history";
+import { legacyToView, viewToLegacy } from "./state/legacy";
+import { fitToLibrary, fromSession, loadSession, toSession, writeSession } from "./state/session";
+import { archiveFilterOf, cubeBoxOf, isSongTab, songFilterOf, type UiState } from "./state/uiState";
+import { playlistsOf } from "./tips/tips";
+import { TipLayer } from "./tips/TipLayer";
 
 export function App() {
   const { state, reload } = useLibrary();
@@ -47,8 +58,14 @@ const TIP_COLUMNS: ReadonlySet<string> = new Set(["name", "artist", "album", "ge
 const CLICKABLE = new Set([...Object.keys(FACET_COLUMNS), "path"]);
 const NO_SONGS: readonly Song[] = [];
 
-function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<Dataset | null> }) {
-  const [ui, dispatch] = useReducer(reduce, undefined, initialUiState);
+export function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<Dataset | null> }) {
+  // the view of the last visit (the page opens as it was left); `hist` and `fwd` are what the "← back" chip and the mouse buttons go through
+  const [boot] = useState(() => {
+    const saved = fromSession(loadSession());
+    const names = dataset.playlists.map((p) => p.name);
+    return { ...saved, ui: fitToLibrary(saved.ui, { playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset) }) };
+  });
+  const [{ ui, hist, fwd }, dispatch] = useReducer(historyReducer, boot.ui, initialHistory);
   const [message, flash] = useFlash();
   const deferredQuery = useDeferredValue(ui.query); // typing stays responsive; the list follows a moment later
   const helper = useHelper();
@@ -78,15 +95,69 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
   // the list goes back to the top when a filter changes, but not when the data is refreshed or a rated song leaves a playlist
   const scrollKey = useMemo(() => ({}), filters);
 
-  const songRows = useMemo(() => (isSongTab(ui.tab) ? (rows as readonly Song[]) : NO_SONGS), [rows, ui.tab]);
+  // On the archive tab (songs on CDs, nothing to start) the player goes on with the list it had: the songs of the last tab that has songs.
+  const lastSongRows = useRef<readonly Song[]>(NO_SONGS);
+  const onSongTab = isSongTab(ui.tab);
+  const songRows = onSongTab ? (rows as readonly Song[]) : lastSongRows.current;
+  useEffect(() => {
+    lastSongRows.current = songRows;
+  });
 
   // ---- the player ----
-  const player = useAudioPlayer(songRows, volume);
-  const { markStale, pause } = player;
-  useEffect(() => markStale(), [rows, markStale]); // the list changed: the song playing goes on, the next one comes from the new list
+  const player = useAudioPlayer(songRows, volume, boot.shuffle);
+  const { markStale, restore } = player;
+  // the list changed: the song playing goes on, the next one comes from the new list (not on the first render, which only repeats under StrictMode;
+  // not on the archive tab, whose rows are not songs to play: coming back to a song tab the lists differ, and that is when it counts)
+  const lastRows = useRef(rows);
   useEffect(() => {
-    if (ui.tab === "archive") pause(); // archive songs are on CDs; nothing plays there
-  }, [ui.tab, pause]);
+    if (!onSongTab || lastRows.current === rows) return;
+    lastRows.current = rows;
+    markStale();
+  }, [rows, onSongTab, markStale]);
+
+  // the song of the last visit comes back paused at its position (a page must not start playing by itself); press play to go on
+  const restoreTried = useRef(false);
+  const sessionSettled = useRef(!boot.song); // the session is not saved until the song is back, or known not to come back
+  useEffect(() => {
+    if (restoreTried.current) return;
+    restoreTried.current = true;
+    const saved = boot.song;
+    const song = saved && dataset.songs.find((s) => s.path === saved.path);
+    if (!saved || !song || song.protected) {
+      sessionSettled.current = true;
+      return;
+    }
+    restore(song, songRows.findIndex((s) => s.path === song.path), saved.t);
+  }, [boot.song, dataset, restore, songRows]);
+
+  // remember the view and the song, as the page is used and when it is closed (the position is kept up to date while playing)
+  const sessionNow = useRef({ ui, shuffle: player.queue.shuffle, song: player.queue.current, time: player.status.time, serial: player.queue.serial });
+  useEffect(() => {
+    sessionNow.current = { ui, shuffle: player.queue.shuffle, song: player.queue.current, time: player.status.time, serial: player.queue.serial };
+  });
+  const saveSession = useCallback(() => {
+    const { ui, shuffle, song, time, serial } = sessionNow.current;
+    if (song || serial > 0) sessionSettled.current = true; // the song is back (or it was started, or it would not load and was dropped)
+    if (!sessionSettled.current) return;
+    writeSession(toSession(ui, shuffle, song ? { path: song.path, t: Math.floor(time) } : null));
+  }, []);
+  const playingPath = player.queue.current?.path;
+  useEffect(() => saveSession(), [ui, player.queue.shuffle, playingPath, player.queue.serial, saveSession]);
+  const playingNow = !player.status.paused;
+  useEffect(() => {
+    if (!playingNow) return;
+    const id = window.setInterval(saveSession, 3000);
+    return () => window.clearInterval(id);
+  }, [playingNow, saveSession]);
+  useEffect(() => {
+    const onHide = () => document.visibilityState === "hidden" && saveSession();
+    window.addEventListener("pagehide", saveSession);
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      window.removeEventListener("pagehide", saveSession);
+      document.removeEventListener("visibilitychange", onHide);
+    };
+  }, [saveSession]);
 
   const [pinged, setPinged] = useState<string | null>(null);
   const pingTimer = useRef<number | undefined>(undefined);
@@ -107,15 +178,37 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
   useEffect(() => {
     if (wantShow.current && player.queue.current) {
       wantShow.current = false;
-      showNow();
+      if (ui.tab !== "archive") showNow(); // the archive tab has no row for the song: stay there
     }
     // runs when a new song starts
   }, [player.queue.serial]);
+  // A click on the song's name goes to its row. The playing song is in the iTunes Library, so from the archive tab that means changing tab (every other
+  // tab stays as it is); the row is shown once that tab is on screen.
+  const wantShowOnTab = useRef(false);
+  useEffect(() => {
+    if (wantShowOnTab.current && ui.tab !== "archive") {
+      wantShowOnTab.current = false;
+      showNow();
+    }
+  }, [ui.tab]);
+  const onNow = () => {
+    if (ui.tab === "archive") {
+      wantShowOnTab.current = true;
+      dispatch({ type: "tab", tab: "itunes" });
+    } else showNow();
+  };
   // Songs are streamed by the helper. Without it every song would fail to load and the player would skip through the list, so say so instead
   // (asking again first: start serve.bat, click a song, and it plays).
   const ensureHelper = helper.ensure;
   const { start: startSong, toggle: toggleSong, notice } = player;
+  /** Nothing can be started on the archive tab (its songs are on CDs); what is already playing goes on. */
+  const canStart = () => {
+    if (ui.tab !== "archive" || player.queue.current) return true;
+    flash("Archive songs are on CDs, so they can't be played here");
+    return false;
+  };
   const tryStart = async (index: number | null) => {
+    if (ui.tab === "archive") return void flash("Archive songs are on CDs, so they can't be played here");
     if (!(await ensureHelper())) return notice("Playing needs the helper: start serve.bat (this page notices when it is up)", 5000);
     startSong(index);
   };
@@ -210,9 +303,60 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
     }
   };
 
+  // ---- presets: saved views ----
+  const bounds = useMemo(() => (cube ? cube.lo.map((lo, i): [number, number] => [lo, cube.hi[i]!]) : undefined), [cube]);
+  const presets = usePresets(helper.available, flash);
+  const asked = { prompt: (m: string, initial: string) => window.prompt(m, initial), confirm: (m: string) => window.confirm(m) };
+  const currentState = (): presetOps.Preset["state"] => ({ ...viewToLegacy(ui, bounds) });
+  const applyPreset = (index: number) => {
+    const p = presets.presets[index];
+    if (!p) return;
+    const names = dataset.playlists.map((x) => x.name);
+    const view: UiState = fitToLibrary(legacyToView(p.state, undefined, bounds), {
+      playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset),
+    });
+    dispatch({ type: "apply", view: { ...view, cube: { ...view.cube, view: ui.cube.view } } }); // the Cube / Flat choice is a way of looking, not part of a view
+  };
+  const savePreset = (name: string): boolean => {
+    const r = presetOps.saveAs(presets.presets, name, currentState());
+    if (!r) return false;
+    presets.save(r.list);
+    flash(r.updated ? "Preset updated" : "Preset saved");
+    return true;
+  };
+
+  // ---- back and forward through the views ("← back", the mouse buttons, Alt+Left and Alt+Right) ----
+  const goBack = () => {
+    if (!hist.length) return false;
+    dispatch({ type: "back" });
+    return true;
+  };
+  const goForward = () => {
+    if (!fwd.length) return false;
+    dispatch({ type: "forward" });
+    return true;
+  };
+  useHistoryButtons(goBack, goForward, flash);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const closeAbout = useCallback(() => setAboutOpen(false), []);
+
   // ---- what the table shows ----
   const group = groupOf(ui.tab, ui.feel.graph);
-  const columns = useMemo(() => columnsOf(group).filter((c) => !HIDDEN_BY_DEFAULT[group].has(c.key)), [group]);
+  const [prefs, setPrefs] = useState(() => loadPrefs());
+  const changePrefs = (next: typeof prefs) => {
+    setPrefs(next);
+    savePrefs(next);
+  };
+  const columns = useMemo(() => visibleColumns(group, prefs), [group, prefs]);
+  const allColumns = useMemo(() => prefs.order[group].map((k) => columnsOf(group).find((c) => c.key === k)!), [group, prefs]);
+  const [colMenu, setColMenu] = useState<{ x: number; y: number } | null>(null);
+  const closeColMenu = useCallback(() => setColMenu(null), []);
+  const showColumn = (key: string, shown: boolean) => {
+    const next = setColumnShown(prefs, group, key, shown);
+    if (next === prefs) return flash("At least one column stays");
+    changePrefs(next);
+    if (!shown && ui.sort.key === key) dispatch({ type: "dropSort" }); // a sort on a column that is gone ends
+  };
   const feelTab = ui.tab === "feel" || ui.tab === "cube";
   const total = ui.tab === "archive" ? dataset.archive.length : feelTab ? ratedCount : dataset.songs.length;
 
@@ -235,7 +379,7 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
       const value = kind === "volume" ? ("volume" in row ? row.volume : "") : row[kind];
       if (value) return dispatch({ type: "facet", kind, value, keep: e.ctrlKey || e.metaKey });
     }
-    if (selecting || !isSongTab(ui.tab)) return;
+    if (selecting) return;
     void tryStart(index);
   };
 
@@ -261,6 +405,13 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
     return c.join(" ") || undefined;
   };
 
+  // hovering a song's name also lists the playlists it is in
+  const songPlaylists = (el: HTMLElement): readonly string[] => {
+    if (el.tagName !== "TD" || el.dataset.k !== "name" || !isSongTab(ui.tab)) return [];
+    const row = rows[Number(el.closest("tr")?.dataset.i)];
+    return row && "feel" in row ? playlistsOf(dataset, row) : [];
+  };
+
   const emptyMessage =
     ui.tab === "archive" ? "No archive rows match these filters."
     : ui.tab === "cube" && !cube ? "No Feel Axes data yet (run tools\\emotions\\axes.py and refresh the data)."
@@ -272,11 +423,11 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
       <header>
         <div className="top">
           <h1>Music Hub</h1>
-          <span className="preview" title="The React rebuild, slice 4: the player, rating and Save as playlist">React preview</span>
+          <span className="preview" data-tip="The React rebuild, slice 5: presets, remembered view, column menu, tips and About">React preview</span>
           <Tabs tab={ui.tab} onChange={(tab) => dispatch({ type: "tab", tab })} />
           <div className="acts">
             {helper.available === false && (
-              <span className="nohelper" title="The Python helper (serve.bat) streams the songs and talks to iTunes. Start it and this note goes away.">
+              <span className="nohelper" data-tip="The Python helper (serve.bat) streams the songs and talks to iTunes. Start it and this note goes away.">
                 ⚠ helper not running
               </span>
             )}
@@ -284,11 +435,12 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
             <button
               type="button"
               disabled={refreshing}
-              title="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)"
+              data-tip="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)"
               onClick={() => void refresh()}
             >
               {refreshing ? "⟳ Refreshing…" : "⟳ Refresh data"}
             </button>
+            <button type="button" data-tip="About Music Hub" onClick={() => setAboutOpen(true)}>ⓘ About</button>
           </div>
         </div>
         <SearchBar
@@ -301,34 +453,52 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
           onRemoveFacet={(kind) => dispatch({ type: "removeFacet", kind })}
           onClear={() => dispatch({ type: "clear" })}
           onSavePlaylist={isSongTab(ui.tab) && helper.available ? () => void savePlaylist() : undefined}
+          onBack={hist.length ? goBack : undefined}
+          after={
+            <PresetsControl
+              presets={presets.presets}
+              onSave={savePreset}
+              onApply={applyPreset}
+              onReplace={(i) => {
+                presets.save(presetOps.replaceState(presets.presets, i, currentState()));
+                flash("Preset replaced");
+              }}
+              onRename={(i) => {
+                const next = presetOps.renameWithPrompt(presets.presets, i, asked);
+                if (next) presets.save(next);
+              }}
+              onDelete={(i) => {
+                const next = presetOps.removeWithConfirm(presets.presets, i, asked);
+                if (next) presets.save(next);
+              }}
+            />
+          }
         />
         {ui.tab === "feel" && <FeelPanel feel={ui.feel} dispatch={dispatch} />}
         {ui.tab === "cube" && <CubeControls cube={cube} ui={ui.cube} dispatch={dispatch} />}
         <FilterRow dataset={dataset} state={ui} dispatch={dispatch} />
-        {isSongTab(ui.tab) && (
-          <PlayerBar
-            text={player.text}
-            path={playing?.path}
-            paused={player.status.paused}
-            time={player.status.time}
-            duration={player.status.duration}
-            shuffle={player.queue.shuffle}
-            vol={volume.vol}
-            muted={volume.muted}
-            onPrev={() => { wantShow.current = true; player.prev(); }}
-            onNext={() => { wantShow.current = true; player.next(); }}
-            onStop={player.stop}
-            onToggle={playOrPause}
-            onShuffle={() => player.setShuffle(!player.queue.shuffle)}
-            onNow={showNow}
-            onSeek={player.seekTo}
-            onSkip={player.skipBy}
-            onVolume={volume.setVol}
-            onVolumeBy={volume.changeBy}
-            onMute={volume.toggleMute}
-            onHint={flash}
-          />
-        )}
+        <PlayerBar
+          text={player.text}
+          path={playing?.path}
+          paused={player.status.paused}
+          time={player.status.time}
+          duration={player.status.duration}
+          shuffle={player.queue.shuffle}
+          vol={volume.vol}
+          muted={volume.muted}
+          onPrev={() => { if (canStart()) { wantShow.current = true; player.prev(); } }}
+          onNext={() => { if (canStart()) { wantShow.current = true; player.next(); } }}
+          onStop={player.stop}
+          onToggle={playOrPause}
+          onShuffle={() => player.setShuffle(!player.queue.shuffle)}
+          onNow={onNow}
+          onSeek={player.seekTo}
+          onSkip={player.skipBy}
+          onVolume={volume.setVol}
+          onVolumeBy={volume.changeBy}
+          onMute={volume.toggleMute}
+          onHint={flash}
+        />
       </header>
       <main className="split">
         <div className="listpane">
@@ -346,6 +516,11 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
             cellStyle={cellStyle}
             rowClass={rowClass}
             onCellClick={onCellClick}
+            onHeaderContextMenu={(e) => {
+              e.preventDefault();
+              setColMenu({ x: e.clientX, y: e.clientY });
+            }}
+            onMoveColumn={(from, to) => changePrefs(moveColumn(prefs, group, from, to))}
             clickableKeys={CLICKABLE}
             emptyMessage={emptyMessage}
           />
@@ -363,6 +538,18 @@ function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<
           />
         )}
       </main>
+      {colMenu && (
+        <ColumnMenu
+          columns={allColumns}
+          hidden={prefs.hidden[group]}
+          at={colMenu}
+          onToggle={showColumn}
+          onResetOrder={() => changePrefs(resetOrder(prefs, group))}
+          onClose={closeColMenu}
+        />
+      )}
+      <AboutDialog open={aboutOpen} version={dataset.version} onClose={closeAbout} />
+      <TipLayer extra={songPlaylists} />
     </>
   );
 }

@@ -146,3 +146,29 @@ tr.ping td { animation: ping 1.4s ease-out; }
 @keyframes ping { 0%, 40% { background: #e8a31766; } 100% { background: transparent; } }
 
 .nohelper { padding: 0 8px; border: 1px solid #c9822b; border-radius: 10px; color: #c9822b; font-size: 12px; white-space: nowrap; cursor: help; }
+
+/* presets menu, column menu, tooltip, About, and the header being dragged */
+.presetmenu { position: fixed; z-index: 30; min-width: 300px; max-width: 400px; max-height: 70vh; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 28px rgba(0, 0, 0, .35); padding: 8px; }
+.pm-save { display: flex; gap: 6px; margin-bottom: 6px; }
+.pm-save input { flex: 1; min-width: 0; font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+.pm-row { display: flex; gap: 4px; margin-top: 4px; }
+.pm-row .nm { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pm-row .nm small { color: var(--mut); margin-left: 6px; }
+.pm-empty { color: var(--mut); padding: 6px 4px; font-size: 13px; }
+
+#colbox { position: fixed; z-index: 30; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; white-space: nowrap; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); max-height: calc(100vh - 16px); overflow: auto; }
+#colbox .mh { font-weight: 600; color: var(--mut); margin-bottom: 2px; }
+#colbox .mh small { font-weight: 400; }
+
+#tip { position: fixed; z-index: 20; display: none; max-width: min(70vw, 640px); padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); box-shadow: 0 4px 14px rgba(0, 0, 0, .25); font-size: 13px; line-height: 1.35; pointer-events: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+#about { width: min(92vw, 460px); padding: 20px 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); box-shadow: 0 8px 28px rgba(0, 0, 0, .35); }
+#about::backdrop { background: rgba(0, 0, 0, .45); }
+#about h2 { margin: 0 0 6px; font-size: 18px; }
+#about p { margin: 8px 0; }
+#about .mut { color: var(--mut); }
+#about a { color: var(--acc); }
+#about .x { display: flex; justify-content: flex-end; margin-top: 14px; }
+
+th.dragging { opacity: .4; }
+th.over { box-shadow: inset 3px 0 0 var(--acc), 0 1px 0 var(--line); }

@@ -76,6 +76,8 @@ export type Action =
   | { type: "clear" }
   /** a click on a column header */
   | { type: "sort"; key: string }
+  /** the sorted column was hidden: back to the library's own order */
+  | { type: "dropSort" }
   // Raw Feel
   | { type: "feelRange"; index: number; which: "lo" | "hi"; value: number }
   | { type: "feelLink"; pair: string }
@@ -151,6 +153,8 @@ export function reduce(s: UiState, a: Action): UiState {
         ...s,
         sort: { key: a.key, desc: s.sort.key === a.key ? !s.sort.desc : DESC_FIRST.has(a.key) },
       };
+    case "dropSort":
+      return s.sort.key === null ? s : { ...s, sort: noSort() };
     case "feelRange":
       return { ...s, feel: setFeelRange(s.feel, a.index, a.which, a.value) };
     case "feelLink":

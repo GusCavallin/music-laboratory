@@ -208,3 +208,49 @@ describe("nowText", () => {
     expect(nowText(s)).toBe("▶ Spider Man Theme — The Webs  (next: from the current results)");
   });
 });
+
+describe("restore (the song of the last visit)", () => {
+  const rows = first(4);
+  it("brings the song back waiting, paused, at its position, in its place in the list", () => {
+    const s = run([{ type: "restore", song: rows[2]!, rows, index: 2, t: 75 }]);
+    expect(s.current).toBe(rows[2]);
+    expect(s.pos).toBe(2);
+    expect(s.stale).toBe(false);
+    expect(s.resume).toBe(75);
+    expect(nowText(s)).toBe("⏸ Spider Man Theme — The Webs  (resume at 1:15)".replace("Spider Man Theme — The Webs", `${rows[2]!.name} — ${rows[2]!.artist}`));
+  });
+  it("says nothing about a position at the very start", () => {
+    const s = run([{ type: "restore", song: rows[0]!, rows, index: 0, t: 0 }]);
+    expect(nowText(s)).toBe(`⏸ ${rows[0]!.name} — ${rows[0]!.artist}`);
+  });
+  it("a song that is not in the list is the whole queue, and the next song comes from the list", () => {
+    const s = run([{ type: "restore", song: songs[6]!, rows, index: -1, t: 5 }]);
+    expect(s.songs).toEqual([songs[6]]);
+    expect(s.stale).toBe(true);
+    const n = queueReducer(s, { type: "next", rows });
+    expect(n.current).toBe(rows[0]);
+  });
+  it("an index that points at another song counts as not in the list", () => {
+    const s = run([{ type: "restore", song: songs[6]!, rows, index: 1, t: 5 }]);
+    expect(s.songs).toEqual([songs[6]]);
+  });
+  it("seconds are whole and never negative", () => {
+    expect(run([{ type: "restore", song: rows[0]!, rows, index: 0, t: 7.9 }]).resume).toBe(7);
+    expect(run([{ type: "restore", song: rows[0]!, rows, index: 0, t: -3 }]).resume).toBe(0);
+  });
+  it("a protected song is not brought back", () => {
+    expect(run([{ type: "restore", song: lock(rows[0]!), rows, index: 0, t: 5 }])).toEqual(idleQueue());
+  });
+  it("playing clears the wait; so does starting or moving to another song, and stopping", () => {
+    const r = run([{ type: "restore", song: rows[1]!, rows, index: 1, t: 30 }]);
+    expect(queueReducer(r, { type: "playing" }).resume).toBeNull();
+    expect(queueReducer(r, { type: "next", rows }).resume).toBeNull();
+    expect(queueReducer(r, { type: "start", rows, index: 0 }).resume).toBeNull();
+    expect(queueReducer(r, { type: "stop" }).resume).toBeNull();
+  });
+  it("shuffle and stale marks keep the wait", () => {
+    const r = run([{ type: "restore", song: rows[1]!, rows, index: 1, t: 30 }]);
+    expect(queueReducer(r, { type: "shuffle", value: true }).resume).toBe(30);
+    expect(queueReducer(r, { type: "stale" }).resume).toBe(30);
+  });
+});

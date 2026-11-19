@@ -45,7 +45,7 @@ describe("FeelPanel", () => {
   });
   it("the pill's hover text says how strong the link is", () => {
     setup();
-    expect(screen.getByRole("button", { name: /Calm/ }).title).toContain("strongly linked");
+    expect(screen.getByRole("button", { name: /Calm/ }).dataset.tip).toContain("strongly linked");
   });
   it("the options dispatch their own actions", async () => {
     const dispatch = setup();

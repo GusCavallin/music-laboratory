@@ -1,3 +1,4 @@
+import { formatTime } from "../data/format";
 import type { Song } from "../data/types";
 
 /**
@@ -23,6 +24,8 @@ export interface QueueState {
   halted: null | "protected" | "errors";
   /** goes up each time a song is started (or playback stopped): the audio plays again when it changes, even for the same song */
   serial: number;
+  /** the song was brought back from the last visit and waits, paused, at this many seconds; null once anything is played */
+  resume: number | null;
 }
 
 export const MAX_ERRORS = 5;
@@ -31,7 +34,7 @@ export const MAX_ERRORS = 5;
 export type Rng = () => number;
 
 export const idleQueue = (): QueueState => ({
-  songs: [], order: [], pos: -1, current: null, shuffle: false, stale: false, errs: 0, skipping: null, halted: null, serial: 0,
+  songs: [], order: [], pos: -1, current: null, shuffle: false, stale: false, errs: 0, skipping: null, halted: null, serial: 0, resume: null,
 });
 
 /** The order of play for n songs: 0..n-1, or shuffled with `first` (if any) played first. */
@@ -59,7 +62,7 @@ function landOn(s: QueueState, p: number): QueueState {
     const errs = s.errs + 1;
     return errs < MAX_ERRORS ? { ...s, pos, errs, skipping: song, halted: null } : { ...s, pos, errs: 0, skipping: null, halted: "protected" };
   }
-  return { ...s, pos, current: song, skipping: null, halted: null, serial: s.serial + 1 };
+  return { ...s, pos, current: song, skipping: null, halted: null, serial: s.serial + 1, resume: null };
 }
 
 /** A fresh snapshot of the list that keeps the playing song's place. */
@@ -73,6 +76,8 @@ function resnapshot(s: QueueState, rows: readonly Song[], rng: Rng): QueueState 
 export type QueueAction =
   /** start playing the list: at `index`, or (null) at the top, or at a random song when shuffling */
   | { type: "start"; rows: readonly Song[]; index: number | null; rng?: Rng }
+  /** the song of the last visit comes back paused at `t` seconds. `index` is its place in `rows` (-1: not in the list, so the queue is just that song) */
+  | { type: "restore"; song: Song; rows: readonly Song[]; index: number; t: number; rng?: Rng }
   | { type: "goto"; pos: number }
   | { type: "next"; rows: readonly Song[]; rng?: Rng }
   | { type: "prev"; rows: readonly Song[]; rng?: Rng }
@@ -96,6 +101,14 @@ export function queueReducer(s: QueueState, a: QueueAction): QueueState {
       const pos = order.indexOf(first);
       return landOn({ ...s, songs: [...a.rows], order, pos, stale: false }, pos);
     }
+    case "restore": {
+      if (a.song.protected) return s;
+      const inList = a.index >= 0 && a.rows[a.index]?.path === a.song.path;
+      const songs = inList ? [...a.rows] : [a.song];
+      const first = inList ? a.index : 0;
+      const order = playOrder(songs.length, s.shuffle, first, a.rng ?? Math.random);
+      return { ...s, songs, order, pos: order.indexOf(first), current: a.song, stale: !inList, errs: 0, skipping: null, halted: null, serial: s.serial + 1, resume: Math.max(0, Math.floor(a.t)) };
+    }
     case "goto":
       return landOn(s, a.pos);
     case "next": {
@@ -118,7 +131,7 @@ export function queueReducer(s: QueueState, a: QueueAction): QueueState {
     case "stop":
       return { ...idleQueue(), shuffle: s.shuffle, serial: s.serial + 1 };
     case "playing":
-      return s.errs ? { ...s, errs: 0 } : s;
+      return s.errs || s.resume !== null ? { ...s, errs: 0, resume: null } : s;
     case "error": {
       const errs = s.errs + 1;
       return { ...s, errs, halted: errs >= MAX_ERRORS ? "errors" : s.halted };
@@ -132,6 +145,7 @@ export function nowText(s: QueueState): string | null {
   if (s.halted === "errors") return "Stopped: several songs in a row couldn't be played";
   if (s.skipping) return `🔒 ${s.skipping.name} is protected, skipping (play it in iTunes)`;
   if (!s.current) return null;
+  if (s.resume !== null) return `⏸ ${s.current.name} — ${s.current.artist}${s.resume > 0 ? `  (resume at ${formatTime(s.resume)})` : ""}`;
   const where = s.stale ? "next: from the current results" : `${s.pos + 1}/${s.songs.length}${s.shuffle ? ", shuffled" : ""}`;
   return `▶ ${s.current.name} — ${s.current.artist}  (${where})`;
 }

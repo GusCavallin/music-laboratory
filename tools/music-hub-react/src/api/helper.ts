@@ -82,3 +82,28 @@ export async function rebuild(fetcher: Fetch = fetch): Promise<RebuildResult> {
     return { ok: false, error: "Can't reach the helper (is its window still open?)" };
   }
 }
+
+export interface PresetsResult {
+  presets: unknown;
+}
+
+/** The saved views kept by the helper (presets.json), or null when it cannot be reached. */
+export async function loadPresets(fetcher: Fetch = fetch): Promise<unknown | null> {
+  try {
+    const r = await fetcher("/presets", { cache: "no-store" });
+    if (!r.ok) return null;
+    return ((await r.json()) as PresetsResult).presets ?? [];
+  } catch {
+    return null;
+  }
+}
+
+/** Writes the whole list of saved views to the helper (it checks it and writes the file in one go). */
+export async function savePresetsToHelper(presets: readonly unknown[], fetcher: Fetch = fetch): Promise<boolean> {
+  try {
+    const r = await fetcher("/presets", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ presets }) });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}

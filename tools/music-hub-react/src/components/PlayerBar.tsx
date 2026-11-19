@@ -67,25 +67,25 @@ export function PlayerBar(p: Props) {
   const progress = p.duration ? (p.time / p.duration) * 1000 : 0;
   return (
     <div className="player">
-      <button type="button" aria-label="Previous" title="Previous" onClick={p.onPrev}>⏮</button>
-      <button type="button" aria-label="Stop" title="Stop" onClick={p.onStop}>⏹</button>
-      <button type="button" aria-label={p.paused ? "Play" : "Pause"} title="Play / Pause" onClick={p.onToggle}>{p.paused ? "▶" : "⏸"}</button>
-      <button type="button" aria-label="Next" title="Next" onClick={p.onNext}>⏭</button>
-      <button type="button" className={p.shuffle ? "on" : undefined} aria-pressed={p.shuffle} aria-label="Shuffle" title="Shuffle" onClick={p.onShuffle}>🔀</button>
-      <button type="button" className="pnow" title={p.path} onClick={p.onNow}>{p.text}</button>
+      <button type="button" aria-label="Previous" data-tip="Previous" onClick={p.onPrev}>⏮</button>
+      <button type="button" aria-label="Stop" data-tip="Stop" onClick={p.onStop}>⏹</button>
+      <button type="button" aria-label={p.paused ? "Play" : "Pause"} data-tip="Play / Pause" onClick={p.onToggle}>{p.paused ? "▶" : "⏸"}</button>
+      <button type="button" aria-label="Next" data-tip="Next" onClick={p.onNext}>⏭</button>
+      <button type="button" className={p.shuffle ? "on" : undefined} aria-pressed={p.shuffle} aria-label="Shuffle" data-tip="Shuffle" onClick={p.onShuffle}>🔀</button>
+      <button type="button" className="pnow" data-tip={p.path} onClick={p.onNow}>{p.text}</button>
       <div className="zone" ref={seekBox}>
         <input
           type="range" min={0} max={1000} value={progress} aria-label="Position in the song"
-          title="Drag to seek; mouse wheel skips 5 s"
+          data-tip="Drag to seek; mouse wheel skips 5 s"
           onChange={(e) => p.onSeek(Number(e.target.value) / 1000)}
         />
         <span className="ptime">{mmss(p.time)} / {mmss(p.duration)}</span>
       </div>
       <div className="zone" ref={volBox}>
-        <button type="button" aria-label={p.muted ? "Unmute" : "Mute"} title={p.muted ? "Unmute" : "Mute"} onClick={p.onMute}>{volumeIcon(p.vol, p.muted)}</button>
+        <button type="button" aria-label={p.muted ? "Unmute" : "Mute"} data-tip={p.muted ? "Unmute" : "Mute"} onClick={p.onMute}>{volumeIcon(p.vol, p.muted)}</button>
         <input
           type="range" min={0} max={100} value={p.vol} aria-label="Volume"
-          title={`Volume ${p.vol}% (mouse wheel adjusts)`}
+          data-tip={`Volume ${p.vol}% (mouse wheel adjusts)`}
           onChange={(e) => p.onVolume(Number(e.target.value))}
         />
       </div>

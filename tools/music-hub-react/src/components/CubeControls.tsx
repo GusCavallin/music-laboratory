@@ -26,7 +26,7 @@ export function CubeControls({ cube, ui, dispatch }: Props) {
       {cube.axes.map((axis, i) => {
         const [lo, hi] = ranges[i]!;
         return (
-          <div className="fbox" key={axis.name} title={`${axis.low}  ←  →  ${axis.high}`}>
+          <div className="fbox" key={axis.name} data-tip={`${axis.low}  ←  →  ${axis.high}`}>
             <b>
               {axis.name} <small>{lo.toFixed(1)} – {hi.toFixed(1)}</small>
             </b>
@@ -37,7 +37,7 @@ export function CubeControls({ cube, ui, dispatch }: Props) {
           </div>
         );
       })}
-      <div className="fbox" title="Maturity is the dot color. Instrumentals have no maturity score, so narrowing this slider leaves them out">
+      <div className="fbox" data-tip="Maturity is the dot color. Instrumentals have no maturity score, so narrowing this slider leaves them out">
         <b>
           Maturity <small>{ui.maturity[0]} – {ui.maturity[1]}</small>
         </b>
@@ -46,7 +46,7 @@ export function CubeControls({ cube, ui, dispatch }: Props) {
           onChange={(which, value) => dispatch({ type: "cubeRange", index: "m", which, value, bounds })}
         />
       </div>
-      <button type="button" title="The box grows back to every song" onClick={() => dispatch({ type: "cubeReset" })}>Reset box</button>
+      <button type="button" data-tip="The box grows back to every song" onClick={() => dispatch({ type: "cubeReset" })}>Reset box</button>
     </div>
   );
 }

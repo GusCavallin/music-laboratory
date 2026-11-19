@@ -17,7 +17,7 @@ export function Tabs({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) => void
           role="tab"
           aria-selected={t.tab === tab}
           className={t.tab === tab ? "on" : ""}
-          title={t.tip}
+          data-tip={t.tip}
           onClick={() => onChange(t.tab)}
         >
           {t.label}

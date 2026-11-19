@@ -218,3 +218,56 @@ describe("volume", () => {
     expect(audio!.volume).toBe(1);
   });
 });
+
+describe("restoring the song of the last visit", () => {
+  it("loads it but does not play, and says where it will resume", () => {
+    const { result } = setup();
+    act(() => result.current.restore(songs[1]!, 1, 83));
+    expect(played).toEqual([]);
+    expect(result.current.queue.current).toBe(songs[1]);
+    expect(result.current.status.paused).toBe(true);
+    expect(result.current.text).toBe(`⏸ ${songs[1]!.name} — ${songs[1]!.artist}  (resume at 1:23)`);
+  });
+  it("puts the song at its place once it knows its length (but not at the very end)", () => {
+    const { result } = setup();
+    let el: HTMLAudioElement | undefined;
+    vi.spyOn(HTMLMediaElement.prototype, "preload", "set").mockImplementation(function (this: HTMLMediaElement) {
+      el = this as HTMLAudioElement;
+    });
+    act(() => result.current.restore(songs[1]!, 1, 83));
+    setTime(el!, 0, 200);
+    el!.dispatchEvent(new Event("loadedmetadata"));
+    expect(el!.currentTime).toBe(83);
+    // a position at or past the end is ignored
+    act(() => result.current.restore(songs[2]!, 2, 199.5));
+    setTime(el!, 0, 200);
+    el!.dispatchEvent(new Event("loadedmetadata"));
+    expect(el!.currentTime).toBe(0);
+  });
+  it("pressing play plays it, and the waiting text goes away", () => {
+    const { result } = setup();
+    act(() => result.current.restore(songs[1]!, 1, 83));
+    act(() => result.current.toggle());
+    send("playing");
+    expect(result.current.queue.resume).toBeNull();
+    expect(result.current.text).toBe(`▶ ${songs[1]!.name} — ${songs[1]!.artist}  (2/4)`);
+  });
+  it("a song that will not load is forgotten without a fuss (no skipping, no notice)", () => {
+    const { result } = setup();
+    let el: HTMLAudioElement | undefined;
+    vi.spyOn(HTMLMediaElement.prototype, "preload", "set").mockImplementation(function (this: HTMLMediaElement) {
+      el = this as HTMLAudioElement;
+    });
+    act(() => result.current.restore(songs[1]!, 1, 83));
+    act(() => void el!.dispatchEvent(new Event("error")));
+    act(() => void vi.advanceTimersByTime(2000));
+    expect(result.current.queue.current).toBeNull();
+    expect(result.current.queue.errs).toBe(0);
+    expect(result.current.text).toBe("Click a song to play the current selection");
+    expect(played).toEqual([]);
+  });
+  it("starts with shuffle on when the last visit had it", () => {
+    const { result } = renderHook(() => useAudioPlayer(songs, volume, true));
+    expect(result.current.queue.shuffle).toBe(true);
+  });
+});

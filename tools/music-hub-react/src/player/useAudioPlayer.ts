@@ -17,12 +17,12 @@ export interface AudioStatus {
  * Plays the songs of the list. The queue (queue.ts) decides which song is next; this hook is the part that touches the browser: one audio element, its
  * events, the media keys, and the volume. `rows` is the list on screen, `volume` what the volume slider says.
  */
-export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; muted: boolean }) {
+export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; muted: boolean }, initialShuffle = false) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   if (!audioRef.current && typeof Audio !== "undefined") audioRef.current = new Audio();
   const audio = audioRef.current;
 
-  const [queue, dispatch] = useReducer(queueReducer, undefined, idleQueue);
+  const [queue, dispatch] = useReducer(queueReducer, initialShuffle, (shuffle: boolean) => ({ ...idleQueue(), shuffle }));
   const [status, setStatus] = useState<AudioStatus>({ paused: true, time: 0, duration: NaN });
   const [notice, showNotice] = useNotice();
 
@@ -49,6 +49,17 @@ export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; mut
       return;
     }
     audio.src = audioUrl(song.path);
+    const resume = queueRef.current.resume;
+    if (resume !== null) {
+      // the song of the last visit: load it, put it where it was, and wait for the play button (a page must not start playing by itself)
+      audio.preload = "metadata";
+      audio.addEventListener("loadedmetadata", () => {
+        if (resume > 0 && resume < audio.duration - 1) audio.currentTime = resume;
+      }, { once: true });
+      setStatus({ paused: true, time: resume, duration: NaN });
+      return;
+    }
+    audio.preload = "auto";
     void audio.play().catch(() => {}); // the browser may refuse before the first click; the play button then starts it
     if ("mediaSession" in navigator && typeof MediaMetadata !== "undefined") {
       navigator.mediaSession.metadata = new MediaMetadata({ title: song.name, artist: song.artist, album: song.album });
@@ -66,6 +77,7 @@ export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; mut
     const onError = () => {
       const q = queueRef.current;
       if (!q.current) return;
+      if (q.resume !== null) return dispatch({ type: "stop" }); // the song of the last visit would not load: forget it quietly
       dispatch({ type: "error" });
       if (q.errs + 1 < MAX_ERRORS) {
         showNotice(`Can't play ${q.current.name} (skipping)`, 1500);
@@ -117,6 +129,9 @@ export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; mut
     },
     [showNotice],
   );
+
+  /** Brings the song of the last visit back, paused at `t` seconds (`index`: its place in the list, or -1). */
+  const restore = useCallback((song: Song, index: number, t: number) => dispatch({ type: "restore", song, rows: rowsRef.current, index, t }), []);
 
   const toggle = useCallback(() => {
     if (!audio) return;
@@ -170,6 +185,6 @@ export function useAudioPlayer(rows: readonly Song[], volume: { vol: number; mut
     // a short notice shows for a moment, but never over the message that playback has stopped
     text: (queue.halted ? nowText(queue) : (notice ?? nowText(queue))) ?? IDLE_TEXT,
     notice: showNotice,
-    start, toggle, next, prev, stop, pause, setShuffle, markStale, seekTo, skipBy,
+    start, restore, toggle, next, prev, stop, pause, setShuffle, markStale, seekTo, skipBy,
   };
 }

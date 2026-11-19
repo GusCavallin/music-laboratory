@@ -51,7 +51,7 @@ const proxy = Object.fromEntries(
 
 export default defineConfig({
   plugins: [react(), serveDataJs()],
-  server: { proxy },
+  server: { host: "127.0.0.1", port: 5273, strictPort: true, proxy }, // not Vite's usual 5173, which other projects use
   test: {
     environment: "node", // a component test opts in to jsdom with a "@vitest-environment jsdom" comment at the top of the file
     include: ["src/**/*.test.{ts,tsx}"],

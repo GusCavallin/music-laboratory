@@ -109,7 +109,7 @@ export function GraphPanel({ model, songs, rows, showViewChoice, view, onView, n
             <button type="button" className={view === "flat" ? "on" : undefined} onClick={() => onView("flat")}>Flat</button>
           </>
         )}
-        {rot3 && <button type="button" title="Reset the camera (or double-click the cube)" onClick={() => setCam(CAM0)}>⟲ View</button>}
+        {rot3 && <button type="button" data-tip="Reset the camera (or double-click the cube)" onClick={() => setCam(CAM0)}>⟲ View</button>}
         <span className="cubecount" aria-live="polite">{rows.length.toLocaleString()} songs lit</span>
       </div>
       <div className="cubestage" ref={stage}>
@@ -163,7 +163,7 @@ function StatsBlock({ lines, count, extra }: { lines: readonly StatLine[]; count
             `${r.name}: mean ${plain(r.mean, 2)} over ${r.n.toLocaleString()} songs in the list · all rated songs ${plain(r.m, 2)} · ` +
             `${signed(r.d, 2)} (${signed(r.z, 2)} stdev)`;
           return (
-            <span className="sc" key={r.name} title={tip} style={style}>
+            <span className="sc" key={r.name} data-tip={tip} style={style}>
               <b>{first}</b> {plain(r.mean, r.dp > 1 ? r.dp : 1)} <span>{signed(r.d, r.dp)}</span> <small>{signed(r.z, 1)} sd</small>
             </span>
           );

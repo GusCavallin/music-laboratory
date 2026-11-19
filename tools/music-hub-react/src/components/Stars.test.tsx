@@ -33,8 +33,8 @@ describe("Stars (clickable)", () => {
   it("the star that is the current rating says that a click clears it", () => {
     render(<Stars n={4} onRate={() => {}} />);
     expect(screen.getByRole("button", { name: "4 stars, click again to clear" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "4 stars, click again to clear" }).title).toBe("Click again to clear the rating");
-    expect(screen.getByRole("button", { name: "5 stars" }).title).toBe("Rate 5 stars in iTunes");
+    expect(screen.getByRole("button", { name: "4 stars, click again to clear" }).dataset.tip).toBe("Click again to clear the rating");
+    expect(screen.getByRole("button", { name: "5 stars" }).dataset.tip).toBe("Rate 5 stars in iTunes");
   });
   it("a click reports the star (what it does with the current rating is the caller's rule)", async () => {
     const onRate = vi.fn();
