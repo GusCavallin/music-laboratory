@@ -5,6 +5,13 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- **Music Hub in React and TypeScript, a preview** (`tools/music-hub-react`), built one slice at a time; each slice is a tagged commit, so the history shows how it
+  grows. It reads the same `data.js` and does not replace the current page, which is still the one to use.
+  - `react-slice-1`: the data layer (loading `data.js`, search, filters, sorting, the Feel scales), with tests.
+  - `react-slice-2`: the table, search box, filters and sorting on screen, with windowed rows, for the iTunes and MP3 archive tabs.
+
 ## 0.2.0 - 2026-11-09
 
 New in Music Hub: saving a filtered list as a playlist, a Track column, and linked Feel sliders. After updating, restart the helper and click **Refresh data**.
