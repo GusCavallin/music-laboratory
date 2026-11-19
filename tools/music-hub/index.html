@@ -175,7 +175,7 @@ function fmt(k,v,o){if(k==="track"){if(!v)return"";return (o&&o.discs>1?o.disc+"
  if(k==="secs")return Math.floor(v/60)+":"+String(v%60).padStart(2,"0");
  if(k==="stars")return v?"⭐".repeat(v):"";if(k==="loved")return v?"❤️":"";if(k==="year"&&!v)return"";if(k==="in_itunes")return v?"✔":"";return v}
 function run(keep){
- if(keep!==true&&Q.length){stale=true;if(cur)$("pnow").textContent=nowText()} // a filter/search/sort change drops what comes next, not the song playing now
+ if(keep!==true&&Q.length&&src==="itunes"){stale=true;if(cur)$("pnow").textContent=nowText()} // a filter/search/sort change drops what comes next, not the song playing now
  const terms=fold($("q").value).split(/\s+/).filter(Boolean).map(t=>[sp(t),jn(t)]).filter(t=>t[0]||t[1]);
  let a=D[src];
  const dec=$("dec").value,cty=$("cty").value,cat=$("cat").value,st=+$("stars").value,smax=+$("starsmax").value;
@@ -226,7 +226,7 @@ function shuffled(first){const a=[...Q.keys()];for(let i=a.length-1;i>0;i--){con
 function setOrder(first){order=shuf?shuffled(first):[...Q.keys()];pos=first>=0?order.indexOf(first):-1}
 const nowText=()=>"▶ "+cur.name+" — "+cur.artist+"  ("+(stale?"next: from the current results":(pos+1)+"/"+Q.length+(shuf?", shuffled":""))+")";
 function rebuildQueue(){Q=res.slice();setOrder(cur?Q.findIndex(o=>o.path===cur.path):-1);stale=false} // keeps the playing song's place if it is in the new results
-function startQueue(i){if(src!=="itunes"){$("pnow").textContent="Archive songs are on CDs, so they can't be played here";return}
+function startQueue(i){if(src!=="itunes"){flash("Archive songs are on CDs, so they can't be played here");return}
  if(i!=null&&res[i]&&res[i].protected){protectedNote(res[i]);return}  // clicked a protected song: say why, keep what is playing
  if(!res.length)return;Q=res.slice();stale=false;const first=i==null?(shuf?Math.floor(Math.random()*Q.length):0):i;setOrder(first);playAt(pos)}
 function protectedNote(o){const prev=$("pnow").textContent,msg="🔒 "+o.name+": a protected iTunes purchase, a browser can't play it. Play it in iTunes.";
@@ -250,7 +250,7 @@ function stopPlayback(){ // back to the idle state: song unloaded and rewound, q
  cur=null;Q=[];order=[];pos=-1;stale=false;errs=0;
  $("pplay").textContent="▶";$("pnow").textContent=IDLE;delete $("pnow").dataset.tip;$("seek").value=0;$("ptime").textContent="0:00 / 0:00";mark();
  if("mediaSession"in navigator)navigator.mediaSession.metadata=null;saveSession()}
-$("pnext").onclick=()=>{next();showNow()};$("pprev").onclick=()=>{prev();showNow()};$("pplay").onclick=toggle;$("pstop").onclick=stopPlayback;
+$("pnext").onclick=()=>{next();if(src!=="archive")showNow()};$("pprev").onclick=()=>{prev();if(src!=="archive")showNow()};$("pplay").onclick=toggle;$("pstop").onclick=stopPlayback; // on the archive tab Next / Previous don't jump to the song: it isn't in that list
 $("pshuf").onclick=()=>{shuf=!shuf;$("pshuf").classList.toggle("on",shuf);if(Q.length&&!stale)setOrder(Q.indexOf(cur));saveSession()};
 // volume: the slider is squared before it reaches the audio element (feels natural at low levels); remembered
 let vol=80,muted=false;
@@ -299,7 +299,8 @@ function showNow(){ // jump to the playing song's row in the list (click the now
  if(at>=shown){shown=at+PAGE;render()}
  const tr=document.querySelector(`#tb tr[data-i="${at}"]`);if(!tr)return;
  tr.scrollIntoView({block:"center"});tr.classList.remove("ping");void tr.offsetWidth;tr.classList.add("ping")}
-$("pnow").onclick=showNow;
+$("pnow").onclick=()=>{if(src==="archive")document.querySelector(TABSEL.itunes).click(); // the playing song lives in the iTunes Library: go there; on every other tab stay where you are
+ showNow()};
 document.addEventListener("keydown",e=>{if(e.code==="Space"&&!/INPUT|SELECT|BUTTON|SUMMARY/.test(e.target.tagName)){e.preventDefault();toggle()}});
 if("mediaSession"in navigator)for(const[a,f]of[["play",toggle],["pause",toggle],["stop",stopPlayback],["nexttrack",next],["previoustrack",prev]])navigator.mediaSession.setActionHandler(a,f);
 function reloadData(){
@@ -441,7 +442,7 @@ const feelReset=()=>{for(const [k] of FEEL){$("fl_"+k+"_lo").value=0;$("fl_"+k+"
 $("fl_reset").onclick=()=>{feelReset();run()};readFeel();
 document.querySelectorAll("#tabs button[data-s]").forEach(b=>b.onclick=()=>{src=b.dataset.s;feelMode=b.dataset.feel==="1";cubeMode=b.dataset.cube==="1";if(src!=="archive"&&facet.volume!=null){facet.volume=null;chips()}sort={k:null,d:0};
  document.querySelectorAll("#tabs button[data-s]").forEach(x=>x.classList.toggle("on",x===b));
- picker();$("player").hidden=src!=="itunes";if(src!=="itunes")audio.pause();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run()});
+ picker();$("f1").hidden=src!=="itunes";$("f2").hidden=src!=="archive";$("feel").hidden=!feelMode;$("cubectl").hidden=!cubeMode;layout();readFeel();run()});
 // --- Feel Axes tab (internal id "cube"): every rated song is a dot; the three axes are independent principal components of the nine GEMS scales
 // (tools/emotions/axes.py); dot colour = maturity (cool = below the average song, warm = above, hollow = no score).
 // The slider box picks the songs: dots inside stay bright, the list on the left shows exactly those. Plain canvas, no library. ---

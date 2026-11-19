@@ -82,7 +82,7 @@ count above the number of songs you have means a track is missing. It needs **�
 
 ## Playing music
 
-Click a song to play the current results; ⏮ ⏹ ⏯ ⏭ and 🔀 (shuffle) work on the results as filtered and sorted when playback started. **Space** plays/pauses, and the media keys work too.
+Click a song to play the current results; ⏮ ⏹ ⏯ ⏭ and 🔀 (shuffle) work on the results as filtered and sorted when playback started. **Space** plays/pauses, and the media keys work too. Playback goes on when you switch tabs, including the MP3 archive tab (those songs are on CDs, so nothing can be started there). Click the song's name in the player to jump to its row; from the archive tab that takes you to the iTunes Library.
 
 - **Volume:** 🔊 mutes; the slider sets the volume (remembered; squared so low levels are finer). Mouse wheel over the volume area changes it by 5%; over the progress area it skips 5 seconds.
 - **Jump to the song:** click the now-playing text at the top, or use ⏮ / ⏭, and the list scrolls to the playing song and flashes it.
