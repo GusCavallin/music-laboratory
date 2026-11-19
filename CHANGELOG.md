@@ -5,6 +5,11 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.3.0 - 2026-11-19
+
+Music Hub keeps playing when you switch to the MP3 Archive tab, and what the Music Hub pages share now lives in `tools/music-hub-core/`. Also new: a React preview of the page, built slice by slice, that does not replace the current one.
+After updating, restart the helper and click **Refresh data**.
+
 ### Added
 
 - **Music Hub in React and TypeScript, a preview** (`tools/music-hub-react`), built one slice at a time; each slice is a tagged commit, so the history shows how it
@@ -17,6 +22,7 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ### Changed
 
+- Music Hub: what the pages share moved to a new folder, `tools/music-hub-core/`: the local helper (`server.py` became `helper.py`; `tools/music-hub/server.py` now just starts it), `build_data.py`, the built `data.js`, your `presets.json` and `mojibake_fixes.json`. `serve.bat`, `py -3 build_data.py` and `./build_data.sh` in `tools/music-hub` work as before. Your saved views are copied to the new place the first time the helper starts. After updating, restart the helper and click **Refresh data** (or run `build_data.py`), because `data.js` is now built in the new folder. The helper has tests (`py -3 -m unittest test_helper` in the new folder).
 - Music Hub: the song keeps playing, and the player bar stays, when you switch to the MP3 Archive tab (it used to pause). Clicking the song's name in the player
   on that tab takes you to the iTunes Library tab and shows the song; on every other tab it stays where you are. Next and Previous don't change tab.
 
