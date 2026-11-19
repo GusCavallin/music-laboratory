@@ -13,6 +13,12 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
   - `react-slice-2`: the table, search box, filters and sorting on screen, with windowed rows, for the iTunes and MP3 archive tabs.
   - `react-slice-3`: the Feel tabs. Raw Feel (ten sliders in five linked pairs, a graph of the first four narrowed scales) and Feel Axes (every rated song in a 3D cube you can turn, with a box that picks the list, and a flat view).
   - `react-slice-4`: everything that goes through the Python helper. The player (click a row or a dot to play, shuffle, seeking, volume, the media keys), rating by clicking stars (including taking a song off a `[To Rate]` playlist), Save as playlist and Refresh data. It says so when the helper is not running.
+  - `react-slice-5`: the page as you use it. Presets (★ Presets), the view and the playing song remembered between visits, ← back and the mouse Back and Forward buttons for the filter views, a column menu (right-click a header; drag to reorder), hover tips, and an ⓘ About box. The song keeps playing on the MP3 archive tab, and `preview.bat` starts the preview (the dev server now uses port 5273).
+
+### Changed
+
+- Music Hub: the song keeps playing, and the player bar stays, when you switch to the MP3 Archive tab (it used to pause). Clicking the song's name in the player
+  on that tab takes you to the iTunes Library tab and shows the song; on every other tab it stays where you are. Next and Previous don't change tab.
 
 ## 0.2.0 - 2026-11-09
 
