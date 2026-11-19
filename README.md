@@ -21,6 +21,7 @@ The scripts get these settings from `musiclab_config.py` at the repo root. Pytho
 | Folder | What |
 |---|---|
 | `tools/music-hub/` | **Music Hub**: search, play, rate and explore the whole library, with the Feel tabs and graphs ([README](tools/music-hub/README.md)) |
+| `tools/music-hub-core/` | What the Music Hub pages share: the local helper, the data builder (`data.js`) and the saved views ([README](tools/music-hub-core/README.md)) |
 | `tools/release-years/` | Original release year per track, via MusicBrainz ([README](tools/release-years/README.md)) |
 | `tools/artist-genres/` | Genre and country per artist, via MusicBrainz votes ([README](tools/artist-genres/README.md)) |
 | `tools/bpm/` | Tempo index (AcousticBrainz) and a workout playlist builder ([README](tools/bpm/README.md)) |

@@ -110,7 +110,7 @@
   <!-- ===== Column C: Music Hub ===== -->
   <rect x="700" y="100" width="260" height="135" rx="6" class="tp"/>
   <text x="716" y="124" class="name">build_data.py</text>
-  <text x="716" y="143" class="s">in tools/music-hub</text>
+  <text x="716" y="143" class="s">in tools/music-hub-core</text>
   <text x="716" y="166" class="t">collects the songs and playlists,</text>
   <text x="716" y="183" class="t">the years, genres, tempo, Feel</text>
   <text x="716" y="200" class="t">ratings and the CD index into</text>

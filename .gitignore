@@ -2,8 +2,8 @@
 config.json
 
 # Built from your own library; regenerate with the scripts
-tools/music-hub/data.js
-tools/music-hub/presets.json
+tools/music-hub-core/data.js
+tools/music-hub-core/presets.json
 tools/release-years/release_years.csv
 tools/artist-genres/artist_genres.csv
 tools/bpm/bpm.csv

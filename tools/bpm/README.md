@@ -14,7 +14,7 @@ py -3 update_bpm.py --no-fetch   # rebuild bpm.csv from the cache only
 - Input: `tools/release-years/release_years.csv` (its `mb_recording_id`). Run `update_index.py` there first for new songs.
 - `bpm_cache.json` (committed, costly to rebuild): `{recording id: {bpm, danceability, onset, loudness, n}}`; a miss is cached as `{bpm: null}`.
   Since AcousticBrainz no longer collects data, a recording needs asking about only once.
-- `bpm.csv` (derived, git-ignored): one row per track, joined by `persistent_id`. `tools/music-hub/build_data.py`
+- `bpm.csv` (derived, git-ignored): one row per track, joined by `persistent_id`. `tools/music-hub-core/build_data.py`
   reads it, so run `build_data.sh` (or **Refresh data** in Music Hub) afterwards.
 - One request per second, 25 recordings per request. A whole library takes a while the first time.
 

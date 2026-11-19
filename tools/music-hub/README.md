@@ -68,7 +68,7 @@ On the archive tab: **Category** and **In iTunes** (any / in iTunes / not in iTu
 
 **Presets (★ Presets, next to ✕ Clear filters).** Saves the current *view* under a name: the tab, search text, every filter, artist/album/volume chips, the Feel sliders and color mode, the 3D box and the sort order
 (not the playing song or your column layout). Type a name and press Save (an existing name is updated); click a preset to apply it; ⟳ replaces it with the current view, ✎ renames, ✕ deletes. **Applying a preset replaces your current view and can be
-undone with ← back.** Presets are stored by the helper in `presets.json` in this folder, so they survive a port change, a cleared browser or switching between Chrome and Edge (without the helper they fall back to this browser's storage).
+undone with ← back.** Presets are stored by the helper in `presets.json` in `tools/music-hub-core/` (shared with the React preview), so they survive a port change, a cleared browser or switching between Chrome and Edge (without the helper they fall back to this browser's storage).
 
 **Sorting.** Click a column header to sort, click again to reverse. For **Rating, Plays, Loved and the ten Feel scores** the first click puts the highest
 first; for every other column the first click goes A to Z / low to high.
@@ -155,7 +155,7 @@ Drawn with a plain canvas: no library, works offline.
 
 ## Where the data comes from
 
-`build_data.py` builds one file, **`data.js`** (`window.LIB = {...}`, git-ignored and always regenerable). The page loads it with a `<script>` tag and filters it in memory; a plain script
+`tools/music-hub-core/build_data.py` builds one file, **`data.js`** (`window.LIB = {...}`, git-ignored and always regenerable; it lives in `tools/music-hub-core/`, shared with the other Music Hub page). The page loads it with a `<script>` tag and filters it in memory; a plain script
 file works even from `file://`, where `fetch` of a JSON file would be blocked, and a database would be overkill for a list this size.
 
 | Input | Read from | Used for |
@@ -167,14 +167,14 @@ file works even from `file://`, where `fetch` of a JSON file would be blocked, a
 | Composite axes (Calm, Ease, Awe) | `tools/emotions/axes.json` | Feel Axes tab |
 | Tempo (BPM) | `tools/bpm/bpm.csv` | Built into the data but the column is hidden (see below) |
 | CD archive | the spreadsheet named by `cd_archive_index` in `config.json` (optional, read-only; without it the archive tab is empty). Its Path column shows `$DL` in place of the drive letter, which only said which CD drive the disc was read in | The archive tab |
-| Spelling repairs | `mojibake_fixes.json` | Fixes accented letters lost in the CD index |
+| Spelling repairs | `tools/music-hub-core/mojibake_fixes.json` | Fixes accented letters lost in the CD index |
 
 Rebuilding: **⟳ Refresh data** (with the helper running) rebuilds `data.js` from iTunes and swaps the new data in without reloading the page: your search, scroll position and the playing song are kept.
-Or run `./build_data.sh` yourself. Re-run the index tools first when you add songs: `tools/release-years/update_index.py`, `tools/artist-genres/update_genres.py`.
+Or run `./build_data.sh` (or `py -3 build_data.py`) yourself; both pass on to the script in `tools/music-hub-core/`. Re-run the index tools first when you add songs: `tools/release-years/update_index.py`, `tools/artist-genres/update_genres.py`.
 
 **Row order in `data.js`:** the iTunes columns end with `...protected, feel, path`; `path` must stay last (the helper reads it to decide which files it may stream).
 
-**The CD archive and garbled text.** The CD spreadsheet lost some accented letters when it was made; they show up as `ï¿½` (for example `Clï¿½sicos`). `mojibake_fixes.json` maps each damaged
+**The CD archive and garbled text.** The CD spreadsheet lost some accented letters when it was made; they show up as `ï¿½` (for example `Clï¿½sicos`). `tools/music-hub-core/mojibake_fixes.json` maps each damaged
 word to its real spelling (a `?` stands for one lost character); `build_data.py` applies it before matching archive songs to iTunes, so repaired names match their iTunes copies. A damaged word with no
 entry gets a plain replacement mark. The spreadsheet itself is never modified.
 
@@ -192,7 +192,7 @@ and the **song that was playing, at its position**. The song comes back *paused*
 
 With the helper running, open the page in Chrome or Edge and use **Install** (the icon at the right end of the address bar). It then opens in its own window with its own icon. The app is only the page:
 the helper (`serve.bat`) must be running, and the port must stay the same (an app installed from `:9123` won't work from another port).
-`manifest.webmanifest`, `sw.js` (installability only; it caches nothing, so data is always fresh) and the icons (`make_icons.py`) are served by `server.py`.
+`manifest.webmanifest`, `sw.js` (installability only; it caches nothing, so data is always fresh) and the icons (`make_icons.py`) are served by the helper (`server.py` starts it).
 
 **Window size.** A web app manifest cannot set one, so when the app window opens on a desktop, the page makes it at least `MIN_W` × `MIN_H` (1090 × 600, at the end of `index.html`), once. 1090 is the narrowest
 width that keeps the Raw Feel controls beside the sliders. You can still drag the window smaller afterwards (it stays that way until the app is opened again); a normal browser tab and a phone are left alone.
@@ -213,12 +213,12 @@ width that keeps the Raw Feel controls beside the sliders. You can still drag th
 | File | What it is |
 |---|---|
 | `index.html` | The whole page: markup, styles and script. |
-| `data.js` | The built data (git-ignored). |
-| `presets.json` | Your saved views (created on the first Save; plain JSON, safe to commit or back up). |
-| `build_data.py` / `build_data.sh` | Builds `data.js`. |
-| `server.py` | The local helper: static files, audio streaming, `/rebuild`, `/rate`, `/presets`, `/playlist`, `/presence`. Standard library only. |
-| `serve.bat` / `serve.sh` | Start the helper. |
-| `mojibake_fixes.json` | Spelling repairs for the CD index. |
+| `build_data.py` / `build_data.sh` | Pass on to the scripts in `tools/music-hub-core/` (so the old command still works). |
+| `server.py` | Starts the helper for this page (port 9123). The helper itself is `tools/music-hub-core/helper.py`. |
+| `serve.bat` / `serve.sh` | Start the helper and open the page. |
 | `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `make_icons.py` | The installable-app pieces. |
+
+**Shared with the React preview** (`tools/music-hub-react/`), in `tools/music-hub-core/`: the helper (audio, rating, playlists, presets, rebuild), `build_data.py`, the built `data.js`
+and your `presets.json`. The two pages can run at the same time (this one on port 9123).
 
 Related tools: `tools/itunes-com/` (rating through iTunes), `tools/emotions/` (Feel ratings and axes), `tools/release-years/`, `tools/artist-genres/`, `tools/bpm/`, and `AGENTS.md` at the repo root for the conventions behind all of it.
