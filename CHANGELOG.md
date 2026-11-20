@@ -5,9 +5,14 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-19
+
+The React version of Music Hub can now be installed as an app and runs with its own helper, beside the current page. After updating, restart the helper if it was running.
+
 ### Added
 
-- The React preview of Music Hub (`tools/music-hub-react`) has its own helper and can be installed as an app (`react-slice-6`). `serve.bat` (or `./serve.sh`) builds the page when it is out of date, starts the helper on its own port, 9223 (the current page keeps 9123, so both can run at once), and opens it in an app window; the browser can install it as "Music Hub (React)", with a teal icon. `preview.bat` is now for development only, and the dev server now reaches that helper (restart it if it was running).
+- The React preview of Music Hub (`tools/music-hub-react`) has its own helper and can be installed as an app (`react-slice-6`). `serve.bat` (or `./serve.sh`) builds the page when it is out of date, starts the helper on its own port, 9223 (the current page keeps 9123, so both can run at once), and opens it in an app window; the browser can install it as "Music Hub (React)", with a teal icon. `preview.bat` is now for development only, and the dev server now reaches that helper.
+- `docs/architecture-react.svg`: a diagram of how the parts of Music Hub in React fit together, from the iTunes library file through the helper to the layers of the app.
 
 ## 0.3.1 - 2026-11-19
 
