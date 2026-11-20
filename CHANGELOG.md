@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.3.1 - 2026-11-19
+
+The About box shows the version that is running, and the search box no longer looks in the genre. After updating, restart the helper.
+
 ### Changed
 
 - Music Hub: the About box shows the version of the code that is running (the helper reads the `VERSION` file each time, through a new `/version` route), not the one `data.js` was built with, so a new release no longer shows the old number until you click Refresh data. It also says when the data was built ("Data built 2026-11-19 17:50"). Without the helper it falls back to the number in `data.js`. The React preview does the same. Restart the helper after updating.
