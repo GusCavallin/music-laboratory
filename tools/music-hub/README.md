@@ -107,7 +107,7 @@ top right says why and nothing changes.
   never touches iTunes for this: import the file yourself (*File → Library → Import Playlist…*), then check it. It refuses a name that is already in
   `playlists\bak` (already imported) and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
   warned: importing the same name only adds the songs iTunes doesn't have, it never replaces the old list (delete the old playlist in iTunes first).
-- **ⓘ About** (top right) opens a small box: the version (read from the `VERSION` file at the repo root when the data is built; "Not released yet" until the first release), what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
+- **ⓘ About** (top right) opens a small box: the version (the helper reads the `VERSION` file at the repo root each time; without the helper, the one `data.js` was built with; "Not released yet" until the first release), when the data was built, what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
 
 ## Raw Feel and Feel Axes
@@ -219,6 +219,8 @@ width that keeps the Raw Feel controls beside the sliders. You can still drag th
 | `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `make_icons.py` | The installable-app pieces. |
 
 **Shared with the React preview** (`tools/music-hub-react/`), in `tools/music-hub-core/`: the helper (audio, rating, playlists, presets, rebuild), `build_data.py`, the built `data.js`
-and your `presets.json`. The two pages can run at the same time (this one on port 9123).
+and your `presets.json`. The two pages can run at the same time (this one on port 9123, the preview on 9223).
+
+**To try the React version:** run `serve.bat` (or `./serve.sh`) in `tools/music-hub-react/`. It builds the page when it is out of date (the first time you need `npm install` there), starts its own helper on port 9223 and opens it in an app window. Its README has the details.
 
 Related tools: `tools/itunes-com/` (rating through iTunes), `tools/emotions/` (Feel ratings and axes), `tools/release-years/`, `tools/artist-genres/`, `tools/bpm/`, and `AGENTS.md` at the repo root for the conventions behind all of it.

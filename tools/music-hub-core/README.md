@@ -28,6 +28,7 @@ helper.run(app_dir, files=None, port=9123, signature="music-library-search")
 | Page | Folder | Port | Signature |
 |---|---|---|---|
 | Music Hub | `tools/music-hub` | 9123 | `music-library-search` |
+| Music Hub, React preview | `tools/music-hub-react` (serves its built `dist/`; builds it first when it is out of date) | 9223 | `music-hub-react` |
 
 `data.js` and `presets.json` stay here, so every page reads the same library and the same saved views.
 

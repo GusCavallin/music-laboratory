@@ -12,7 +12,8 @@ describe("audioUrl", () => {
 });
 
 describe("ping", () => {
-  it("is true when the helper answers with its name", async () => {
+  it("is true when the helper answers with its name (this page's own, or the current page's)", async () => {
+    expect(await ping(fakeFetch(() => reply("music-hub-react")))).toBe(true);
     expect(await ping(fakeFetch(() => reply("music-library-search")))).toBe(true);
   });
   it("is false for another answer, an error, or no helper at all", async () => {

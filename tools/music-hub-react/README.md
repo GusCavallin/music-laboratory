@@ -16,14 +16,16 @@ will call the same endpoints.
 | 3 | The Feel tabs: Raw Feel (paired sliders with links, the graph) and Feel Axes (the 3D cube, the flat plots) | done |
 | 4 | The player, star rating, Save as playlist, Refresh data (through the helper) | done |
 | 5 | Presets, remembered view and song, filter history (with the mouse buttons), column menu, tooltips, About | done |
-| 6 | PWA, serving from the helper, public export, docs | |
+| 6 | Its own helper (`serve.bat`, port 9223) that builds and serves the page, the installable app (PWA), docs | done |
 
 ## Run it
 
 ```
-preview.bat            # the preview: starts the helper (without opening its own page) and the dev server, and opens http://127.0.0.1:5273/
-preview.bat vanilla    # the current page instead (the same as ..\music-hub\serve.bat)
 npm install            # once
+serve.bat              # the app: builds the page if dist\ is missing or older than the source, starts the helper on http://127.0.0.1:9223 and opens it in an app window
+./serve.sh             # the same from Git Bash (options: --port 9000, --browser edge, --tab, --no-browser, --keep-alive, --no-build)
+preview.bat            # for development: the helper (no page, no build) and the dev server, and opens http://127.0.0.1:5273/
+preview.bat vanilla    # the current page instead (the same as ..\music-hub\serve.bat)
 npm test               # the tests (invented library only)
 npm run typecheck      # TypeScript, strict
 npm run build          # type check, then a production build in dist\
@@ -33,8 +35,10 @@ npm run dev            # the app at http://127.0.0.1:5273 (the dev server alone,
 `npm run dev` serves the `data.js` of the `music-hub-core` folder at `/data.js`. To try another library (for example an invented one), set
 `$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
 
-**The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub-core\helper.py`; for now it is started with the current page's `serve.bat`).
-`npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`, `/presets`, `/version`) on to it at `http://127.0.0.1:9123`; set `MUSICLAB_HELPER` to use another. The helper only accepts
+**The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub-core\helper.py`, the one the current page uses). This folder has its own
+`server.py` (started by `serve.bat` or `serve.sh`): it serves the built page from `dist\` on **port 9223** (the current page has 9123, so both can run at once) and closes itself when the window closes. It runs `npm run build`
+first when `dist\` is missing or older than `src\`, `public\`, `index.html` or the package files; `--no-build` skips that. The helper has no page of its own to show in `preview.bat`; there the dev server serves it.
+`npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`, `/presets`, `/version`) on to the helper at `http://127.0.0.1:9223`; set `MUSICLAB_HELPER` to use another (the current page's, `http://127.0.0.1:9123`, works too). The helper only accepts
 requests that name itself as their origin, so the dev server rewrites that header. **Without the helper** everything else works: the header says "⚠ helper not running", and playing or rating says
 that it needs the helper (instead of every song failing to load and being skipped). The page asks again when you click and when you come back to the window, so starting `serve.bat` is enough, with no reload.
 
@@ -62,7 +66,9 @@ What it does so far (the same as the current page, unless noted):
 - **Slice 5, columns:** right-click a header for the column menu (show or hide columns, **Reset order**; the last column stays), drag a header onto another to reorder. Each tab keeps its own
   columns, in `ls_hidden` and `ls_order` like the current page.
 - **Slice 5, tips and About:** hover text is the page's own (it shows after a moment, follows the pointer, and a song's name also lists the playlists it is in). **ⓘ About** shows the version and the links.
-- Not yet: the installable app (PWA) and being served by the helper itself (slice 6).
+- **Slice 6, the app:** `serve.bat` serves the built page from its own helper (port 9223) and opens it in an app window; the browser can **install** it as an app ("Music Hub (React)", a teal icon, so it is not mistaken for the current page's blue one).
+  Like the current page, the service worker caches nothing (`data.js` must be fresh, the music is streamed). It is registered only by the built page, not by the dev server. An app installed from `:9223` needs the helper on that port.
+  `make_icons.py` redraws the icons in `public\`. `py -3 -m unittest test_server` tests when it builds and what port and name it uses.
 
 To check the data layer against your real library (read-only; it asserts no numbers, it compares each filter with a second, naive count from the raw rows):
 

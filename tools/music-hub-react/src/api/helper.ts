@@ -9,11 +9,17 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
 /** The address that streams a song. Files only the helper can reach are asked for by path; the helper serves only paths listed in data.js. */
 export const audioUrl = (path: string): string => `/audio?p=${encodeURIComponent(path)}`;
 
+/**
+ * What a helper answers to /ping: this page's own (server.py here, port 9223), or the current page's (tools/music-hub), which does the same work
+ * and is what the dev server reaches if MUSICLAB_HELPER points to it.
+ */
+export const HELPER_NAMES: readonly string[] = ["music-hub-react", "music-library-search"];
+
 /** Is the helper there? It answers /ping with its name (so a second launch can recognise a running one). */
 export async function ping(fetcher: Fetch = fetch): Promise<boolean> {
   try {
     const r = await fetcher("/ping", { cache: "no-store" });
-    return r.ok && (await r.text()).trim() === "music-library-search";
+    return r.ok && HELPER_NAMES.includes((await r.text()).trim());
   } catch {
     return false;
   }

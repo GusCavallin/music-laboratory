@@ -32,10 +32,11 @@ function serveDataJs(): Plugin {
 
 /**
  * Dev only: the Python helper (tools/music-hub-core/helper.py, started with a page's serve.bat) streams the audio and talks to iTunes. The dev server hands its
- * routes on to it, so the app works the same as when the helper serves it. MUSICLAB_HELPER names another helper (default http://127.0.0.1:9123).
+ * routes on to it, so the app works the same as when the helper serves it. MUSICLAB_HELPER names another helper (default http://127.0.0.1:9223, this
+ * folder's server.py; the current page's helper, 9123, does the same work).
  * The helper only accepts requests that name itself as their origin, so the Origin header is rewritten.
  */
-const helper = process.env.MUSICLAB_HELPER ?? "http://127.0.0.1:9123";
+const helper = process.env.MUSICLAB_HELPER ?? "http://127.0.0.1:9223";
 const HELPER_ROUTES = ["/audio", "/rate", "/playlist", "/rebuild", "/presence", "/ping", "/presets", "/version"];
 const proxy = Object.fromEntries(
   HELPER_ROUTES.map((route) => [

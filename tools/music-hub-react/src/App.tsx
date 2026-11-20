@@ -435,7 +435,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
       <header>
         <div className="top">
           <h1>Music Hub</h1>
-          <span className="preview" data-tip="The React rebuild, slice 5: presets, remembered view, column menu, tips and About">React preview</span>
+          <span className="preview" data-tip="The React version of Music Hub: it has its own helper (port 9223) and can be installed as an app">React</span>
           <Tabs tab={ui.tab} onChange={(tab) => dispatch({ type: "tab", tab })} />
           <div className="acts">
             {helper.available === false && (

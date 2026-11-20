@@ -21,6 +21,7 @@ The scripts get these settings from `musiclab_config.py` at the repo root. Pytho
 | Folder | What |
 |---|---|
 | `tools/music-hub/` | **Music Hub**: search, play, rate and explore the whole library, with the Feel tabs and graphs ([README](tools/music-hub/README.md)) |
+| `tools/music-hub-react/` | **Music Hub in React and TypeScript**: the same page rebuilt slice by slice, with its own helper (`serve.bat`, port 9223) and installable as an app; runs beside the one above ([README](tools/music-hub-react/README.md)) |
 | `tools/music-hub-core/` | What the Music Hub pages share: the local helper, the data builder (`data.js`) and the saved views ([README](tools/music-hub-core/README.md)) |
 | `tools/release-years/` | Original release year per track, via MusicBrainz ([README](tools/release-years/README.md)) |
 | `tools/artist-genres/` | Genre and country per artist, via MusicBrainz votes ([README](tools/artist-genres/README.md)) |
