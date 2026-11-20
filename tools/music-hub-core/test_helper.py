@@ -158,6 +158,18 @@ class HelperTests(unittest.TestCase):
         lib = json.loads(data.read_text(encoding="utf-8")[len("window.LIB = "):].rstrip().rstrip(";"))
         self.assertEqual(lib["version"], "9.9.9")
 
+    def test_version_is_read_from_the_version_file_each_time_not_from_data_js(self):
+        version = self.t.root / "VERSION"
+        for port in (self.vp, self.ap):
+            self.assertEqual(json.loads(request(port, "/version")[2]), {"version": "9.9.9"})
+        version.write_text("10.0.0\n")  # data.js still says 9.9.9: the helper must report the file
+        try:
+            self.assertEqual(json.loads(request(self.vp, "/version")[2]), {"version": "10.0.0"})
+            version.unlink()
+            self.assertEqual(json.loads(request(self.vp, "/version")[2]), {"version": ""})  # before the first release
+        finally:
+            version.write_text("9.9.9\n")
+
     def test_each_page_answers_with_its_own_signature(self):
         self.assertEqual(self.vsig, "music-library-search")
         self.assertEqual(self.asig, "built-app-test")

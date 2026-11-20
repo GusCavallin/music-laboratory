@@ -36,7 +36,7 @@ function serveDataJs(): Plugin {
  * The helper only accepts requests that name itself as their origin, so the Origin header is rewritten.
  */
 const helper = process.env.MUSICLAB_HELPER ?? "http://127.0.0.1:9123";
-const HELPER_ROUTES = ["/audio", "/rate", "/playlist", "/rebuild", "/presence", "/ping", "/presets"];
+const HELPER_ROUTES = ["/audio", "/rate", "/playlist", "/rebuild", "/presence", "/ping", "/presets", "/version"];
 const proxy = Object.fromEntries(
   HELPER_ROUTES.map((route) => [
     route,

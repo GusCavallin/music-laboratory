@@ -286,6 +286,22 @@ describe("About, and the back and forward buttons", () => {
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect((document.getElementById("about") as HTMLDialogElement).open).toBe(false);
   });
+  it("the version is the one the helper reads now, not the one data.js was built with; and when the data was built", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url === "/version") return new Response(JSON.stringify({ version: "0.3.0" }), { status: 200 });
+      throw new TypeError("Failed to fetch");
+    }));
+    await open(); // the fixture's data.js says 0.2.0
+    await userEvent.click(screen.getByRole("button", { name: "ⓘ About" }));
+    expect(screen.getByText("Version 0.3.0")).toBeTruthy();
+    expect(screen.queryByText("Version 0.2.0")).toBeNull();
+    expect(screen.getByText("Data built 2026-11-19 10:00")).toBeTruthy();
+  });
+  it("without the helper the About box falls back to the version in data.js", async () => {
+    await open();
+    await userEvent.click(screen.getByRole("button", { name: "ⓘ About" }));
+    expect(screen.getByText("Version 0.2.0")).toBeTruthy();
+  });
   it("the mouse Back button undoes the last artist click, and says when there is nothing to go back to", async () => {
     await open();
     expect(history.back).toHaveBeenCalled(); // parked on the middle of three entries

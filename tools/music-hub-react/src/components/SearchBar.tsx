@@ -40,7 +40,7 @@ export function SearchBar({ query, onQuery, count, total, countNote = "", facet,
           autoComplete="off"
           spellCheck={false}
           aria-label="Search"
-          placeholder="Search name, artist, album, composer, genre… (all words must match; accents ignored)"
+          placeholder="Search name, artist, album, composer… (all words must match; accents ignored)"
           onChange={(e) => onQuery(e.target.value)}
         />
         {query !== "" && (

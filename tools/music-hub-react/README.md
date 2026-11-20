@@ -34,7 +34,7 @@ npm run dev            # the app at http://127.0.0.1:5273 (the dev server alone,
 `$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
 
 **The helper.** Playing songs, rating them in iTunes, writing a playlist file and rebuilding the data go through the Python helper (`..\music-hub-core\helper.py`; for now it is started with the current page's `serve.bat`).
-`npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`, `/presets`) on to it at `http://127.0.0.1:9123`; set `MUSICLAB_HELPER` to use another. The helper only accepts
+`npm run dev` hands those routes (`/audio`, `/rate`, `/playlist`, `/rebuild`, `/presence`, `/ping`, `/presets`, `/version`) on to it at `http://127.0.0.1:9123`; set `MUSICLAB_HELPER` to use another. The helper only accepts
 requests that name itself as their origin, so the dev server rewrites that header. **Without the helper** everything else works: the header says "⚠ helper not running", and playing or rating says
 that it needs the helper (instead of every song failing to load and being skipped). The page asks again when you click and when you come back to the window, so starting `serve.bat` is enough, with no reload.
 

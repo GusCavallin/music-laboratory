@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { audioUrl, loadPresets, ping, rateSong, rebuild, savePlaylist, savePresetsToHelper, type Fetch } from "./helper";
+import { audioUrl, loadPresets, loadVersion, ping, rateSong, rebuild, savePlaylist, savePresetsToHelper, type Fetch } from "./helper";
 
 const reply = (body: unknown, init: ResponseInit = {}) => new Response(typeof body === "string" ? body : JSON.stringify(body), { status: 200, ...init });
 const fakeFetch = (impl: (url: string, init?: RequestInit) => Response | Promise<Response>) => vi.fn(impl as never) as unknown as Fetch & ReturnType<typeof vi.fn>;
@@ -19,6 +19,23 @@ describe("ping", () => {
     expect(await ping(fakeFetch(() => reply("something else")))).toBe(false);
     expect(await ping(fakeFetch(() => reply("nope", { status: 502 })))).toBe(false);
     expect(await ping(down)).toBe(false);
+  });
+});
+
+describe("loadVersion", () => {
+  it("is the version the helper reads from the VERSION file, asked for fresh each time", async () => {
+    const f = fakeFetch(() => reply({ version: "0.3.0" }));
+    expect(await loadVersion(f)).toBe("0.3.0");
+    expect(f).toHaveBeenCalledWith("/version", { cache: "no-store" });
+  });
+  it("is an empty string before the first release", async () => {
+    expect(await loadVersion(fakeFetch(() => reply({ version: "" })))).toBe("");
+  });
+  it("is null when there is no helper, an error, or an answer that is not a version", async () => {
+    expect(await loadVersion(down)).toBeNull();
+    expect(await loadVersion(fakeFetch(() => reply("nope", { status: 404 })))).toBeNull();
+    expect(await loadVersion(fakeFetch(() => reply({ version: 3 })))).toBeNull();
+    expect(await loadVersion(fakeFetch(() => reply("<html>")))).toBeNull();
   });
 });
 

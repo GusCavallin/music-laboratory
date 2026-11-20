@@ -5,6 +5,11 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Changed
+
+- Music Hub: the About box shows the version of the code that is running (the helper reads the `VERSION` file each time, through a new `/version` route), not the one `data.js` was built with, so a new release no longer shows the old number until you click Refresh data. It also says when the data was built ("Data built 2026-11-19 17:50"). Without the helper it falls back to the number in `data.js`. The React preview does the same. Restart the helper after updating.
+- Music Hub: the search box no longer looks in the genre: typing "rock" finds songs with "rock" in the name, artist, album or composer, not every song tagged Rock. On the MP3 Archive tab it no longer looks in the category or the CD either (the Category menu and a click on a CD cell do that). The React preview does the same.
+
 ## 0.3.0 - 2026-11-19
 
 Music Hub keeps playing when you switch to the MP3 Archive tab, and what the Music Hub pages share now lives in `tools/music-hub-core/`. Also new: a React preview of the page, built slice by slice, that does not replace the current one.

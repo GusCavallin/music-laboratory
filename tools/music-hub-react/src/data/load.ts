@@ -45,7 +45,7 @@ export function buildDataset(raw: RawLibrary): Dataset {
       discs: num(o.discs),
       feel,
       path: str(o.path),
-      ...searchForms([str(o.name), str(o.artist), str(o.album), str(o.composer), str(o.genres)]),
+      ...searchForms([str(o.name), str(o.artist), str(o.album), str(o.composer)]),
       artistFold: fold(str(o.artist)),
       albumFold: fold(str(o.album)),
     };
@@ -64,7 +64,7 @@ export function buildDataset(raw: RawLibrary): Dataset {
       track: num(o.track),
       in_itunes: !!o.in_itunes,
       path: str(o.path),
-      ...searchForms([str(o.name), str(o.artist), str(o.album), str(o.category), str(o.volume)]),
+      ...searchForms([str(o.name), str(o.artist), str(o.album)]),
       artistFold: fold(str(o.artist)),
       albumFold: fold(str(o.album)),
     };

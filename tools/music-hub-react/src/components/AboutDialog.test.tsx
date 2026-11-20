@@ -31,6 +31,12 @@ describe("AboutDialog", () => {
     rerender(<AboutDialog open version="" onClose={() => {}} />);
     expect(screen.getByText("Not released yet")).toBeTruthy();
   });
+  it("says when the data was built, if it says", () => {
+    const { rerender } = render(<AboutDialog open version="0.3.0" built="2026-11-19 17:18" onClose={() => {}} />);
+    expect(screen.getByText("Data built 2026-11-19 17:18")).toBeTruthy();
+    rerender(<AboutDialog open version="0.3.0" onClose={() => {}} />);
+    expect(screen.queryByText(/Data built/)).toBeNull();
+  });
   it("has the name, the licence and the links, opening in a new tab", () => {
     render(<AboutDialog open version="" onClose={() => {}} />);
     expect(screen.getByRole("heading", { name: "Music Hub" })).toBeTruthy();

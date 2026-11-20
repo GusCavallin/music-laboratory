@@ -4,11 +4,13 @@ interface Props {
   open: boolean;
   /** from the VERSION file at the repo root (empty until the first release) */
   version: string;
+  /** when data.js was built, as it says ("2026-11-19 17:18"); empty when it does not say */
+  built?: string;
   onClose: () => void;
 }
 
 /** The "ⓘ About" box. Esc, the Close button or a click outside it closes it. */
-export function AboutDialog({ open, version, onClose }: Props) {
+export function AboutDialog({ open, version, built = "", onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function AboutDialog({ open, version, onClose }: Props) {
     >
       <h2 id="about_h">Music Hub</h2>
       <p className="mut">{version ? `Version ${version}` : "Not released yet"}</p>
+      {built && <p className="mut">Data built {built}</p>}
       <p>Search, explore and play your iTunes library, with Feel ratings and a map of how songs feel.</p>
       <p className="mut">
         It reads your iTunes library file and never changes it. The one exception is clicking stars, which sets that rating in iTunes (it needs the

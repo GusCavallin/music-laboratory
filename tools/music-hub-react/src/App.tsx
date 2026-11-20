@@ -339,6 +339,18 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
   useHistoryButtons(goBack, goForward, flash);
   const [aboutOpen, setAboutOpen] = useState(false);
   const closeAbout = useCallback(() => setAboutOpen(false), []);
+  // The version of the code running now comes from the helper (it reads the VERSION file each time); data.js only has the one it was built with.
+  // Asked at the start and again whenever the box opens or closes, so an update shows without a Refresh.
+  const [liveVersion, setLiveVersion] = useState<string | null>(null);
+  useEffect(() => {
+    let current = true;
+    void helperApi.loadVersion().then((v) => {
+      if (current && v !== null) setLiveVersion(v);
+    });
+    return () => {
+      current = false;
+    };
+  }, [aboutOpen]);
 
   // ---- what the table shows ----
   const group = groupOf(ui.tab, ui.feel.graph);
@@ -548,7 +560,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
           onClose={closeColMenu}
         />
       )}
-      <AboutDialog open={aboutOpen} version={dataset.version} onClose={closeAbout} />
+      <AboutDialog open={aboutOpen} version={liveVersion ?? dataset.version} built={dataset.built} onClose={closeAbout} />
       <TipLayer extra={songPlaylists} />
     </>
   );

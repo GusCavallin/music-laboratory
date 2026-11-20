@@ -53,7 +53,7 @@ clears the Forward steps). They never leave the page. Typing in the search box a
 
 ## Searching, filtering and sorting
 
-**Search.** Type words in the box: all words must match (in name, artist, album, composer or genre), accents are ignored, and punctuation counts as a word break
+**Search.** Type words in the box: all words must match (in name, artist, album or composer; the MP3 Archive searches name, artist and album), accents are ignored, and punctuation counts as a word break
 ("spider man" finds "Spider-Man"), but also joined ("aha" finds "a-ha", "acdc" finds "AC/DC").
 
 **Filters** (iTunes and Feel tabs): **Playlist**, **Rating from-to** (0 = unrated, so "from 1" leaves unrated songs out), **Loved**, **Decade**, **Country**.

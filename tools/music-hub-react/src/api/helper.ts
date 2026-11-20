@@ -19,6 +19,21 @@ export async function ping(fetcher: Fetch = fetch): Promise<boolean> {
   }
 }
 
+/**
+ * The version of the code that is running, from the VERSION file (read by the helper each time). data.js only has the version it was built with,
+ * which is older until the next Refresh. "" means no release yet; null means the helper can't be reached.
+ */
+export async function loadVersion(fetcher: Fetch = fetch): Promise<string | null> {
+  try {
+    const r = await fetcher("/version", { cache: "no-store" });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { version?: unknown };
+    return typeof j.version === "string" ? j.version : null;
+  } catch {
+    return null;
+  }
+}
+
 export interface RateRequest {
   path: string;
   name: string;

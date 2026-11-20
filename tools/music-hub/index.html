@@ -52,7 +52,7 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
  <div id="top"><h1>Music Hub</h1>
   <div id="tabs" role="tablist"><button data-s="itunes" class="on">iTunes Library</button><button data-s="itunes" data-feel="1" data-tip="Find songs by emotional tone (nine GEMS scales + maturity). Only songs that have been rated for feeling.">Raw Feel</button><button data-s="itunes" data-cube="1" data-tip="Every rated song as a dot in a cube of three independent feelings (Calm, Ease, Awe), colored by maturity; the box you size picks the songs in the list">Feel Axes</button><button data-s="archive">MP3 Archive (CDs)</button></div>
   <div id="acts"><span id="rmsg"></span><button id="refresh" data-tip="Rebuild from iTunes and swap in the new data without reloading the page (needs serve.bat; otherwise just reloads data.js)">⟳ Refresh data</button><button id="aboutbtn" data-tip="About Music Hub">ⓘ About</button></div></div>
- <div id="qrow"><span id="qwrap"><input id="q" placeholder="Search name, artist, album, composer, genre… (all words must match; accents ignored)" autofocus><button id="qclear" type="button" aria-label="Clear the search text" data-tip="Clear the search text">×</button></span>
+ <div id="qrow"><span id="qwrap"><input id="q" placeholder="Search name, artist, album, composer… (all words must match; accents ignored)" autofocus><button id="qclear" type="button" aria-label="Clear the search text" data-tip="Clear the search text">×</button></span>
   <span id="count"></span><span id="fchips"></span><button id="presetbtn" data-tip="Saved views: tab, filters, sliders, 3D box and sort">★ Presets ▾</button><button id="savepl" data-tip="Write the songs in the list, in this order, as a playlist file (&quot;[Gen] name.m3u8&quot; in the playlists folder). Then import it in iTunes: File → Library → Import Playlist.">💾 Save as playlist</button><button id="clearf" data-tip="Reset the search box and all filters (keeps sort and columns)">✕ Clear filters</button></div>
 <div class="row" id="feel" hidden></div>
 <div class="row" id="cubectl" hidden></div>
@@ -84,7 +84,7 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
 </section></div>
 <dialog id="about" aria-labelledby="about_h">
  <h2 id="about_h">Music Hub</h2>
- <p class="mut" id="about_v"></p>
+ <p class="mut" id="about_v"></p><p class="mut" id="about_b"></p>
  <p>Search, explore and play your iTunes library, with Feel ratings and a map of how songs feel.</p>
  <p class="mut">It reads your iTunes library file and never changes it. The one exception is clicking stars, which sets that rating in iTunes (it needs the helper, <code>serve.bat</code>).</p>
  <p>Made by Gustavo Cavallin, with Claude (Anthropic).</p>
@@ -119,8 +119,8 @@ const index=(o,f)=>{const t=f.map(k=>o[k]).join(" | ");o._h=" "+sp(t)+" ";o._j="
 function build(){D={itunes:objs(LIB.itunes_cols,LIB.itunes),archive:objs(LIB.archive_cols,LIB.archive)};
 D.itunes.forEach((o,i)=>{o._ix=i;const f=o.feel;FEEL.forEach((s,j)=>o["f_"+s[0]]=f?f[j]:null);o.f_conf=f?f[10]:null});
  FEELSTAT={};FEEL.forEach((s,j)=>{const v=D.itunes.map(o=>o.feel?o.feel[j]:null).filter(x=>x!=null),n=v.length,m=v.reduce((a,b)=>a+b,0)/n;FEELSTAT[s[0]]={n,m,sd:Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1))}}); // mean and stdev of each scale over all rated songs
- for(const o of D.itunes)index(o,["name","artist","album","composer","genres"]);
- for(const o of D.archive)index(o,["name","artist","album","category","volume"])}
+ for(const o of D.itunes)index(o,["name","artist","album","composer"]);
+ for(const o of D.archive)index(o,["name","artist","album"])}
 build();
 const COLS={
  itunes:[["name","Name"],["artist","Artist"],["album","Album"],["track","Track",1],["year","Year",1],["loved","❤️",1],["stars","Rating"],["plays","Plays",1],["last_played","Last played"],["genres","Genres"],["country","Ctry"],["composer","Composer"],["secs","Time",1],["path","Path"]],
@@ -722,9 +722,12 @@ picker();restoreSession();sessionReady=true;saveSession();
   const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
   if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
 // --- About: a small dialog (Esc, the Close button or a click outside closes it) ---
-// LIB.version comes from the VERSION file at the repo root (empty until the first release); a click on the backdrop lands on the dialog element itself
+// The version is asked of the helper (/version reads the VERSION file at the repo root each time, empty until the first release); LIB.version is only what data.js
+// was built with, so it is the fallback when there is no helper. "Data built" is when data.js was made. A click on the backdrop lands on the dialog element itself
 {const ab=$("about");
- $("aboutbtn").onclick=()=>{hideTip();$("about_v").textContent=LIB.version?"Version "+LIB.version:"Not released yet";ab.showModal()};
+ $("aboutbtn").onclick=async()=>{hideTip();let v=LIB.version;
+  if(location.protocol==="http:")try{const r=await fetch("/version",{cache:"no-store"});if(r.ok){const j=await r.json();if(typeof j.version==="string")v=j.version}}catch(e){}
+  $("about_v").textContent=v?"Version "+v:"Not released yet";$("about_b").textContent=LIB.built?"Data built "+LIB.built:"";ab.showModal()};
  $("about_close").onclick=()=>ab.close();
  ab.addEventListener("click",e=>{if(e.target===ab)ab.close()})}
 // --- Mouse Back / Forward buttons (and Alt+Left / Alt+Right): undo and redo the filter views, like the "← back" chip. ---

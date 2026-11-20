@@ -19,6 +19,7 @@ takes the next free one; if our own helper is already there it just opens the wi
     /presence         kept open by each page; when the last one closes the helper stops itself
                       (a few seconds of grace for reloads; --keep-alive turns this off)
     /ping             answers the signature so a second launch can recognise a running helper
+    /version          {"version": "0.3.0"} from the VERSION file, read each time (the About box; data.js only has the one it was built with)
     /                 the page's index.html, its other app files, and data.js (never cached)
     POST /rebuild     runs build_data (in-process), then the page swaps in the new data.js
     GET/POST /presets saved views (presets.json): the page reads the list and writes it back whole
@@ -160,6 +161,12 @@ class Handler(BaseHTTPRequestHandler):
             return self.presence()
         if url.path == "/presets":
             return self.presets_get()
+        if url.path == "/version":  # read each time: it is the code that is running now, not what data.js was built with
+            try:
+                version = build_data.VERSION.read_text(encoding="utf-8").strip()
+            except OSError:
+                version = ""
+            return self.send_text(HTTPStatus.OK, json.dumps({"version": version}), "application/json")
         if url.path == "/ping":
             return self.send_text(HTTPStatus.OK, SIGNATURE)
         if url.path == "/audio":

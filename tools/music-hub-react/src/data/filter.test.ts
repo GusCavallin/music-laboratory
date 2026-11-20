@@ -17,8 +17,9 @@ describe("filterSongs", () => {
   it("returns every song, in library order, with no filters", () => {
     expect(songs()).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
   });
-  it("searches the name, artist, album, composer and genres", () => {
-    expect(songs({ query: "rock" })).toEqual([0, 3]); // genres
+  it("searches the name, artist, album and composer, not the genres", () => {
+    expect(songs({ query: "rock" })).toEqual([]); // only a genre says "rock"
+    expect(songs({ query: "classical" })).toEqual([]);
     expect(songs({ query: "dvorak" })).toEqual([2]); // accents ignored
     expect(songs({ query: "aha" })).toEqual([1]);
     expect(songs({ query: "highway hell" })).toEqual([3]);
@@ -39,7 +40,7 @@ describe("filterSongs", () => {
     expect(songs({ country: "AU" })).toEqual([3]);
   });
   it("combines filters (all must hold)", () => {
-    expect(songs({ query: "rock", stars: [4, 5] })).toEqual([0]);
+    expect(songs({ query: "spider", stars: [4, 5] })).toEqual([0]);
     expect(songs({ lovedOnly: true, decade: "1890s" })).toEqual([2]);
   });
 
@@ -55,7 +56,7 @@ describe("filterSongs", () => {
       expect(songs({ playlist: "Nope" })).toHaveLength(8);
     });
     it("works together with other filters", () => {
-      expect(songs({ playlist: "Road Trip", query: "rock" })).toEqual([3, 0]);
+      expect(songs({ playlist: "Road Trip", query: "highway" })).toEqual([3]);
     });
   });
 
@@ -130,6 +131,9 @@ describe("filterArchive", () => {
   });
   it("searches, and filters by category", () => {
     expect(arch({ query: "someone" })).toEqual([0, 2]);
+    expect(arch({ query: "kids" })).toEqual([]); // the category and the CD are not searched
+    expect(arch({ query: "mp3_1s" })).toEqual([]);
+    expect(arch({ query: "other" })).toEqual([1]);
     expect(arch({ category: "Kids" })).toEqual([0, 2]);
     expect(arch({ category: "Rock" })).toEqual([1]);
   });
