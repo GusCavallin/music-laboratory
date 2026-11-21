@@ -217,7 +217,7 @@ the helper (`serve.bat`) must be running, and the port must stay the same (an ap
 `manifest.webmanifest`, `sw.js` (installability only; it caches nothing, so data is always fresh) and the icons (`make_icons.py`) are served by the helper (`server.py` starts it).
 
 **Window size.** A web app manifest cannot set one, so when the app window opens on a desktop, the page makes it at least `MIN_W` × `MIN_H` (1090 × 600, at the end of `index.html`), once. 1090 is the narrowest
-width that keeps the Raw Feel controls beside the sliders. You can still drag the window smaller afterwards (it stays that way until the app is opened again); a normal browser tab and a phone are left alone.
+width that keeps the Raw Feel controls beside the sliders. You can still drag the window smaller (the browser decides how small, and a web page cannot stop it), but the page then keeps at least 1090 px of width and scrolls sideways instead of squeezing: the Raw Feel controls stay beside the sliders. A normal browser tab and a phone are left alone, and keep the narrow layouts.
 
 ## Troubleshooting
 

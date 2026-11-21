@@ -5,6 +5,15 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.5.1 - 2026-11-20
+
+The installed app window: the React page now opens at a sensible size like the current one, and on both pages a narrow window no longer squeezes the page. After updating, restart `serve.bat` (the React page rebuilds itself), and reopen the app.
+
+### Fixed
+
+- Music Hub (React): the installed app window opens at least 1090 × 600, as the current page's does (the width that keeps the Raw Feel options beside the sliders); a normal browser tab, a phone and a smaller screen are left alone.
+- Music Hub, both pages: in the installed app, a window dragged narrower than 1090 px no longer squeezes the page: the page keeps its 1090 px width, with the wide Raw Feel layout, and scrolls sideways. (A web page cannot stop a window from being made small.) A normal browser tab is unchanged.
+
 ## 0.5.0 - 2026-11-20
 
 Music Hub columns can be resized, a Track cell says it in words, and the Album and Track sorts handle compilations and multi-disc albums. Screenshots are in the READMEs. After updating, reload Music Hub; restart the React helper (`serve.bat`) so it rebuilds the page.

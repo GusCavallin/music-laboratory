@@ -7,6 +7,10 @@
 html, body, #root { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
 #root { display: flex; flex-direction: column; overflow: hidden; }
+/* An installed app window on a desktop (appWindow.ts puts class "app" on <html>) never lays out narrower than 1090px (MIN_WINDOW_WIDTH: the width that keeps the Raw Feel
+   options beside the sliders): a narrower window scrolls sideways instead of squeezing the page. A browser tab and a phone are untouched. The block after the Raw Feel
+   rules below gives the app the wide layouts, because the width breakpoints look at the window and not at the page. */
+html.app { min-width: 1090px; overflow-x: auto; }
 h1 { margin: 0; font-size: 20px; }
 code { font-size: 90%; }
 .status { padding: 24px 16px; color: var(--mut); }
@@ -21,7 +25,7 @@ header { flex: none; background: var(--bg); border-bottom: 1px solid var(--line)
 .preview { align-self: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--chip); color: var(--mut); font-size: 12px; }
 .acts { margin-left: auto; padding-bottom: 5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .rmsg { color: var(--mut); }
-@media (max-width: 760px) { .top { flex-wrap: wrap; row-gap: 6px; } .acts { order: 2; } .tabs { order: 3; flex: 1 0 100%; } }
+@media (max-width: 760px) { html:not(.app) .top { flex-wrap: wrap; row-gap: 6px; } html:not(.app) .acts { order: 2; } html:not(.app) .tabs { order: 3; flex: 1 0 100%; } }
 
 .tabs { flex: 1 1 auto; min-width: 0; display: flex; gap: 2px; align-items: flex-end; overflow-x: auto; overflow-y: hidden; }
 .tabs button { flex: none; white-space: nowrap; padding: 8px 16px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: transparent; color: var(--mut); font-weight: 500; }
@@ -81,6 +85,11 @@ button.on { background: var(--acc); color: #fff; border-color: var(--acc); }
   .feelrow .fsl { flex: 0 0 auto; }
   .feelrow .fopts { flex: 0 1 340px; align-content: flex-start; gap: 8px 12px; }
 }
+/* in the app the page is always at least 1090px wide: the wide layout, whatever the window width */
+html.app .fsl { grid-template-columns: repeat(5, 128px); }
+html.app .feelrow { flex-wrap: nowrap; align-items: flex-start; gap: 24px; }
+html.app .feelrow .fsl { flex: 0 0 auto; }
+html.app .feelrow .fopts { flex: 0 1 340px; align-content: flex-start; gap: 8px 12px; }
 .fopts { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
 .fo { display: inline-flex; align-items: center; gap: 6px; }
 .fbox { display: flex; flex-direction: column; gap: 1px; min-width: 128px; }
