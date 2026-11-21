@@ -2,6 +2,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode, type Ref } from "react";
 import type { Column } from "../columns";
 import type { SortSpec } from "../data/filter";
+import { MIN_COLUMN_WIDTH } from "../state/columnPrefs";
 
 /** Every row is this tall, so the list can be windowed: only the rows on screen (plus a few) are in the page. */
 export const ROW_HEIGHT = 30;
@@ -37,16 +38,48 @@ interface Props<R extends { ix: number }> {
   onHeaderContextMenu?: (event: MouseEvent) => void;
   /** a header was dragged onto another: the first takes the place of the second (headers are draggable only when this is given) */
   onMoveColumn?: (from: string, to: string) => void;
+  /** the right edge of a header was dragged and let go: this column is now this wide, in px (an edge to drag is shown only when this is given) */
+  onResizeColumn?: (key: string, width: number) => void;
+  /** a double-click on the edge: the column goes back to its usual width */
+  onResetColumnWidth?: (key: string) => void;
 }
 
 export function DataTable<R extends { ix: number }>({
   rows, columns, sort, onSort, renderCell, onCellClick, rowClass, handle, scrollResetKey, cellTitle, cellStyle, emptyMessage = "Nothing matches.", clickableKeys,
-  onHeaderContextMenu, onMoveColumn,
+  onHeaderContextMenu, onMoveColumn, onResizeColumn, onResetColumnWidth,
 }: Props<R>) {
   const scroller = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{ from: string; over: string | null } | null>(null);
+  // while an edge is being dragged only this column changes, so the table moves with the pointer; the width is reported once, on release
+  const [live, setLive] = useState<{ key: string; width: number } | null>(null);
+  const justResized = useRef(false);
   const byKey = useMemo(() => new Map(columns.map((c) => [c.key, c] as const)), [columns]);
-  const totalWidth = columns.reduce((sum, c) => sum + c.width, 0);
+  const widthOf = (c: Column) => (live?.key === c.key ? live.width : c.width);
+  const totalWidth = columns.reduce((sum, c) => sum + widthOf(c), 0);
+
+  const startResize = (e: MouseEvent, c: Column) => {
+    if (e.button !== 0) return;
+    e.preventDefault(); // no text selection, and the header must not start its own drag (reordering)
+    const x0 = e.clientX;
+    const w0 = c.width;
+    let width = w0;
+    document.body.style.cursor = "col-resize";
+    const move = (ev: globalThis.MouseEvent) => {
+      width = Math.max(MIN_COLUMN_WIDTH, Math.round(w0 + ev.clientX - x0));
+      setLive({ key: c.key, width });
+    };
+    const up = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+      document.body.style.cursor = "";
+      setLive(null);
+      justResized.current = true; // the click that follows the release must not sort the column
+      setTimeout(() => { justResized.current = false; }, 0);
+      onResizeColumn?.(c.key, width);
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  };
 
   const virtual = useVirtualizer({
     count: rows.length,
@@ -83,7 +116,7 @@ export function DataTable<R extends { ix: number }>({
     <div className="scroll" ref={scroller}>
       <table style={{ width: totalWidth }}>
         <colgroup>
-          {columns.map((c) => <col key={c.key} style={{ width: c.width }} />)}
+          {columns.map((c) => <col key={c.key} style={{ width: widthOf(c) }} />)}
         </colgroup>
         <thead onContextMenu={onHeaderContextMenu}>
           <tr>
@@ -115,9 +148,17 @@ export function DataTable<R extends { ix: number }>({
                   onDragEnd={() => setDrag(null)}
                   aria-sort={sorted ? (sort.desc ? "descending" : "ascending") : undefined}
                 >
-                  <button type="button" className={sorted ? (sort.desc ? "sorted desc" : "sorted") : undefined} onClick={() => onSort(c.key)} data-tip="Click to sort">
+                  <button type="button" className={sorted ? (sort.desc ? "sorted desc" : "sorted") : undefined} onClick={() => { if (!justResized.current) onSort(c.key); }} data-tip="Click to sort">
                     {c.label}
                   </button>
+                  {onResizeColumn && (
+                    <span
+                      className={live?.key === c.key ? "rs on" : "rs"}
+                      data-tip="Drag to resize this column, double-click for its usual width"
+                      onMouseDown={(e) => startResize(e, c)}
+                      onDoubleClick={() => onResetColumnWidth?.(c.key)}
+                    />
+                  )}
                 </th>
               );
             })}

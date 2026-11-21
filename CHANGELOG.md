@@ -5,6 +5,21 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.5.0 - 2026-11-20
+
+Music Hub columns can be resized, a Track cell says it in words, and the Album and Track sorts handle compilations and multi-disc albums. Screenshots are in the READMEs. After updating, reload Music Hub; restart the React helper (`serve.bat`) so it rebuilds the page.
+
+### Fixed
+
+- Music Hub: sorting by Album keeps a compilation in disc and track order even when every song has a different artist (it used to sort by artist first, which scrambled "100 Best Piano Classics"). Different albums that share a title, like several "Greatest Hits", are still told apart by artist. The React preview does the same.
+- Music Hub: sorting by the Track column goes disc by disc (every track of disc 1 by number, then disc 2), not by the track number alone, which mixed all the discs together. The React preview does the same.
+
+### Added
+
+- Screenshots of Music Hub (the iTunes Library tab, Raw Feel as a list and with one, two and three sliders narrowed, and Feel Axes) in its README, and the same six of the React preview in its README, in `docs/`.
+- Music Hub: hovering a Track cell says it in words, "Disc 2 - Track 5 of 12" (the disc is left out on a single-disc album; the total is the tracks on that disc). The React preview does the same.
+- Music Hub: drag the right edge of a column header to resize that column only; the others keep their width and the table gets wider or narrower. Double-click the edge to go back to the column's usual width. Each tab remembers its own widths, and the React preview reads and writes the same ones. (The table no longer stretches to fill the window when its columns are narrower than the window.)
+
 ## 0.4.0 - 2026-11-19
 
 The React version of Music Hub can now be installed as an app and runs with its own helper, beside the current page. After updating, restart the helper if it was running.

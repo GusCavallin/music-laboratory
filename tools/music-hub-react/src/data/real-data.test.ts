@@ -65,7 +65,14 @@ describe.skipIf(!file)("a real data.js", () => {
     const out = filterSongs(ds, defaultSongFilter(), { key: "album", desc: false });
     for (let i = 1; i < out.length; i++) {
       const a = out[i - 1]!, b = out[i]!;
-      if (a.album === b.album && a.artist === b.artist) expect(a.disc < b.disc || (a.disc === b.disc && a.track <= b.track)).toBe(true);
+      if (a.album === b.album && a.albumGroup === b.albumGroup) expect(a.disc < b.disc || (a.disc === b.disc && a.track <= b.track)).toBe(true);
+    }
+  });
+  it("a track sort goes disc by disc, then by track number", () => {
+    const out = filterSongs(ds, defaultSongFilter(), { key: "track", desc: false });
+    for (let i = 1; i < out.length; i++) {
+      const a = out[i - 1]!, b = out[i]!;
+      expect((a.disc || 1) < (b.disc || 1) || ((a.disc || 1) === (b.disc || 1) && a.track <= b.track)).toBe(true);
     }
   });
   it("the archive filters agree with a naive count", () => {

@@ -15,8 +15,9 @@ select,input[type=number],input#pl,button{font:inherit;padding:4px 6px;border:1p
 button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 label{color:var(--mut)}#f1,#f2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}#f1[hidden],#f2[hidden]{display:none}#pl{max-width:260px}#qrow{display:flex;gap:10px;align-items:center}#qrow #q{flex:1;min-width:0;width:auto;padding-right:36px}#qwrap{position:relative;flex:1;min-width:0;display:flex}#qclear{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mut);font-size:20px;line-height:1;padding:2px 9px 4px;border-radius:50%;cursor:pointer}#qclear:hover{color:var(--fg);background:var(--chip)}#q:placeholder-shown+#qclear{display:none}#rmsg{color:var(--mut)}#count{color:var(--mut);white-space:nowrap;text-align:right;min-width:11ch}
 main{flex:1;min-height:0;overflow:auto;padding:0 16px 40px}
-table{border-collapse:collapse;table-layout:fixed;min-width:100%}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table{border-collapse:collapse;table-layout:fixed}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 th{cursor:pointer;color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--bg);z-index:1;box-shadow:0 1px 0 var(--line)}
+.rs{position:absolute;top:0;right:0;bottom:0;width:7px;cursor:col-resize}.rs:hover,.rs.on{background:var(--acc);opacity:.5}
 th.dragging{opacity:.4}th.over{box-shadow:inset 3px 0 0 var(--acc),0 1px 0 var(--line)}
 th.s::after{content:" ▲"}th.s.d::after{content:" ▼"}
 td.n{text-align:right}th[data-k=loved],td[data-k=loved],th[data-k=in_itunes],td[data-k=in_itunes]{text-align:center}td[data-k=in_itunes]{color:#2ea043;font-weight:700}.tag{background:var(--chip);border-radius:4px;padding:0 5px;color:var(--mut)}
@@ -118,6 +119,9 @@ const sp=s=>fold(s).replace(/[^\p{L}\p{N}]+/gu," ").trim(), jn=s=>fold(s).replac
 const index=(o,f)=>{const t=f.map(k=>o[k]).join(" | ");o._h=" "+sp(t)+" ";o._j=" "+jn(t)+" "};
 function build(){D={itunes:objs(LIB.itunes_cols,LIB.itunes),archive:objs(LIB.archive_cols,LIB.archive)};
 D.itunes.forEach((o,i)=>{o._ix=i;const f=o.feel;FEEL.forEach((s,j)=>o["f_"+s[0]]=f?f[j]:null);o.f_conf=f?f[10]:null});
+ {const seen=new Map(),clash=new Set(); // an album title whose songs repeat a disc/track number is several albums sharing it (two "Greatest Hits"): sort them apart by artist. Otherwise it is one album, a compilation with a different artist on every song (100 Best Piano Classics): disc and track order only.
+  for(const o of D.itunes){if(!o.album)continue;const k=(o.disc||1)+"-"+o.track;let s=seen.get(o.album);if(!s)seen.set(o.album,s=new Set());if(s.has(k))clash.add(o.album);s.add(k)}
+  for(const o of D.itunes){o._ak=clash.has(o.album)?o.artist:"";o._dk=o.disc||1}} // _dk: the disc a Track sort uses (a song with no disc tag counts as disc 1, as the column shows it)
  FEELSTAT={};FEEL.forEach((s,j)=>{const v=D.itunes.map(o=>o.feel?o.feel[j]:null).filter(x=>x!=null),n=v.length,m=v.reduce((a,b)=>a+b,0)/n;FEELSTAT[s[0]]={n,m,sd:Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1))}}); // mean and stdev of each scale over all rated songs
  for(const o of D.itunes)index(o,["name","artist","album","composer"]);
  for(const o of D.archive)index(o,["name","artist","album"])}
@@ -171,6 +175,7 @@ function fillFilters(){
  for(const [n,ids] of LIB.playlists||[]){const o=document.createElement("option");o.value=n;o.label=ids.length.toLocaleString()+" songs";dl.appendChild(o)}
  if(pl.value&&!(LIB.playlists||[]).some(p=>p[0]===pl.value))pl.value=""}
 fillFilters();
+const trackTip=o=>o.track?(o.discs>1?"Disc "+o.disc+" - ":"")+"Track "+o.track+(o.tracks?" of "+o.tracks:""):""; // hover text of the Track cell: "Disc 2 - Track 5 of 12" (no disc on a single-disc album; "of" is the tracks on that disc)
 function fmt(k,v,o){if(k==="track"){if(!v)return"";return (o&&o.discs>1?o.disc+"-":"")+v+(o&&o.tracks?"/"+o.tracks:"")} // "5/13" (disc-track/tracks on that disc: "2-5/12")
  if(k==="secs")return Math.floor(v/60)+":"+String(v%60).padStart(2,"0");
  if(k==="stars")return v?"⭐".repeat(v):"";if(k==="loved")return v?"❤️":"";if(k==="year"&&!v)return"";if(k==="in_itunes")return v?"✔":"";return v}
@@ -197,20 +202,25 @@ function run(keep){
   }else{ if(cat&&o.category!==cat)return false; const it=$("inits").value;if(it==="in"&&!o.in_itunes)return false;if(it==="out"&&o.in_itunes)return false; }
   return true});
  if(rank&&!sort.k)res.sort((x,y)=>rank.get(x._ix)-rank.get(y._ix)); // no sort chosen: playlist order
- if(sort.k){const k=sort.k,ks=k==="album"&&src==="itunes"?["album","artist","disc","track"]:[k]; // an album sort keeps each album together, in disc and track order
+ if(sort.k){const k=sort.k,ks=k==="album"&&src==="itunes"?["album","_ak","disc","track"]:k==="track"&&src==="itunes"?["_dk","track"]:[k]; // an album sort keeps each album together, in disc and track order (_ak: the artist only where several albums share the title)
   res.sort((x,y)=>{for(const c of ks){if(x[c]!==y[c])return(x[c]>y[c]?1:-1)*(sort.d?-1:1)}return 0})}
  shown=PAGE;document.querySelector("main").scrollTop=0;render();saveSession()}
 const W={f_wonder:74,f_transcendence:96,f_tenderness:86,f_nostalgia:84,f_peacefulness:96,f_power:66,f_joyful:112,f_tension:74,f_sadness:76,f_maturity:80,f_conf:60,year:64,loved:48,stars:120,plays:64,secs:64,country:56,in_itunes:84,last_played:110,track:56,genres:240,path:520,volume:90,category:140,composer:180};
+// widths the user dragged (ls_widths: {tab group: {column: px}}), per tab like the order and the hidden columns; a column without one has the width in W
+const MINW=30;let colW={itunes:{},archive:{},feel:{},cube:{}},resized=false;
+try{const w=JSON.parse(localStorage.getItem("ls_widths")||"{}");for(const g in colW)for(const k in w[g]||{})if(+w[g][k]>=MINW)colW[g][k]=Math.round(+w[g][k])}catch(e){}
+const saveWidths=()=>{try{localStorage.setItem("ls_widths",JSON.stringify(colW))}catch(e){}};
+const widthOf=k=>colW[ck()][k]||W[k]||200;
 function render(){
  const cols=vis();let tw=0;
- $("cg").innerHTML=cols.map(([k])=>{const w=W[k]||200;tw+=w;return `<col style="width:${w}px">`}).join("");
+ $("cg").innerHTML=cols.map(([k])=>{const w=widthOf(k);tw+=w;return `<col style="width:${w}px">`}).join("");
  $("tbl").style.width=tw+"px";
- $("th").innerHTML="<tr>"+vis().map(([k,l,n])=>`<th data-k="${k}" draggable="true" data-tip="Click to sort, drag to move, right-click for columns" class="${sort.k===k?"s"+(sort.d?" d":""):""}">${l}</th>`).join("")+"</tr>";
+ $("th").innerHTML="<tr>"+vis().map(([k,l,n])=>`<th data-k="${k}" draggable="true" data-tip="Click to sort, drag to move, right-click for columns" class="${sort.k===k?"s"+(sort.d?" d":""):""}">${l}<span class="rs" data-tip="Drag to resize this column, double-click for its usual width"></span></th>`).join("")+"</tr>";
  $("tb").innerHTML=res.slice(0,shown).map((o,i)=>`<tr data-i="${i}"${cur&&o.path===cur.path?' class="now"':""}>`+vis().map(([k,,n])=>{
   if(k==="stars"&&src==="itunes")return `<td class="st" data-k="stars">`+[1,2,3,4,5].map(n=>`<span data-n="${n}" class="${n<=o.stars?"on":""}">${n<=o.stars?"★":"☆"}</span>`).join("")+"</td>";
   const v=((k==="name"&&o.protected?"🔒 ":"")+String(fmt(k,o[k],o)??"")).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   const fv=k.startsWith("f_")&&k!=="f_conf"&&o[k]!=null?(colorDev()?devStyle(k,o[k]):` style="background:hsl(205 80% 50% / ${o[k]*0.06})"`):"";
-  return `<td class="${n?(k.startsWith("f_")?"fv":"n"):""}" data-k="${k}" data-tip="${k.startsWith("f_")?feelTip(k,o):v}"${fv}>${v}</td>`}).join("")+"</tr>").join("");
+  return `<td class="${n?(k.startsWith("f_")?"fv":"n"):""}" data-k="${k}" data-tip="${k.startsWith("f_")?feelTip(k,o):k==="track"&&"disc"in o?trackTip(o):v}"${fv}>${v}</td>`}).join("")+"</tr>").join("");
  $("count").textContent=res.length.toLocaleString()+" of "+((feelMode||cubeMode)?D.itunes.filter(o=>o.feel).length:D[src].length).toLocaleString()+((feelMode||cubeMode)?" with feel ratings":"");
  $("more").hidden=res.length<=shown;$("savepl").hidden=!(location.protocol==="http:"&&src==="itunes");if(plotOn())drawCube()}
 // --- player: works on the current selection (itunes tab), a snapshot taken when playback starts ---
@@ -375,7 +385,7 @@ document.addEventListener("mouseover",e=>{hideTip();const el=e.target.closest&&e
  let txt=el.dataset.tip,pls=false;
  if(el.tagName==="TD"&&el.dataset.k==="name"&&src==="itunes"){const o=res[+el.parentNode.dataset.i],ps=o?playlistsOf(o):[];
   if(ps.length){txt+="\n\nIn playlists:\n"+ps.map(n=>"• "+n).join("\n");pls=true}}
- if(el.tagName==="TD"&&!pls&&el.scrollWidth<=el.clientWidth&&!el.classList.contains("fv"))return; // cell text fully visible: nothing to add (except Feel scores: their tooltip is the distribution; and a song's playlists)
+ if(el.tagName==="TD"&&!pls&&el.scrollWidth<=el.clientWidth&&!el.classList.contains("fv")&&!(el.dataset.k==="track"&&txt!==el.textContent))return; // cell text fully visible: nothing to add (except Feel scores: their tooltip is the distribution; a song's playlists; and a Track cell, whose tip says it in words)
  tipTimer=setTimeout(()=>{tip.textContent=txt;tip.style.display="block";placeTip(e)},TIP_DELAY)});
 document.addEventListener("mousemove",e=>{if(tip.style.display==="block")placeTip(e)});
 for(const ev of["mousedown","wheel","dragstart","keydown"])document.addEventListener(ev,hideTip,true);
@@ -401,7 +411,18 @@ $("th").ondrop=e=>{const th=e.target.closest("th");if(!th||!dragK)return;e.preve
  clearDrag();render()};
 $("th").ondragend=clearDrag;
 const DESC_FIRST=new Set(["stars","plays","loved",...FEEL.map(s=>"f_"+s[0])]); // columns whose first click sorts high to low: rating, plays, the ten Feel scores (maturity included)
-$("th").onclick=e=>{const k=e.target.dataset.k;if(!k)return;sort={k,d:sort.k===k?(sort.d?0:1):(DESC_FIRST.has(k)?1:0)};run()};
+// drag the right edge of a header to resize that column only (the others keep their width; the table gets wider or narrower), double-click it for the usual width
+$("th").addEventListener("mousedown",e=>{const h=e.target.closest(".rs");if(!h||e.button!==0)return;
+ e.preventDefault(); // no text selection, and the header must not start its own drag (reordering)
+ const th=h.parentElement,k=th.dataset.k,g=ck(),col=$("cg").children[[...th.parentElement.children].indexOf(th)],x0=e.clientX,w0=parseFloat(col.style.width);
+ h.classList.add("on");document.body.style.cursor="col-resize";
+ const move=ev=>{const w=Math.max(MINW,Math.round(w0+ev.clientX-x0));colW[g][k]=w;col.style.width=w+"px";
+  $("tbl").style.width=[...$("cg").children].reduce((s,c)=>s+parseFloat(c.style.width),0)+"px"};
+ const up=()=>{removeEventListener("mousemove",move);removeEventListener("mouseup",up);h.classList.remove("on");document.body.style.cursor="";
+  saveWidths();resized=true;setTimeout(()=>{resized=false},0)}; // the click that follows the release must not sort the column
+ addEventListener("mousemove",move);addEventListener("mouseup",up)});
+$("th").addEventListener("dblclick",e=>{const h=e.target.closest(".rs");if(!h)return;delete colW[ck()][h.parentElement.dataset.k];saveWidths();render()});
+$("th").onclick=e=>{const k=e.target.dataset.k;if(!k||resized)return;sort={k,d:sort.k===k?(sort.d?0:1):(DESC_FIRST.has(k)?1:0)};run()};
 // --- Feel: one min/max slider pair per scale (0-10). A song stays only if every scale is inside its range. ---
 // The ten scales are stacked in five pairs of scales that move together in the ratings (r from tools/emotions/correlations.md; a note, it may drift as ratings change).
 // A pair's link toggle makes the two sliders follow each other; sign -1 = opposite scales (joyful/sadness), linked as a mirror image (0-4 on one is 6-10 on the other).

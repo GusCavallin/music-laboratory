@@ -9,6 +9,15 @@ export function formatTrack(s: Pick<Song, "track" | "tracks" | "disc" | "discs">
   return `${s.discs > 1 ? `${s.disc}-` : ""}${s.track}${s.tracks ? `/${s.tracks}` : ""}`;
 }
 
+/**
+ * The hover text of a Track cell: "Disc 2 - Track 5 of 12" (the disc is left out on a single-disc album, as in the column; the total is the tracks on that disc);
+ * "" when the tags are empty.
+ */
+export function trackTip(s: Pick<Song, "track" | "tracks" | "disc" | "discs">): string {
+  if (!s.track) return "";
+  return `${s.discs > 1 ? `Disc ${s.disc} - ` : ""}Track ${s.track}${s.tracks ? ` of ${s.tracks}` : ""}`;
+}
+
 export const formatStars = (stars: number): string => (stars ? "⭐".repeat(stars) : "");
 
 /** The decade filter value of a year: 1994 becomes "1990s". */

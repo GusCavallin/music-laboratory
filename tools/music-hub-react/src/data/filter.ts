@@ -113,6 +113,7 @@ type Cell = string | number | boolean | null | undefined;
 function sortValue(row: Song | ArchiveRow, key: string): Cell {
   const fi = feelColumnIndex(key);
   if (fi !== null) return "feel" in row ? (row.feel?.[fi] ?? null) : null;
+  if (key === "discNo") return "disc" in row ? row.disc || 1 : 1; // a song with no disc tag counts as disc 1, as the Track column shows it
   const v = (row as unknown as Record<string, Cell>)[key];
   return typeof v === "boolean" ? Number(v) : v;
 }
@@ -125,12 +126,16 @@ function compare(a: Cell, b: Cell): number {
   return a > b ? 1 : a < b ? -1 : 0;
 }
 
-/** Sorts a copy. An album sort on the iTunes tab keeps each album together, in disc and track order. */
+/**
+ * Sorts a copy. An album sort on the iTunes tab keeps each album together, in disc and track order (the artist counts only where albums share a title:
+ * `albumGroup`). A track sort goes disc by disc.
+ */
 export function sortRows<T extends Song | ArchiveRow>(rows: readonly T[], sort: SortSpec, tab: "itunes" | "archive"): T[] {
   const out = [...rows];
   const key = sort.key;
   if (!key) return out;
-  const keys = key === "album" && tab === "itunes" ? ["album", "artist", "disc", "track"] : [key];
+  // sorting by Track on the iTunes tab goes disc by disc: all of disc 1 by track number, then disc 2 ...
+  const keys = tab !== "itunes" ? [key] : key === "album" ? ["album", "albumGroup", "disc", "track"] : key === "track" ? ["discNo", "track"] : [key];
   const dir = sort.desc ? -1 : 1;
   out.sort((x, y) => {
     for (const k of keys) {

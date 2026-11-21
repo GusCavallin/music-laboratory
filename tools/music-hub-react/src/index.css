@@ -46,7 +46,7 @@ header { flex: none; background: var(--bg); border-bottom: 1px solid var(--line)
 main { flex: 1; min-height: 0; display: flex; }
 .listpane { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
 .scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 16px 40px; }
-table { border-collapse: collapse; table-layout: fixed; min-width: 100%; }
+table { border-collapse: collapse; table-layout: fixed; }
 th, td { text-align: left; padding: 0 8px; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 td { height: 30px; }
 th { position: sticky; top: 0; z-index: 1; background: var(--bg); box-shadow: 0 1px 0 var(--line); height: 30px; }
@@ -170,5 +170,7 @@ tr.ping td { animation: ping 1.4s ease-out; }
 #about a { color: var(--acc); }
 #about .x { display: flex; justify-content: flex-end; margin-top: 14px; }
 
+.rs { position: absolute; top: 0; right: 0; bottom: 0; width: 7px; cursor: col-resize; }
+.rs:hover, .rs.on { background: var(--acc); opacity: .5; }
 th.dragging { opacity: .4; }
 th.over { box-shadow: inset 3px 0 0 var(--acc), 0 1px 0 var(--line); }

@@ -18,6 +18,24 @@ function toObject(cols: readonly string[], row: readonly unknown[]): Record<stri
   return o;
 }
 
+/**
+ * An album title whose songs repeat a disc and track number is several albums sharing it (two "Greatest Hits"): those are told apart by artist. Any other title is
+ * one album, including a compilation with a different artist on every song ("100 Best Piano Classics"), which then sorts by disc and track only.
+ */
+function setAlbumGroups(songs: Song[]): void {
+  const seen = new Map<string, Set<string>>();
+  const shared = new Set<string>();
+  for (const s of songs) {
+    if (!s.album) continue;
+    const key = `${s.disc || 1}-${s.track}`;
+    let numbers = seen.get(s.album);
+    if (!numbers) seen.set(s.album, (numbers = new Set()));
+    if (numbers.has(key)) shared.add(s.album);
+    numbers.add(key);
+  }
+  for (const s of songs) s.albumGroup = shared.has(s.album) ? s.artist : "";
+}
+
 export function buildDataset(raw: RawLibrary): Dataset {
   const songs: Song[] = raw.itunes.map((row, ix) => {
     const o = toObject(raw.itunes_cols, row);
@@ -45,12 +63,14 @@ export function buildDataset(raw: RawLibrary): Dataset {
       discs: num(o.discs),
       feel,
       path: str(o.path),
+      albumGroup: "",
       ...searchForms([str(o.name), str(o.artist), str(o.album), str(o.composer)]),
       artistFold: fold(str(o.artist)),
       albumFold: fold(str(o.album)),
     };
     return song;
   });
+  setAlbumGroups(songs);
 
   const archive: ArchiveRow[] = raw.archive.map((row, ix) => {
     const o = toObject(raw.archive_cols, row);

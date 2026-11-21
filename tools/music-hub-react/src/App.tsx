@@ -31,7 +31,8 @@ import { useVolume } from "./player/useVolume";
 import * as presetOps from "./presets/presets";
 import { usePresets } from "./presets/usePresets";
 import { playlistToRateFrom, starsAfterClick } from "./rating";
-import { loadPrefs, moveColumn, resetOrder, savePrefs, setColumnShown, visibleColumns } from "./state/columnPrefs";
+import { trackTip } from "./data/format";
+import { loadPrefs, moveColumn, resetColumnWidth, resetOrder, savePrefs, setColumnShown, setColumnWidth, visibleColumns } from "./state/columnPrefs";
 import { historyReducer, initialHistory } from "./state/history";
 import { legacyToView, viewToLegacy } from "./state/legacy";
 import { fitToLibrary, fromSession, loadSession, toSession, writeSession } from "./state/session";
@@ -397,6 +398,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
 
   const cellTitle = (row: Song | ArchiveRow, column: Column): string | undefined => {
     if (feelColumnIndex(column.key) !== null) return "feel" in row ? feelTip(row, column.key, dataset.feelStats) || undefined : undefined;
+    if (column.key === "track" && "disc" in row) return trackTip(row) || undefined; // "Disc 2 - Track 5 of 12"
     return TIP_COLUMNS.has(column.key) ? cellText(row, column.key) : undefined;
   };
 
@@ -533,6 +535,8 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
               setColMenu({ x: e.clientX, y: e.clientY });
             }}
             onMoveColumn={(from, to) => changePrefs(moveColumn(prefs, group, from, to))}
+            onResizeColumn={(key, width) => changePrefs(setColumnWidth(prefs, group, key, width))}
+            onResetColumnWidth={(key) => changePrefs(resetColumnWidth(prefs, group, key))}
             clickableKeys={CLICKABLE}
             emptyMessage={emptyMessage}
           />

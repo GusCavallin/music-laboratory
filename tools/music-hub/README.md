@@ -44,6 +44,28 @@ Without the helper you can still double-click `index.html`: search, filters and 
 | **Feel Axes** | The same songs as dots in a cube of three independent feelings; a box you size picks the songs in the list. |
 | **MP3 Archive (CDs)** | The index of MP3s burned on CDs. The paths are not on disk, so these songs can't be played; the tab shows which ones are already in iTunes. |
 
+**Screenshots** (a classical playlist; the Feel scores are estimates).
+
+The iTunes Library tab, with the player bar above the list:
+
+![The iTunes Library tab showing a classical playlist](../../docs/MusicHub_0_iTunes-Library_Best-Classical.png)
+
+Raw Feel as a list: the ten scores are columns, tinted against the mean of all rated songs:
+
+![Raw Feel as a list, with the score columns tinted](../../docs/MusicHub_1_Raw-Feel-List_Best-Classical.png)
+
+Raw Feel with its graph. Narrow one slider and the graph is a line, two make a plane, three a cube (a fourth colors the dots):
+
+![Raw Feel with one slider narrowed: a line of dots](../../docs/MusicHub_2_Raw-Feel-1D_Best-Classical.png)
+
+![Raw Feel with two sliders narrowed: a plane of dots](../../docs/MusicHub_3_Raw-Feel-2D_Best-Classical.png)
+
+![Raw Feel with three sliders narrowed: a cube of dots you can turn](../../docs/MusicHub_4_Raw-Feel-3D_Best-Classical.png)
+
+Feel Axes: every rated song in a cube of three independent feelings, and a box that picks the songs in the list:
+
+![The Feel Axes tab: a cube of dots with a box that selects songs](../../docs/MusicHub_5_Feel-Axes_Best-Classical.png)
+
 The top row has the title, the tab strip and, at the right, **⟳ Refresh data** with its status message. Right under it are the search box (an **×** at its right end clears the text when
 there is some), the result count, **★ Presets** and **✕ Clear filters**.
 
@@ -73,12 +95,12 @@ undone with ← back.** Presets are stored by the helper in `presets.json` in `t
 **Sorting.** Click a column header to sort, click again to reverse. For **Rating, Plays, Loved and the ten Feel scores** the first click puts the highest
 first; for every other column the first click goes A to Z / low to high.
 
-**Columns.** Right-click any header for the column menu (show/hide, **Reset order**); drag a header onto another to move it. The iTunes, Raw Feel, Feel Axes and archive
-tabs each keep their own columns. The Path column is hidden by default; click it to copy a song's file path.
+**Columns.** Right-click any header for the column menu (show/hide, **Reset order**); drag a header onto another to move it, and drag the right edge of a header to resize that column only (double-click the edge for its usual width). The iTunes, Raw Feel, Feel Axes and archive
+tabs each keep their own columns and widths. The Path column is hidden by default; click it to copy a song's file path.
 
 **Track column (iTunes tab).** Shows the track number and how many tracks the album has, as iTunes has them tagged: `5/13`, or `2-5/12` (disc 2, track 5 of 12 on that disc) on a
-multi-disc album. Blank when the tags are empty. To look for missing tracks, sort by **Album**: each album stays together in disc and track order, so a gap in the numbers (3, 5) or a
-count above the number of songs you have means a track is missing. It needs **⟳ Refresh data** once after updating, so the page learns the track numbers. It is hidden by default on the Raw Feel and Feel Axes tabs.
+multi-disc album. Blank when the tags are empty. Hover a cell for the plain words: "Disc 2 - Track 5 of 12" (no disc on a single-disc album). To look for missing tracks, sort by **Album**: each album stays together in disc and track order (a compilation with a different artist on every song stays one album; two different albums that share a title, like several "Greatest Hits", are told apart by artist), so a gap in the numbers (3, 5) or a
+count above the number of songs you have means a track is missing. Sorting by the **Track** column itself goes disc by disc: every track of disc 1 by number, then disc 2 (a song with no disc tag counts as disc 1). It needs **⟳ Refresh data** once after updating, so the page learns the track numbers. It is hidden by default on the Raw Feel and Feel Axes tabs.
 
 ## Playing music
 
@@ -185,7 +207,7 @@ The data is still built; bringing the column back means adding `["bpm","BPM",1]`
 
 Closing and reopening Music Hub restores the **tab** (including Raw Feel and Feel Axes), the **search text**, every **filter**, any **artist/album chip**, the **sort order**, the **Shuffle** state, the **color mode**
 and the **song that was playing, at its position**. The song comes back *paused* (a page must not start playing by itself); press ▶ to continue. It is all kept in this browser's `localStorage`
-(`ls_session`, plus `ls_order`, `ls_hidden` and `ls_volume` for columns and volume). A song, playlist or sort column that no longer exists is ignored, and so is a damaged save.
+(`ls_session`, plus `ls_order`, `ls_hidden`, `ls_widths` and `ls_volume` for columns, their widths and volume). A song, playlist or sort column that no longer exists is ignored, and so is a damaged save.
 **Stop** forgets the song but keeps the filters; **Clear filters** resets the filters.
 
 ## Install as an app

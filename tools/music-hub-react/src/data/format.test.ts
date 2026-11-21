@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decadeOf, formatStars, formatTime, formatTrack } from "./format";
+import { decadeOf, formatStars, formatTime, formatTrack, trackTip } from "./format";
 
 describe("formatTime", () => {
   it("shows minutes and two-digit seconds", () => {
@@ -20,6 +20,22 @@ describe("formatTrack", () => {
   it("leaves out an unknown total, and is empty without a track number", () => {
     expect(formatTrack({ track: 5, tracks: 0, disc: 1, discs: 1 })).toBe("5");
     expect(formatTrack({ track: 0, tracks: 13, disc: 1, discs: 1 })).toBe("");
+  });
+});
+
+describe("trackTip", () => {
+  it("says the disc, the track and how many tracks are on that disc", () => {
+    expect(trackTip({ track: 1, tracks: 17, disc: 1, discs: 6 })).toBe("Disc 1 - Track 1 of 17");
+    expect(trackTip({ track: 8, tracks: 16, disc: 2, discs: 6 })).toBe("Disc 2 - Track 8 of 16");
+  });
+  it("leaves the disc out on a single-disc album, as the column does", () => {
+    expect(trackTip({ track: 5, tracks: 13, disc: 1, discs: 1 })).toBe("Track 5 of 13");
+    expect(trackTip({ track: 5, tracks: 13, disc: 0, discs: 0 })).toBe("Track 5 of 13");
+  });
+  it("leaves out an unknown total, and is empty without a track number", () => {
+    expect(trackTip({ track: 5, tracks: 0, disc: 2, discs: 3 })).toBe("Disc 2 - Track 5");
+    expect(trackTip({ track: 5, tracks: 0, disc: 1, discs: 1 })).toBe("Track 5");
+    expect(trackTip({ track: 0, tracks: 13, disc: 1, discs: 2 })).toBe("");
   });
 });
 

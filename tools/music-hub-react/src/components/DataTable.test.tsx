@@ -178,3 +178,81 @@ describe("DataTable header menu and reordering", () => {
     expect(onSort).not.toHaveBeenCalled();
   });
 });
+
+describe("DataTable column resizing", () => {
+  const header = (name: string) => screen.getByRole("button", { name }).closest("th") as HTMLElement;
+  const edge = (name: string) => header(name).querySelector(".rs") as HTMLElement;
+  const colWidths = () => [...document.querySelectorAll("col")].map((c) => (c as HTMLElement).style.width);
+  const tableWidth = () => (document.querySelector("table") as HTMLElement).style.width;
+
+  it("there is an edge to drag only when resizing is possible", () => {
+    setup(makeRows(2));
+    expect(document.querySelector(".rs")).toBeNull();
+    cleanup();
+    setup(makeRows(2), { onResizeColumn: vi.fn() });
+    expect(document.querySelectorAll(".rs")).toHaveLength(2);
+  });
+  it("dragging an edge moves only that column while it is held, and reports the width on release", () => {
+    const onResizeColumn = vi.fn();
+    setup(makeRows(2), { onResizeColumn });
+    expect(colWidths()).toEqual(["200px", "64px"]);
+    fireEvent.mouseDown(edge("Name"), { button: 0, clientX: 500 });
+    fireEvent.mouseMove(document, { clientX: 560 });
+    expect(colWidths()).toEqual(["260px", "64px"]);
+    expect(tableWidth()).toBe("324px");
+    expect(onResizeColumn).not.toHaveBeenCalled();
+    fireEvent.mouseUp(document, { clientX: 560 });
+    expect(onResizeColumn).toHaveBeenCalledWith("name", 260);
+  });
+  it("can be dragged narrower, but not below the minimum", () => {
+    const onResizeColumn = vi.fn();
+    setup(makeRows(2), { onResizeColumn });
+    fireEvent.mouseDown(edge("Plays"), { button: 0, clientX: 500 });
+    fireEvent.mouseMove(document, { clientX: 480 });
+    expect(colWidths()).toEqual(["200px", "44px"]);
+    fireEvent.mouseMove(document, { clientX: 100 });
+    expect(colWidths()).toEqual(["200px", "30px"]);
+    fireEvent.mouseUp(document);
+    expect(onResizeColumn).toHaveBeenCalledWith("plays", 30);
+  });
+  it("after the release the table follows the widths it is given again", () => {
+    setup(makeRows(2), { onResizeColumn: vi.fn() });
+    fireEvent.mouseDown(edge("Name"), { button: 0, clientX: 0 });
+    fireEvent.mouseMove(document, { clientX: 50 });
+    fireEvent.mouseUp(document);
+    expect(colWidths()).toEqual(["200px", "64px"]); // the parent did not change them in this test
+  });
+  it("only the left button resizes", () => {
+    const onResizeColumn = vi.fn();
+    setup(makeRows(2), { onResizeColumn });
+    fireEvent.mouseDown(edge("Name"), { button: 2, clientX: 500 });
+    fireEvent.mouseMove(document, { clientX: 600 });
+    fireEvent.mouseUp(document);
+    expect(colWidths()).toEqual(["200px", "64px"]);
+    expect(onResizeColumn).not.toHaveBeenCalled();
+  });
+  it("the click that ends a resize does not sort, and a later click does", async () => {
+    const onSort = vi.fn();
+    setup(makeRows(2), { onResizeColumn: vi.fn(), onSort });
+    fireEvent.mouseDown(edge("Name"), { button: 0, clientX: 500 });
+    fireEvent.mouseMove(document, { clientX: 520 });
+    fireEvent.mouseUp(document);
+    fireEvent.click(screen.getByRole("button", { name: "Name" })); // the click the browser sends after the release
+    expect(onSort).not.toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 5));
+    await userEvent.click(screen.getByRole("button", { name: "Name" }));
+    expect(onSort).toHaveBeenCalledWith("name");
+  });
+  it("a click on the edge itself sorts nothing", async () => {
+    const onSort = vi.fn();
+    setup(makeRows(2), { onResizeColumn: vi.fn(), onSort });
+    await userEvent.click(edge("Name"));
+    expect(onSort).not.toHaveBeenCalled();
+  });
+  it("a double-click on the edge asks for the usual width", () => {
+    const onResetColumnWidth = vi.fn();
+    setup(makeRows(2), { onResizeColumn: vi.fn(), onResetColumnWidth });
+    fireEvent.doubleClick(edge("Plays"));
+    expect(onResetColumnWidth).toHaveBeenCalledWith("plays");
+  });
+});

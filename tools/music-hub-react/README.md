@@ -65,9 +65,9 @@ What it does so far (the same as the current page, unless noted):
   (twenty steps; the page keeps itself on the middle of three history entries so the buttons never leave it).
 - **Slice 5, the page opens as you left it:** the tab, search, filters, sort and Feel sliders, shuffle, and the song that was playing, back **paused** at its position ("resume at 1:23"; a page must not
   start playing by itself). Saved in this browser in the format of the current page (`ls_session`), so both pages read each other's.
-- **Slice 5, columns:** right-click a header for the column menu (show or hide columns, **Reset order**; the last column stays), drag a header onto another to reorder. Each tab keeps its own
-  columns, in `ls_hidden` and `ls_order` like the current page.
-- **Slice 5, tips and About:** hover text is the page's own (it shows after a moment, follows the pointer, and a song's name also lists the playlists it is in). **ⓘ About** shows the version and the links.
+- **Slice 5, columns:** right-click a header for the column menu (show or hide columns, **Reset order**; the last column stays), drag a header onto another to reorder, drag the right edge of a header to resize that column only (double-click the edge for its usual width). Each tab keeps its own
+  columns and widths, in `ls_hidden`, `ls_order` and `ls_widths` like the current page.
+- **Slice 5, tips and About:** hover text is the page's own (it shows after a moment, follows the pointer, and a song's name also lists the playlists it is in, and a Track cell says "Disc 2 - Track 5 of 12"). **ⓘ About** shows the version and the links.
 - **Slice 6, the app:** `serve.bat` serves the built page from its own helper (port 9223) and opens it in an app window; the browser can **install** it as an app ("Music Hub (React)", a teal icon, so it is not mistaken for the current page's blue one).
   Like the current page, the service worker caches nothing (`data.js` must be fresh, the music is streamed). It is registered only by the built page, not by the dev server. An app installed from `:9223` needs the helper on that port.
   `make_icons.py` redraws the icons in `public\`. `py -3 -m unittest test_server` tests when it builds and what port and name it uses.
@@ -77,6 +77,28 @@ To check the data layer against your real library (read-only; it asserts no numb
 ```
 $env:MUSICLAB_DATA_JS = "C:\path\to\music-lab\tools\music-hub-core\data.js"; npm test
 ```
+
+## Screenshots
+
+The album "100 Best Piano Classics" (the Feel scores are estimates). The window title and the **React** badge show which version this is.
+
+The iTunes Library tab, filtered to one album with an album chip:
+
+![The iTunes Library tab, filtered to one album](../../docs/MusicHub-React_0_iTunes-Library_Best-Piano-Classics.png)
+
+Raw Feel as a list, and its graph with one, two and three sliders narrowed:
+
+![Raw Feel as a list, with the score columns tinted](../../docs/MusicHub-React_1_Raw-Feel-List_Best-Piano-Classics.png)
+
+![Raw Feel with one slider narrowed: a line of dots](../../docs/MusicHub-React_2_Raw-Feel-1D_Best-Piano-Classics.png)
+
+![Raw Feel with two sliders narrowed: a plane of dots](../../docs/MusicHub-React_3_Raw-Feel-2D_Best-Piano-Classics.png)
+
+![Raw Feel with three sliders narrowed: a cube of dots you can turn](../../docs/MusicHub-React_4_Raw-Feel-3D_Best-Piano-Classics.png)
+
+Feel Axes, with the box that picks the songs in the list:
+
+![The Feel Axes tab: a cube of dots with a box that selects songs](../../docs/MusicHub-React_5_Feel-Axes_Best-Piano-Classics.png)
 
 ## Where the old code went
 

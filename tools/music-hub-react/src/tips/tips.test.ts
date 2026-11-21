@@ -46,4 +46,13 @@ describe("worthShowing", () => {
     expect(worthShowing(el("TD", 10, 100, ["fv"]), false)).toBe(true);
     expect(worthShowing(el("TD", 10, 100), true)).toBe(true);
   });
+  it("a Track cell is, because its tip says it in words, even when its text is all visible", () => {
+    const track = (text: string, tip: string) => ({ ...el("TD", 10, 100), textContent: text, dataset: { k: "track", tip } });
+    expect(worthShowing(track("2-5/12", "Disc 2 - Track 5 of 12"), false)).toBe(true);
+    expect(worthShowing(track("5/13", "Track 5 of 13"), false)).toBe(true);
+  });
+  it("but a Track cell whose tip is only its own text (the archive's) is not, and another column never gets this", () => {
+    expect(worthShowing({ ...el("TD", 10, 100), textContent: "3", dataset: { k: "track", tip: "3" } }, false)).toBe(false);
+    expect(worthShowing({ ...el("TD", 10, 100), textContent: "Song", dataset: { k: "name", tip: "Something else" } }, false)).toBe(false);
+  });
 });

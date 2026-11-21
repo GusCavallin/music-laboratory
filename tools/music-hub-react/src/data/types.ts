@@ -72,6 +72,11 @@ export interface Song extends Searchable {
   feel: (number | null)[] | null;
   /** Windows path of the file */
   path: string;
+  /**
+   * What tells albums apart when they share a title: the artist if the title repeats a disc and track number (several "Greatest Hits"), otherwise "" (one album,
+   * even a compilation with a different artist on every song). The album sort uses it before disc and track.
+   */
+  albumGroup: string;
 }
 
 /** One row of the old MP3 archive (the CD index). */

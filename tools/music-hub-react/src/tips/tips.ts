@@ -18,12 +18,20 @@ export const withPlaylists = (text: string, names: readonly string[]): string =>
 
 /**
  * Whether a tip is worth showing. A table cell shows one only when its text is cut off (the tip then shows all of it), or when it has more to say
- * than the text: the Feel scores (their tip is the distribution) and a song's playlists.
+ * than the text: the Feel scores (their tip is the distribution), a song's playlists, and a Track cell (its tip says "Disc 2 - Track 5 of 12" for "2-5/12").
  */
 export function worthShowing(
-  el: { tagName: string; scrollWidth: number; clientWidth: number; classList: { contains(c: string): boolean } },
+  el: {
+    tagName: string;
+    scrollWidth: number;
+    clientWidth: number;
+    classList: { contains(c: string): boolean };
+    textContent?: string | null;
+    dataset?: { k?: string; tip?: string };
+  },
   hasExtra: boolean,
 ): boolean {
   if (el.tagName !== "TD") return true;
-  return hasExtra || el.scrollWidth > el.clientWidth || el.classList.contains("fv");
+  const wordsForTrack = el.dataset?.k === "track" && el.dataset.tip !== undefined && el.dataset.tip !== (el.textContent ?? "");
+  return hasExtra || el.scrollWidth > el.clientWidth || el.classList.contains("fv") || wordsForTrack;
 }
