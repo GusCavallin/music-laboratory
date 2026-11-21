@@ -5,8 +5,13 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.5.2 - 2026-11-21
+
+The row of tabs in Music Hub no longer gets a scrollbar when a message sits beside Refresh data, and the React version is no longer called a preview in the READMEs. After updating, restart `serve.bat` (the React page rebuilds itself) and reload.
+
 ### Fixed
 
+- The READMEs no longer call the React version of Music Hub a preview: its README says all six slices are done and it does what the current page does, and the others say "the React version".
 - Music Hub, both pages: the row of tabs no longer gets a scrollbar when a message such as "Data from … · no new data" is shown beside Refresh data (it squeezed the tabs and made the title wrap). The title and the tabs keep their size; the message is cut with "…" when there is little room, and hovering it shows all of it. In a browser window narrower than about 950 px (940 on the current page) the tabs get their own row.
 
 ## 0.5.1 - 2026-11-20
