@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Fixed
+
+- Music Hub, both pages: the row of tabs no longer gets a scrollbar when a message such as "Data from … · no new data" is shown beside Refresh data (it squeezed the tabs and made the title wrap). The title and the tabs keep their size; the message is cut with "…" when there is little room, and hovering it shows all of it. In a browser window narrower than about 950 px (940 on the current page) the tabs get their own row.
+
 ## 0.5.1 - 2026-11-20
 
 The installed app window: the React page now opens at a sensible size like the current one, and on both pages a narrow window no longer squeezes the page. After updating, restart `serve.bat` (the React page rebuilds itself), and reopen the app.

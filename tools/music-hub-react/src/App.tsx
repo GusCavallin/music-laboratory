@@ -445,7 +445,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
                 ⚠ helper not running
               </span>
             )}
-            <span className="rmsg" role="status">{message}</span>
+            <span className="rmsg" role="status" data-tip={message || undefined}>{message}</span>
             <button
               type="button"
               disabled={refreshing}

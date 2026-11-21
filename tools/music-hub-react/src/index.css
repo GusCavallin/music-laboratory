@@ -21,13 +21,16 @@ label { color: var(--mut); }
 
 header { flex: none; background: var(--bg); border-bottom: 1px solid var(--line); padding: 16px 16px 12px; z-index: 2; }
 .top { display: flex; align-items: flex-end; gap: 20px; margin: 0 -16px 12px; padding: 0 16px; box-shadow: inset 0 -1px 0 var(--line); }
-.top h1 { padding-bottom: 7px; }
-.preview { align-self: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--chip); color: var(--mut); font-size: 12px; }
-.acts { margin-left: auto; padding-bottom: 5px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-.rmsg { color: var(--mut); }
-@media (max-width: 760px) { html:not(.app) .top { flex-wrap: wrap; row-gap: 6px; } html:not(.app) .acts { order: 2; } html:not(.app) .tabs { order: 3; flex: 1 0 100%; } }
+.top h1 { padding-bottom: 7px; white-space: nowrap; flex: none; }
+.preview { align-self: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--chip); color: var(--mut); font-size: 12px; flex: none; }
+/* the title, the badge and the tabs keep their size; the actions take what is left, and the message in them is cut with "…" (its tip has all of it) instead of squeezing the tabs into a scrollbar */
+.acts { margin-left: auto; padding-bottom: 5px; display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex: 1 1 0; min-width: 0; }
+.acts button { flex: none; white-space: nowrap; }
+.rmsg { color: var(--mut); flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* below about 980px the header does not fit on one line (title, badge, tabs and the two buttons): the tabs get their own row */
+@media (max-width: 980px) { html:not(.app) .top { flex-wrap: wrap; row-gap: 6px; } html:not(.app) .acts { order: 2; } html:not(.app) .tabs { order: 3; flex: 1 0 100%; } }
 
-.tabs { flex: 1 1 auto; min-width: 0; display: flex; gap: 2px; align-items: flex-end; overflow-x: auto; overflow-y: hidden; }
+.tabs { flex: 0 0 auto; min-width: 0; display: flex; gap: 2px; align-items: flex-end; overflow-x: auto; overflow-y: hidden; }
 .tabs button { flex: none; white-space: nowrap; padding: 8px 16px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: transparent; color: var(--mut); font-weight: 500; }
 .tabs button:hover { background: var(--chip); color: var(--fg); }
 .tabs button.on { background: var(--bg); color: var(--fg); border-color: var(--line); box-shadow: inset 0 3px 0 var(--acc); font-weight: 600; }
