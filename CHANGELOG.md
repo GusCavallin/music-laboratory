@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- `tools/emotions/fetch_lyrics.py`: fetches the lyrics of the songs you pick (by artist, low confidence or your own stars) into a git-ignored `lyrics/` folder, with one combined file to read, so a weak Feel rating can be redone from what the song says. Described in `tools/emotions/README.md`.
+
 ## 0.5.2 - 2026-11-21
 
 The row of tabs in Music Hub no longer gets a scrollbar when a message sits beside Refresh data, and the React version is no longer called a preview in the READMEs. After updating, restart `serve.bat` (the React page rebuilds itself) and reload.

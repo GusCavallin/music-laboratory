@@ -15,6 +15,7 @@ tools/emotions/poc_songs.csv
 tools/emotions/batches/
 tools/emotions/stats.md
 tools/emotions/correlations.md
+tools/emotions/lyrics/
 tools/release-years/mb_cache.json
 tools/artist-genres/artist_cache.json
 tools/artist-genres/mb_genres.txt

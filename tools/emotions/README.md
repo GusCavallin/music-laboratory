@@ -22,9 +22,10 @@ Each rating also has a **confidence**: 1 low, 2 medium, 3 high.
 |---|---|
 | `gems.json` | **The ratings**, keyed by iTunes Persistent ID (git-ignored: your ratings stay on your machine). |
 | `poc_songs.csv` | The songs that were queued for rating (idx, persistent_id, artist, name, album, secs); a song absent from `gems.json` was skipped on purpose (spoken word). |
-| `batches/b01.csv` ... `b55.csv` | The raw ratings, one row per song: `idx, wonder, transcendence, tenderness, nostalgia, peacefulness, power, joyful, tension, sadness, maturity, confidence`. |
+| `batches/b01.csv`, `b02.csv`, ... | The raw ratings, one row per song: `idx, wonder, transcendence, tenderness, nostalgia, peacefulness, power, joyful, tension, sadness, maturity, confidence`. |
 | `merge.py` | Rebuilds `gems.json` from `poc_songs.csv` + `batches/` (writes through a temp file, so it never leaves a half-written file). |
 | `add_set.py` | Queues more songs by star rating: `py -3 add_set.py 4` (4-star loved) or `py -3 add_set.py 4 unloved`. |
+| `fetch_lyrics.py` | Fetches the lyrics of the songs you pick (by artist, low confidence or stars) into `lyrics/`, to rate them from what they say. See *Rating from the lyrics* below. |
 | `stats.py` / `stats.md` | Mean and standard deviation of every scale overall and by stars and hearts. |
 | `correlations.py` / `correlations.md` | The orthogonality check: correlations, principal components, variance inflation factors. |
 | `axes.py` / `axes.json` | The three independent axes used by the Feel Axes tab (see below). |
@@ -40,6 +41,21 @@ Not rated on purpose: songs at 2 stars or lower, and spoken word.
 - **More songs:** queue them (`add_set.py`), write the ratings as a new `batches/bNN.csv`, run `py -3 merge.py`.
 - **Fix one song:** edit its row in the right `batches/` file (find the row by `idx` in `poc_songs.csv`), run `merge.py`, then `stats.py` if the numbers matter. Music Hub shows it after **Refresh data**.
 - **Spoken word** stays out; the 3D axes and statistics assume music only.
+
+### Rating from the lyrics
+
+For a song whose rating is a weak guess (confidence 1), the words help: what the song is about decides maturity, sadness and nostalgia far better than a title does.
+
+```
+py -3 fetch_lyrics.py --artist "Some Artist" --low-confidence --dry-run   # only lists the songs
+py -3 fetch_lyrics.py --artist "Some Artist" --low-confidence
+py -3 fetch_lyrics.py --stars 4 --low-confidence                          # your own 4 and 5 stars (album-computed stars don't count)
+```
+
+- It takes songs from the library (read-only) that are already in `gems.json`, finds their lyrics on LRCLIB (matching artist, title and length) and, if that fails, on lyrics.ovh, and says which songs it could not find (instrumentals have none). Only the artist and the title are sent.
+- Each song's lyrics are saved in `lyrics/<persistent id>.txt`, and all of them go into one file, `lyrics/_combined_<what>.txt`, headed by each song's `idx`, ready to read and rate from. A song already fetched is not fetched again (`--refetch` forces it).
+- **The lyrics are copyrighted.** `lyrics/` is git-ignored and never published; they are for rating, not for sharing.
+- Write the new ratings as a new `batches/bNN.csv` using each song's `idx`, with confidence 2 (the words are known, the sound maybe not). `merge.py` lets the newest batch win, so the new row replaces the old one.
 
 ## What the numbers say
 
