@@ -1,13 +1,12 @@
 # Music Hub in React and TypeScript
 
-A rebuild of Music Hub (`..\music-hub`, vanilla JavaScript) in React and TypeScript, done slice by slice. The current page stays the one to use
-every day until this one matches it. The Python helper (`..\music-hub-core\helper.py`, shared by both pages) and `data.js` are not changed: this app reads the same data and
-will call the same endpoints.
+A rebuild of Music Hub (`..\music-hub`, vanilla JavaScript) in React and TypeScript, done slice by slice. All six slices are done: it does what the current page does, has its
+own helper and installs as an app. The current page stays in the repo beside it for now. The Python helper (`..\music-hub-core\helper.py`, shared by both pages) and `data.js`
+are not changed: this app reads the same data and calls the same endpoints.
 
 ![How the parts of Music Hub in React work together](../../docs/architecture-react.svg)
 
-**Preview, still being built.** This is a rebuild of Music Hub in React and TypeScript, added one slice at a time. Each slice is a tagged commit
-(`react-slice-1`, `react-slice-2`, ...), so the history shows how it grew. It is not a release: the page in `..\music-hub` is still the one to use.
+**Published as it grew.** Each slice is a tagged commit (`react-slice-1`, `react-slice-2`, ... `react-slice-6`), so the history shows how it was built.
 
 ## Status
 

@@ -1,4 +1,4 @@
-"""Draws the app icons of the React preview (a white music note on teal) into public/: icon-192.png and icon-512.png. Standard library only.
+"""Draws the app icons of the React version (a white music note on teal) into public/: icon-192.png and icon-512.png. Standard library only.
 
     py -3 make_icons.py
 

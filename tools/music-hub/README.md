@@ -90,7 +90,7 @@ On the archive tab: **Category** and **In iTunes** (any / in iTunes / not in iTu
 
 **Presets (★ Presets, next to ✕ Clear filters).** Saves the current *view* under a name: the tab, search text, every filter, artist/album/volume chips, the Feel sliders and color mode, the 3D box and the sort order
 (not the playing song or your column layout). Type a name and press Save (an existing name is updated); click a preset to apply it; ⟳ replaces it with the current view, ✎ renames, ✕ deletes. **Applying a preset replaces your current view and can be
-undone with ← back.** Presets are stored by the helper in `presets.json` in `tools/music-hub-core/` (shared with the React preview), so they survive a port change, a cleared browser or switching between Chrome and Edge (without the helper they fall back to this browser's storage).
+undone with ← back.** Presets are stored by the helper in `presets.json` in `tools/music-hub-core/` (shared with the React version), so they survive a port change, a cleared browser or switching between Chrome and Edge (without the helper they fall back to this browser's storage).
 
 **Sorting.** Click a column header to sort, click again to reverse. For **Rating, Plays, Loved and the ten Feel scores** the first click puts the highest
 first; for every other column the first click goes A to Z / low to high.
@@ -240,8 +240,8 @@ width that keeps the Raw Feel controls beside the sliders. You can still drag th
 | `serve.bat` / `serve.sh` | Start the helper and open the page. |
 | `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `make_icons.py` | The installable-app pieces. |
 
-**Shared with the React preview** (`tools/music-hub-react/`), in `tools/music-hub-core/`: the helper (audio, rating, playlists, presets, rebuild), `build_data.py`, the built `data.js`
-and your `presets.json`. The two pages can run at the same time (this one on port 9123, the preview on 9223).
+**Shared with the React version** (`tools/music-hub-react/`), in `tools/music-hub-core/`: the helper (audio, rating, playlists, presets, rebuild), `build_data.py`, the built `data.js`
+and your `presets.json`. The two pages can run at the same time (this one on port 9123, the React version on 9223).
 
 **To try the React version:** run `serve.bat` (or `./serve.sh`) in `tools/music-hub-react/`. It builds the page when it is out of date (the first time you need `npm install` there), starts its own helper on port 9223 and opens it in an app window. Its README has the details.
 
