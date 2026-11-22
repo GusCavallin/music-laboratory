@@ -4,7 +4,7 @@
     py -3 fetch_lyrics.py --artist "Death Cab For Cutie" --low-confidence --dry-run
 
 Picks songs from the iTunes library (read-only) that are already in gems.json, filtered by artist (substring, any case) and/or
-`--low-confidence` (confidence 1) and/or `--stars N` (your own stars, not album-computed), saves each song's lyrics in
+`--low-confidence` (confidence 1), `--vocals` (songs with words), `--loved` and/or `--stars N` (your own stars, not album-computed), saves each song's lyrics in
 `lyrics/<persistent id>.txt` and writes one combined file `lyrics/_combined_<what>.txt` to read in one go. `lyrics/` is git-ignored
 and is never published. Songs already fetched are skipped. Sources, in order: LRCLIB (matches on artist, title and length), then
 lyrics.ovh. Songs with no lyrics found are listed at the end (instrumentals have none). Only the artist and the title are sent.
@@ -92,26 +92,36 @@ def main():
     ap.add_argument("--artist", help="artist contains this text")
     ap.add_argument("--low-confidence", action="store_true", help="only songs rated with confidence 1")
     ap.add_argument("--stars", type=int, help="only songs you rated this many stars or more (your own, not computed)")
+    ap.add_argument("--loved", action="store_true", help="also songs you loved (with --stars: loved or that many of your own stars)")
+    ap.add_argument("--vocals", action="store_true", help="only songs with lyrics (instrumentals have no maturity rating)")
     ap.add_argument("--dry-run", action="store_true", help="list the songs, fetch nothing")
     ap.add_argument("--refetch", action="store_true", help="fetch again even when the lyrics are already saved")
     a = ap.parse_args()
-    if not (a.artist or a.low_confidence or a.stars):
+    if not (a.artist or a.low_confidence or a.stars or a.loved):
         ap.error("give at least one of --artist, --low-confidence, --stars")
 
     gems = json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))["songs"]
     lib = plistlib.load(open(SOURCE_LIBRARY, "rb"))
+    skip = set()  # artists in review-skip.txt are left out, unless --artist asks for one by name
+    if not a.artist and os.path.exists(os.path.join(HERE, "review-skip.txt")):
+        skip = {ln.strip().lower() for ln in open(os.path.join(HERE, "review-skip.txt"), encoding="utf-8") if ln.strip()}
     picked = []
     for t in lib["Tracks"].values():
         g = gems.get(t.get("Persistent ID"))
         if not g:
             continue
+        if (t.get("Artist") or "").lower() in skip:
+            continue
+        if a.vocals and g.get("maturity") is None:
+            continue
         if a.artist and a.artist.lower() not in (t.get("Artist") or "").lower():
             continue
         if a.low_confidence and g["confidence"] != 1:
             continue
-        if a.stars:
+        if a.stars or a.loved:  # loved, or your own stars (a star count computed from the album does not count)
             computed = t.get("Album Rating Computed") or t.get("Rating Computed")
-            if computed or (t.get("Rating") or 0) // 20 < a.stars:
+            own = bool(a.stars) and not computed and (t.get("Rating") or 0) // 20 >= a.stars
+            if not (own or (a.loved and t.get("Loved"))):
                 continue
         picked.append(t)
     picked.sort(key=lambda t: (t.get("Artist", "").lower(), t.get("Album", "").lower(), t.get("Disc Number", 1), t.get("Track Number", 0)))
@@ -142,7 +152,7 @@ def main():
             combined.append((t, text.strip()))
         else:
             missing.append((artist, title, how))
-    what = re.sub(r"[^A-Za-z0-9]+", "_", (a.artist or "all") + ("_lowconf" if a.low_confidence else "") + ("_%dstars" % a.stars if a.stars else "")).strip("_")
+    what = re.sub(r"[^A-Za-z0-9]+", "_", (a.artist or "all") + ("_lowconf" if a.low_confidence else "") + ("_%dstars" % a.stars if a.stars else "") + ("_loved" if a.loved else "")).strip("_")
     with open(os.path.join(OUT, "_combined_%s.txt" % what), "w", encoding="utf-8", newline="\n") as f:
         for t, text in combined:
             f.write("=== idx %s | %s | %s | %s | %ss ===\n%s\n\n" % (

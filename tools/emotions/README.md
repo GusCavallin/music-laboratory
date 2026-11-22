@@ -49,9 +49,10 @@ For a song whose rating is a weak guess (confidence 1), the words help: what the
 ```
 py -3 fetch_lyrics.py --artist "Some Artist" --low-confidence --dry-run   # only lists the songs
 py -3 fetch_lyrics.py --artist "Some Artist" --low-confidence
-py -3 fetch_lyrics.py --stars 4 --low-confidence                          # your own 4 and 5 stars (album-computed stars don't count)
+py -3 fetch_lyrics.py --stars 4 --loved --low-confidence --vocals        # loved, or your own 4 and 5 stars (album-computed stars don't count), only songs with words
 ```
 
+- `--vocals` leaves out instrumentals (they have no maturity rating and no lyrics). Without `--artist`, the artists listed in `review-skip.txt` (one per line) are left out.
 - It takes songs from the library (read-only) that are already in `gems.json`, finds their lyrics on LRCLIB (matching artist, title and length) and, if that fails, on lyrics.ovh, and says which songs it could not find (instrumentals have none). Only the artist and the title are sent.
 - Each song's lyrics are saved in `lyrics/<persistent id>.txt`, and all of them go into one file, `lyrics/_combined_<what>.txt`, headed by each song's `idx`, ready to read and rate from. A song already fetched is not fetched again (`--refetch` forces it).
 - **The lyrics are copyrighted.** `lyrics/` is git-ignored and never published; they are for rating, not for sharing.
