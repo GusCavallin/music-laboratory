@@ -32,6 +32,7 @@ only) and opens Music Hub in an app-style window (Chrome, else Edge).
 - **Port busy?** It takes the next free port. Choose one with `serve.bat --port 9000` (or set `LIBRARY_SEARCH_PORT`).
 - **Options:** `--keep-alive` (don't stop when the window closes), `--browser edge`, `--tab` (a normal browser tab instead of an app window), `--no-browser`.
 - **After any code change, restart the helper** (close the window, run `serve.bat`), then click **Refresh data**.
+- **No library, or just looking around?** `serve.bat --demo` opens Music Hub on the published Feel ratings of classical recordings ([`data/`](../../data/README.md)) instead of your library: the table, the filters, the Raw Feel sliders and the Feel Axes cube all work. There is no audio to play, the stars can't be changed, and your own `data.js` and saved views are not touched (the demo has its own `data.demo.js` and `presets.demo.json`). The header says "Demo data".
 
 Without the helper you can still double-click `index.html`: search, filters and sorting work, but playing music, rating songs and rebuilding the data do not.
 

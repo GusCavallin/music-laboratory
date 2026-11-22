@@ -58,6 +58,8 @@ export function App() {
 const TIP_COLUMNS: ReadonlySet<string> = new Set(["name", "artist", "album", "genres", "composer", "path", "category"]);
 const CLICKABLE = new Set([...Object.keys(FACET_COLUMNS), "path"]);
 const NO_SONGS: readonly Song[] = [];
+/** What the header says all the time on the demo data (build_demo_data.py). */
+const DEMO_NOTE = "Demo data: classical Feel ratings, no audio";
 
 export function Library({ dataset, reload }: { dataset: Dataset; reload: () => Promise<Dataset | null> }) {
   // the view of the last visit (the page opens as it was left); `hist` and `fwd` are what the "← back" chip and the mouse buttons go through
@@ -204,11 +206,16 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
   const { start: startSong, toggle: toggleSong, notice } = player;
   /** Nothing can be started on the archive tab (its songs are on CDs); what is already playing goes on. */
   const canStart = () => {
+    if (dataset.demo) {
+      flash("Demo data: there is no audio to play here");
+      return false;
+    }
     if (ui.tab !== "archive" || player.queue.current) return true;
     flash("Archive songs are on CDs, so they can't be played here");
     return false;
   };
   const tryStart = async (index: number | null) => {
+    if (dataset.demo) return void flash("Demo data: there is no audio to play here");
     if (ui.tab === "archive") return void flash("Archive songs are on CDs, so they can't be played here");
     if (!(await ensureHelper())) return notice("Playing needs the helper: start serve.bat (this page notices when it is up)", 5000);
     startSong(index);
@@ -249,6 +256,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
   const later = (ms: number, fn: () => void) => void timers.current.push(window.setTimeout(fn, ms));
 
   const rate = async (song: Song, clicked: number) => {
+    if (dataset.demo) return flash("Demo data: stars can't be changed here");
     if (!(await ensureHelper())) return flash("Rating needs the helper (serve.bat talks to iTunes)");
     const stars = starsAfterClick(song.stars, clicked);
     const from = playlistToRateFrom(ui.playlist, dataset.playlists.map((p) => p.name), stars);
@@ -445,7 +453,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
                 ⚠ helper not running
               </span>
             )}
-            <span className="rmsg" role="status" data-tip={message || undefined}>{message}</span>
+            <span className="rmsg" role="status" data-tip={message || (dataset.demo ? DEMO_NOTE : undefined)}>{message || (dataset.demo ? DEMO_NOTE : "")}</span>
             <button
               type="button"
               disabled={refreshing}

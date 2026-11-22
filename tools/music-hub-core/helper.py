@@ -28,6 +28,8 @@ takes the next free one; if our own helper is already there it just opens the wi
     POST /playlist    writes the songs the page shows as "[Gen] <name>.m3u8" in the repo's playlists folder (Save as playlist); the user imports it
     /audio?p=<path>   streams a song (with Range, so seeking works). Only files whose path is listed in
                       data.js are served, so nothing else on the disk is reachable.
+--demo           serve data.demo.js (built by build_demo_data.py from the published classical Feel ratings) instead of data.js: no library
+                 is read, nothing can be played or rated, and the saved views go to presets.demo.json.
 Read-only on the iTunes library file and the media files; the only changes it makes in iTunes are the ones /rate does
 (/playlist only writes a file in this repo).
 """
@@ -39,14 +41,17 @@ from urllib.parse import parse_qs, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build_data  # noqa: E402
+import build_demo_data  # noqa: E402
 
 
 def name_and_version():
     """"Music Hub 0.1.0", from the VERSION file at the repo root; plain "Music Hub" before the first release."""
     v = build_data.VERSION.read_text(encoding="utf-8").strip() if build_data.VERSION.exists() else ""
-    return f"Music Hub {v}" if v else "Music Hub"
+    return (f"Music Hub {v}" if v else "Music Hub") + (" (demo)" if DEMO else "")
 
 
+DEMO = False          # --demo: the page opens on data.demo.js (the published classical Feel ratings), nothing of your library or saved views is used
+DATA_NAME = "data.js"  # the data file served as /data.js
 PORT = 9123 # preferred; if it is busy, main() reuses our own server there or takes the next free port
 SIGNATURE = "music-library-search"
 HOSTS = {f"127.0.0.1:{PORT}", f"localhost:{PORT}"}
@@ -60,7 +65,7 @@ TYPES = {".html": HTML, ".js": JS, ".mjs": JS, ".css": "text/css; charset=utf-8"
 def static_file(url_path):
     """(file, content type) for a page file, or None. data.js is the library's, from this folder; the rest is from APP_DIR."""
     if url_path == "/data.js":
-        return os.path.join(HERE, "data.js"), JS
+        return os.path.join(HERE, DATA_NAME), JS
     name = "index.html" if url_path in ("/", "/index.html") else url_path.lstrip("/")
     if FILES is not None and name not in FILES:
         return None
@@ -127,6 +132,9 @@ allowed = set()
 def load_allowed():
     """Song paths listed in data.js (lower-cased: Windows paths are case-insensitive)."""
     global allowed
+    if DEMO:  # no files behind the demo songs: nothing can be played or rated
+        allowed = set()
+        return
     try:
         text = open(os.path.join(HERE, "data.js"), encoding="utf-8").read()
         lib = json.loads(text[len("window.LIB = "):].rstrip().rstrip(";"))
@@ -201,7 +209,7 @@ class Handler(BaseHTTPRequestHandler):
         buf = io.StringIO()
         try:
             with contextlib.redirect_stdout(buf):
-                build_data.main()
+                (build_demo_data if DEMO else build_data).main()
             load_allowed()
             out = {"ok": True, "output": buf.getvalue().strip()}
         except Exception as e:  # report to the page instead of dropping the connection
@@ -281,6 +289,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def rate(self):
         """Set one song's star rating in the running iTunes (COM, tools/itunes-com/rate_file.ps1). Only listed songs."""
+        if DEMO:
+            return self.send_text(HTTPStatus.OK, json.dumps({"ok": False, "stars": None, "removed": False,
+                                                             "error": "this is demo data: there is no iTunes behind it"}), "application/json")
         try:
             req = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
             path, name, stars = req["path"], str(req["name"]), int(req["stars"])
@@ -416,8 +427,12 @@ def open_window(url):
 
 
 def main():
-    global PORT, HOSTS, KEEP_ALIVE, SRV
+    global PORT, HOSTS, KEEP_ALIVE, SRV, DEMO, DATA_NAME, PRESETS
     KEEP_ALIVE = "--keep-alive" in sys.argv
+    if "--demo" in sys.argv:   # the published classical ratings as a library of their own (see build_demo_data.py)
+        DEMO, DATA_NAME, PRESETS = True, "data.demo.js", os.path.join(HERE, "presets.demo.json")
+        if not os.path.exists(os.path.join(HERE, DATA_NAME)):
+            build_demo_data.main()
     if "--port" in sys.argv:
         PORT = int(sys.argv[sys.argv.index("--port") + 1])
     elif os.environ.get("LIBRARY_SEARCH_PORT"):

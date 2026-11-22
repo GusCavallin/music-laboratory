@@ -24,7 +24,7 @@ are not changed: this app reads the same data and calls the same endpoints.
 ```
 npm install            # once
 serve.bat              # the app: builds the page if dist\ is missing or older than the source, starts the helper on http://127.0.0.1:9223 and opens it in an app window
-./serve.sh             # the same from Git Bash (options: --port 9000, --browser edge, --tab, --no-browser, --keep-alive, --no-build)
+./serve.sh             # the same from Git Bash (options: --port 9000, --browser edge, --tab, --no-browser, --keep-alive, --no-build, --demo: the published classical ratings instead of your library, no audio)
 preview.bat            # for development: the helper (no page, no build) and the dev server, and opens http://127.0.0.1:5273/
 preview.bat vanilla    # the current page instead (the same as ..\music-hub\serve.bat)
 npm test               # the tests (invented library only)

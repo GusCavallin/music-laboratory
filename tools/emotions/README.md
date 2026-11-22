@@ -30,6 +30,10 @@ Each rating also has a **confidence**: 1 low, 2 medium, 3 high.
 | `correlations.py` / `correlations.md` | The orthogonality check: correlations, principal components, variance inflation factors. |
 | `axes.py` / `axes.json` | The three independent axes used by the Feel Axes tab (see below). |
 
+## Ratings you can use without rating anything
+
+The Feel ratings of the classical recordings are published in [`data/classical-feel.csv`](../../data/README.md) (CC BY 4.0): artist, composer, album, title and length, so you can match them to your own copies, the scales, and the owner's own stars and favorites. Everything else in this folder that holds ratings stays on your machine.
+
 ## What has been rated
 
 Songs are queued in sets by stars and hearts (`add_set.py`) and rated in batches. How many songs are rated, and how they split by stars and hearts, is in `stats.md` (written by `stats.py`); what was queued is in `poc_songs.csv`.

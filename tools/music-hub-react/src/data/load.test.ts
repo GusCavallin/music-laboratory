@@ -52,4 +52,8 @@ describe("buildDataset", () => {
     expect(ds.built).toBe("2026-11-19 10:00");
     expect(ds.version).toBe("0.2.0");
   });
+  it("knows the demo data (build_demo_data.py writes demo: 1) from a library", () => {
+    expect(ds.demo).toBe(false);
+    expect(buildDataset({ ...fixtureLibrary(), demo: 1 }).demo).toBe(true);
+  });
 });

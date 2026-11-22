@@ -241,7 +241,8 @@ function shuffled(first){const a=[...Q.keys()];for(let i=a.length-1;i>0;i--){con
 function setOrder(first){order=shuf?shuffled(first):[...Q.keys()];pos=first>=0?order.indexOf(first):-1}
 const nowText=()=>"▶ "+cur.name+" — "+cur.artist+"  ("+(stale?"next: from the current results":(pos+1)+"/"+Q.length+(shuf?", shuffled":""))+")";
 function rebuildQueue(){Q=res.slice();setOrder(cur?Q.findIndex(o=>o.path===cur.path):-1);stale=false} // keeps the playing song's place if it is in the new results
-function startQueue(i){if(src!=="itunes"){flash("Archive songs are on CDs, so they can't be played here");return}
+function startQueue(i){if(LIB.demo){flash("Demo data: there is no audio to play here");return}
+ if(src!=="itunes"){flash("Archive songs are on CDs, so they can't be played here");return}
  if(i!=null&&res[i]&&res[i].protected){protectedNote(res[i]);return}  // clicked a protected song: say why, keep what is playing
  if(!res.length)return;Q=res.slice();stale=false;const first=i==null?(shuf?Math.floor(Math.random()*Q.length):0):i;setOrder(first);playAt(pos)}
 function protectedNote(o){const prev=$("pnow").textContent,msg="🔒 "+o.name+": a protected iTunes purchase, a browser can't play it. Play it in iTunes.";
@@ -283,11 +284,13 @@ audio.ontimeupdate=()=>{const now=Date.now();if(now-lastSave>3000){lastSave=now;
  $("seek").value=audio.duration?audio.currentTime/audio.duration*1000:0;$("ptime").textContent=mmss(audio.currentTime)+" / "+mmss(audio.duration)};
 $("seek").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/1000*audio.duration};
 let rtimer;
+if(LIB.demo)$("rmsg").textContent="Demo data: classical Feel ratings, no audio";
 function flash(msg){const el=$("rmsg"),old=el.dataset.old??el.textContent;el.dataset.old=old;el.textContent=msg;clearTimeout(rtimer);
  rtimer=setTimeout(()=>{el.textContent=old;delete el.dataset.old},2000)}
 async function copyText(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}}
 const TAG="[To Rate]"; // rating from a playlist with this tag in its name also takes the song off it (server.py checks the same tag)
 async function rateSong(o,n,tr){ // click a star = set that rating in iTunes (click the current rating again = no rating)
+ if(LIB.demo){flash("Demo data: stars can't be changed here");return}
  if(!served){flash("Rating needs serve.bat (the helper talks to iTunes)");return}
  const stars=n===o.stars?0:n,plName=$("pl").value,toRate=plName.includes(TAG)&&LIB.playlists.some(p=>p[0]===plName)&&stars>0;flash("Setting "+stars+" stars in iTunes…");
  try{const j=await (await fetch("/rate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:o.path,name:o.name,stars,from_playlist:toRate?plName:""})})).json();

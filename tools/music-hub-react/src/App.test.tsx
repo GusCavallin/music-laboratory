@@ -103,6 +103,23 @@ describe("the page opens as it was left", () => {
   });
 });
 
+describe("the demo data", () => {
+  const demo = () => buildDataset({ ...fixtureLibrary(), demo: 1 });
+  it("says so in the header, all the time, and a normal library does not", async () => {
+    await open(demo());
+    expect(document.querySelector(".rmsg")?.textContent).toBe("Demo data: classical Feel ratings, no audio");
+    cleanup();
+    await open();
+    expect(document.querySelector(".rmsg")?.textContent).toBe("");
+  });
+  it("plays nothing, and says why", async () => {
+    await open(demo());
+    await userEvent.click(screen.getByRole("button", { name: "Next" })); // idle: it would start the list
+    expect(document.querySelector(".rmsg")?.textContent).toBe("Demo data: there is no audio to play here");
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+});
+
 describe("back and forward through the views", () => {
   it("clicking an artist filters, offers '← back', and back returns", async () => {
     await open();

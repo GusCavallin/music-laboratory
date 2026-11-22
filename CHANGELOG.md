@@ -7,6 +7,8 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ### Added
 
+- Music Hub demo mode, both pages: `serve.bat --demo` opens Music Hub on the published classical Feel ratings (`data/classical-feel.csv`) instead of your library, so anyone can look around without iTunes: the table, filters, Raw Feel sliders and the Feel Axes cube work. There is no audio and the stars cannot be changed; your own `data.js` and saved views are not touched (`build_demo_data.py` builds `data.demo.js`, saved views go to `presets.demo.json`), and the header says "Demo data". The helper has tests for it.
+- `data/classical-feel.csv`: the Feel ratings of the classical recordings (artist, composer, album, title, length, your own stars and favorites, and the ten scales, with a confidence), published under CC BY 4.0, with a README that explains the columns and how to credit it. Nothing of the library it came from is in it: no paths, play counts or dates.
 - `tools/emotions/fetch_lyrics.py`: fetches the lyrics of the songs you pick (by artist, low confidence or your own stars) into a git-ignored `lyrics/` folder, with one combined file to read, so a weak Feel rating can be redone from what the song says. Described in `tools/emotions/README.md`.
 
 ## 0.5.2 - 2026-11-21

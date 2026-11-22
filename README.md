@@ -28,13 +28,16 @@ The scripts get these settings from `musiclab_config.py` at the repo root. Pytho
 | `tools/bpm/` | Tempo index (AcousticBrainz) and a workout playlist builder ([README](tools/bpm/README.md)) |
 | `tools/emotions/` | Scripts for Feel ratings (nine GEMS scales plus maturity) and the three independent axes ([README](tools/emotions/README.md)) |
 | `tools/itunes-com/` | Read and set star ratings in the running desktop iTunes through COM, Windows only ([README](tools/itunes-com/README.md)) |
+| `data/` | **Feel ratings of classical recordings** (artist, composer, album, title, stars and the ten scales), free to use under CC BY 4.0 ([README](data/README.md)) |
 
 `AGENTS.md` and `agents/` hold instructions for AI agents working in this repo (reading the library, writing and verifying playlists, rating how songs feel).
 
 The tools that need your own data (ratings, caches, playlists) build it from your library the first time you run them. None of it is
-included here.
+included here, except the classical Feel ratings in `data/`, which are published on purpose.
 
 ## License
 
 music-laboratory is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0),
 with the Required Notice in the first line of [LICENSE](LICENSE).
+
+The data in `data/` is the exception: it is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (see [data/README.md](data/README.md)).

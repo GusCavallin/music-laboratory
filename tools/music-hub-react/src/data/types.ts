@@ -28,6 +28,8 @@ export interface RawLibrary {
   axes: RawAxes | null;
   built: string;
   version: string;
+  /** 1 in the demo data (build_demo_data.py): no files behind the songs, so nothing plays and the stars cannot be changed */
+  demo?: number;
 }
 
 /** Text prepared once per row so every keystroke only does string.includes (see text.ts). */
@@ -117,4 +119,6 @@ export interface Dataset {
   axes: RawAxes | null;
   built: string;
   version: string;
+  /** the demo data: no audio, no rating */
+  demo: boolean;
 }

@@ -67,7 +67,7 @@ class Tree:
         (self.root / "playlists" / "bak").mkdir(parents=True)
         core = t / "music-hub-core"
         core.mkdir(parents=True)
-        for name in ("helper.py", "build_data.py"):
+        for name in ("helper.py", "build_data.py", "build_demo_data.py"):
             shutil.copy(CORE / name, core / name)  # (mojibake_fixes.json is optional and not needed here)
         vanilla = t / "music-hub"
         vanilla.mkdir()
@@ -109,9 +109,9 @@ class Tree:
         r = subprocess.run([PY, "build_data.py"], cwd=self.root / "tools" / "music-hub", env=self.env, capture_output=True, text=True, timeout=60)
         return r
 
-    def start(self, page, port):
+    def start(self, page, port, *extra):
         folder = {"vanilla": "music-hub", "app": "built-app"}[page]
-        p = subprocess.Popen([PY, "server.py", "--port", str(port), "--no-browser", "--keep-alive"], cwd=self.root / "tools" / folder,
+        p = subprocess.Popen([PY, "server.py", "--port", str(port), "--no-browser", "--keep-alive", *extra], cwd=self.root / "tools" / folder,
                              env=self.env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         self.procs.append(p)
         return p
@@ -267,6 +267,62 @@ class HelperTests(unittest.TestCase):
         port = int(line.rsplit(":", 1)[1].strip().strip("/"))
         self.assertEqual(self.t.wait_for(port), "built-app-test")
         self.assertEqual(request(self.vp, "/ping")[2].decode(), "music-library-search")  # the vanilla helper is untouched
+
+
+DEMO_CSV = ("artist,composer,album,title,disc,track,seconds,stars,loved,wonder,transcendence,tenderness,nostalgia,peacefulness,power,joyful,tension,sadness,maturity,confidence\n"
+            "Some Pianist,A Composer,An Album,A Nocturne,1,2,240,4,1,3,3,6,5,6,1,1,2,4,,3\n"
+            "Some Orchestra,,An Album,A Finale,1,3,300,,,5,4,2,2,1,9,6,5,1,,2\n")
+
+
+class DemoTests(unittest.TestCase):
+    """--demo: the page opens on the published classical ratings; nothing of the library, the saved views or the disk is reached."""
+    @classmethod
+    def setUpClass(cls):
+        cls.t = Tree()
+        (cls.t.root / "demo.csv").write_text(DEMO_CSV, encoding="utf-8")
+        cls.t.env["MUSICLAB_DEMO_CSV"] = str(cls.t.root / "demo.csv")
+        cls.t.build_with_old_script()   # a real data.js exists next to it: the demo must not use or touch it
+        cls.port = free_port()
+        cls.t.start("vanilla", cls.port, "--demo")
+        cls.t.wait_for(cls.port)
+        cls.core = cls.t.root / "tools" / "music-hub-core"
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.t.close()
+
+    def test_serves_the_demo_data_not_the_library(self):
+        status, ctype, body = request(self.port, "/data.js")
+        self.assertEqual(status, 200)
+        lib = json.loads(body.decode()[len("window.LIB = "):].rstrip().rstrip(";"))
+        self.assertEqual(lib["demo"], 1)
+        self.assertEqual([r[0] for r in lib["itunes"]], ["A Nocturne", "A Finale"])
+        cols = lib["itunes_cols"]
+        row = lib["itunes"][0]
+        self.assertEqual((row[cols.index("stars")], row[cols.index("loved")], row[cols.index("secs")], row[cols.index("path")]), (4, 1, 240, ""))
+        self.assertEqual(row[cols.index("feel")], [3, 3, 6, 5, 6, 1, 1, 2, 4, None, 3])
+        self.assertEqual(lib["itunes"][1][cols.index("stars")], 0)
+        self.assertTrue((self.core / "data.js").exists())
+        self.assertNotIn(b"Tone A", body)
+
+    def test_nothing_can_be_played_or_rated(self):
+        status, _c, body = request(self.port, "/rate", "POST", {"path": "", "name": "A Nocturne", "stars": 3})
+        self.assertEqual(status, 200)
+        self.assertFalse(json.loads(body)["ok"])
+        from urllib.parse import quote
+        self.assertEqual(request(self.port, "/audio?p=" + quote(self.t.songs[0], safe=""))[0], 404)   # the library's files are not reachable
+
+    def test_saved_views_go_to_their_own_file(self):
+        self.assertEqual(request(self.port, "/presets", "POST", {"presets": [{"name": "v", "state": {}}]})[0], 200)
+        self.assertTrue((self.core / "presets.demo.json").exists())
+        self.assertFalse((self.core / "presets.json").exists())
+
+    def test_rebuild_builds_the_demo_data_again(self):
+        status, _c, body = request(self.port, "/rebuild", "POST", {})
+        self.assertEqual(status, 200)
+        out = json.loads(body)
+        self.assertTrue(out["ok"], out)
+        self.assertIn("demo songs: 2", out["output"])
 
 
 if __name__ == "__main__":

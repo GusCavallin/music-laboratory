@@ -100,5 +100,6 @@ export function buildDataset(raw: RawLibrary): Dataset {
     axes: raw.axes ?? null,
     built: raw.built ?? "",
     version: raw.version ?? "",
+    demo: !!raw.demo,
   };
 }
