@@ -12,8 +12,9 @@ const setup = (over: { typed?: string | null; confirms?: boolean[]; results?: Pl
   const prompt = vi.fn<(message: string) => string | null>(() => (over.typed === undefined ? "Calm" : over.typed));
   const confirm = vi.fn<(message: string) => boolean>(() => confirms.shift() ?? true);
   const save = vi.fn<(req: { name: string; songs: PlaylistSong[]; overwrite: boolean }) => Promise<PlaylistResult>>(async () => results.shift()!);
-  const run = () => saveAsPlaylist({ songs: over.list ?? songs, iTunesPlaylists: over.iTunes ?? [], ui: { prompt, confirm }, save });
-  return { prompt, confirm, save, run };
+  const alert = vi.fn<(message: string) => void>();
+  const run = () => saveAsPlaylist({ songs: over.list ?? songs, iTunesPlaylists: over.iTunes ?? [], ui: { prompt, confirm, alert }, save });
+  return { prompt, confirm, alert, save, run };
 };
 
 describe("cleanName", () => {
@@ -95,17 +96,31 @@ describe("saveAsPlaylist", () => {
     it("leaves it alone if you decline, and shows the helper's reason", async () => {
       const t = setup({ results: [pending], confirms: [false] });
       expect(await t.run()).toBe(pending.ok ? "" : pending.error);
+      expect(t.alert).not.toHaveBeenCalled(); // you chose not to replace it: a note in the header is enough
       expect(t.save).toHaveBeenCalledTimes(1);
     });
   });
 
-  it("a name that was already imported is refused with the helper's reason (no question)", async () => {
+  it("a name that was already imported is refused with the helper's reason, in a message that stays until dismissed (no question)", async () => {
     const imported: PlaylistResult = { ok: false, error: '"[Gen] Calm" was already imported (it is in playlists/archive); choose another name', exists: "imported" };
     const t = setup({ results: [imported] });
-    expect(await t.run()).toBe(imported.ok ? "" : imported.error);
+    expect(await t.run()).toBe(""); // nothing to flash: the alert said it
+    expect(t.alert).toHaveBeenCalledWith(imported.error);
     expect(t.confirm).not.toHaveBeenCalled();
   });
-  it("any other failure is shown as it is", async () => {
-    expect(await setup({ results: [{ ok: false, error: "Couldn't reach the helper, nothing saved" }] }).run()).toBe("Couldn't reach the helper, nothing saved");
+  it("any other failure is shown the same way, as it is", async () => {
+    const t = setup({ results: [{ ok: false, error: "Couldn't reach the helper, nothing saved" }] });
+    expect(await t.run()).toBe("");
+    expect(t.alert).toHaveBeenCalledWith("Couldn't reach the helper, nothing saved");
+  });
+  it("a failure with no reason still says something", async () => {
+    const t = setup({ results: [{ ok: false, error: "" }] });
+    await t.run();
+    expect(t.alert).toHaveBeenCalledWith("Couldn't save the playlist");
+  });
+  it("a save that worked does not alert", async () => {
+    const t = setup();
+    expect(await t.run()).toContain("Saved 3 songs");
+    expect(t.alert).not.toHaveBeenCalled();
   });
 });

@@ -33,6 +33,11 @@ npm run build          # type check, then a production build in dist\
 npm run dev            # the app at http://127.0.0.1:5273 (the dev server alone, no helper), reading ..\music-hub-core\data.js (read-only); the helper is needed only to play, rate and save
 ```
 
+**Demo, no library needed.** `serve.bat --demo` (after `npm install` once) opens the page on the published classical Feel ratings (`..\..\data\classical-feel.csv`) with a few made-up CDs
+in the MP3 Archive tab: no audio, the stars cannot be changed, and your own `data.js` and saved views are not touched. A highlighted "Demo data" note in the header says so
+and keeps its look while its text changes. It needs no `config.json`. (The current page has the same option and needs only Python 3.) The MP3 Archive tab is left out
+of the page whenever the library has no CD archive.
+
 `npm run dev` serves the `data.js` of the `music-hub-core` folder at `/data.js`. To try another library (for example an invented one), set
 `$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
 

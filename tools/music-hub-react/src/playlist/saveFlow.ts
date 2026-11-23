@@ -1,10 +1,11 @@
 import type { PlaylistResult, PlaylistSong } from "../api/helper";
 import type { Song } from "../data/types";
 
-/** The questions the flow asks (the browser's prompt and confirm in the app; stand-ins in tests). */
+/** The questions the flow asks (the browser's prompt and confirm in the app; stand-ins in tests), and `alert` for a refusal that must not be missed. */
 export interface SaveUi {
   prompt: (message: string) => string | null;
   confirm: (message: string) => boolean;
+  alert: (message: string) => void;
 }
 
 interface Options {
@@ -45,8 +46,14 @@ export async function saveAsPlaylist({ songs, iTunesPlaylists, ui, save }: Optio
   }
   const songsOut = songs.map(toPlaylistSong);
   let result = await save({ name, songs: songsOut, overwrite: false });
-  if (!result.ok && result.exists === "pending" && ui.confirm(`${result.error}.\nReplace that file?`)) {
-    result = await save({ name, songs: songsOut, overwrite: true });
+  let declined = false;
+  if (!result.ok && result.exists === "pending") {
+    if (ui.confirm(`${result.error}.\nReplace that file?`)) result = await save({ name, songs: songsOut, overwrite: true });
+    else declined = true;
   }
-  return result.ok ? `Saved ${result.count.toLocaleString()} songs: ${result.file}. Import it in iTunes.` : result.error || "Couldn't save the playlist";
+  if (result.ok) return `Saved ${result.count.toLocaleString()} songs: ${result.file}. Import it in iTunes.`;
+  const why = result.error || "Couldn't save the playlist";
+  if (declined) return why; // you chose not to replace the file: a short note is enough
+  ui.alert(why); // a refusal (for example a name that was already imported) must not vanish after two seconds in the header
+  return "";
 }

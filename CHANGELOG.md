@@ -5,6 +5,11 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Fixed
+
+- The READMEs: the front page now has a "Try it without a library" section (`serve.bat --demo`), and the Music Hub, React and core READMEs describe the demo mode, the MP3 Archive tab that only appears with a CD archive, the Playlist box (pick another playlist directly, the ×) and the new iTunes COM scripts; `serve.sh` lists `--demo`.
+- Music Hub, both pages: when **Save as playlist** is refused (for example the name was already imported, so the file is in `playlists\archive`), the reason now shows in a message box that stays until you close it. It used to appear for two seconds, cut short, in the header, so it looked as if nothing had happened.
+
 ## 0.6.0 - 2026-11-22
 
 Music Hub can be tried without iTunes (`serve.bat --demo`, on the published classical Feel ratings), the MP3 Archive tab only appears when there is archive data, the app window reopens at the size you left it, and the Playlist box is wider and lets you switch playlists directly. Also new: a tool to queue a playlist's unrated songs for Feel rating, and the low end of the Awe axis is now called "Down-to-earth". After updating, restart `serve.bat` (the React page rebuilds itself), click **Refresh data** and reload.

@@ -1,6 +1,7 @@
 """Builds data.demo.js, a demo library for Music Hub made from the published Feel ratings of classical recordings (data/classical-feel.csv).
 
-    py -3 build_demo_data.py                  -> reads ../../data/classical-feel.csv
+    py -3 build_demo_data.py                  -> reads data/classical-feel.csv next to this script if there is one (an optional copy, git-ignored),
+                                                 else ../../data/classical-feel.csv (the published file)
     py -3 build_demo_data.py some-file.csv    -> reads another file with the same columns
 
 No iTunes library is needed. Start a page with `--demo` (for example `serve.bat --demo`) to open it on this data: the table, the filters, the
@@ -12,7 +13,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 ROOT = HERE.parents[1]
-CSV = ROOT / "data" / "classical-feel.csv"
+CSV = next((p for p in (HERE / "data" / "classical-feel.csv", ROOT / "data" / "classical-feel.csv") if p.exists()), ROOT / "data" / "classical-feel.csv")
 AXES = [ROOT / "tools" / "emotions" / "axes.json", ROOT / "data" / "feel-axes.json"]   # your own axes if you made them, else the published ones
 VERSION = ROOT / "VERSION"
 SCALES = ["wonder", "transcendence", "tenderness", "nostalgia", "peacefulness", "power", "joyful", "tension", "sadness", "maturity"]

@@ -714,10 +714,12 @@ $("savepl").onclick=async()=>{
     !confirm("iTunes already has a playlist called \"[Gen] "+name+"\".\nImporting a file with the same name only adds the songs it doesn't have yet; it does not replace the old list.\n\nSave the file anyway?"))return;
  const songs=res.map(o=>({path:o.path,name:o.name,artist:o.artist,secs:o.secs}));
  const send=async overwrite=>(await fetch("/playlist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,songs,overwrite})})).json();
- try{let r=await send(false);
-  if(!r.ok&&r.exists==="pending"&&confirm(r.error+".\nReplace that file?"))r=await send(true);
-  flash(r.ok?"Saved "+r.count.toLocaleString()+" songs: "+r.file+". Import it in iTunes.":(r.error||"Couldn't save the playlist"))}
- catch(e){flash("Couldn't reach the helper, nothing saved")}};
+ try{let r=await send(false),declined=false;
+  if(!r.ok&&r.exists==="pending"){if(confirm(r.error+".\nReplace that file?"))r=await send(true);else declined=true}
+  if(r.ok)flash("Saved "+r.count.toLocaleString()+" songs: "+r.file+". Import it in iTunes.");
+  else if(declined)flash(r.error); // you chose not to replace it: a short note is enough
+  else alert(r.error||"Couldn't save the playlist")} // a refusal (for example a name that was already imported) must not vanish after two seconds in the header
+ catch(e){alert("Couldn't reach the helper, nothing saved")}};
 $("presetmenu").onkeydown=e=>{if(e.key==="Enter"&&e.target.id==="pm_name"){e.preventDefault();if(saveCurrent(e.target.value))e.target.value=""}};
 loadPresets();
 // --- remember the session: tab, search, filters, sort, shuffle and the song with its position ---------------------

@@ -284,7 +284,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
     const text = await saveAsPlaylist({
       songs: songRows,
       iTunesPlaylists: dataset.playlists.map((p) => p.name),
-      ui: { prompt: (m) => window.prompt(m, ""), confirm: (m) => window.confirm(m) },
+      ui: { prompt: (m) => window.prompt(m, ""), confirm: (m) => window.confirm(m), alert: (m) => window.alert(m) },
       save: (req) => helperApi.savePlaylist(req),
     });
     if (text) flash(text);

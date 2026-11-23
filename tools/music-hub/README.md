@@ -8,7 +8,7 @@ It runs only on this computer. It **reads** the iTunes library XML and the media
 can change in iTunes are what you ask for with a click: a song's star rating, and removing a song from a `[To Rate]` playlist after you rate it.
 
 1. [Quick start](#quick-start)
-2. [The four tabs](#the-four-tabs)
+2. [The tabs](#the-tabs)
 3. [Searching, filtering and sorting](#searching-filtering-and-sorting)
 4. [Playing music](#playing-music)
 5. [Rating songs](#rating-songs)
@@ -32,11 +32,13 @@ only) and opens Music Hub in an app-style window (Chrome, else Edge).
 - **Port busy?** It takes the next free port. Choose one with `serve.bat --port 9000` (or set `LIBRARY_SEARCH_PORT`).
 - **Options:** `--keep-alive` (don't stop when the window closes), `--browser edge`, `--tab` (a normal browser tab instead of an app window), `--no-browser`.
 - **After any code change, restart the helper** (close the window, run `serve.bat`), then click **Refresh data**.
-- **No library, or just looking around?** `serve.bat --demo` opens Music Hub on the published Feel ratings of classical recordings ([`data/`](../../data/README.md)) instead of your library: the table, the filters, the Raw Feel sliders and the Feel Axes cube all work. There is no audio to play, the stars can't be changed, and your own `data.js` and saved views are not touched (the demo has its own `data.demo.js` and `presets.demo.json`). The header says "Demo data".
+- **No library, or just looking around?** `serve.bat --demo` opens Music Hub on the published Feel ratings of classical recordings ([`data/`](../../data/README.md)) instead of your library: the table, the filters, the Raw Feel sliders and the Feel Axes cube all work. The MP3 Archive tab shows a few made-up CDs built from the albums. There is no audio to play, the stars can't be changed, and your own `data.js` and saved views are not touched (the demo has its own `data.demo.js` and `presets.demo.json`). A highlighted "Demo data" note in the header says so, and stays while its text changes (for example "there is no audio to play here" when you click a song). It needs only Python 3 and no `config.json`; **Refresh data** in the demo rebuilds `data.demo.js`.
 
 Without the helper you can still double-click `index.html`: search, filters and sorting work, but playing music, rating songs and rebuilding the data do not.
 
-## The four tabs
+## The tabs
+
+Four tabs; the last one only appears when you have a CD archive (without one there are three).
 
 | Tab | What it is |
 |---|---|
@@ -83,7 +85,9 @@ clears the Forward steps). They never leave the page. Typing in the search box a
 On the archive tab: **Category** and **In iTunes** (any / in iTunes / not in iTunes, each with a count).
 
 - **Playlist** is a combo box: type part of a name and the list narrows; pick one (or type its full name) to filter. It lists every iTunes
-  playlist, smart ones included, with the song count. With no sort chosen, results follow the playlist's own order.
+  playlist, smart ones included, with the song count. With no sort chosen, results follow the playlist's own order. The box is wide (480 px, less on a
+  narrow window) so long names fit. With a playlist chosen, clicking the box sets its name aside (it stays as the grey placeholder) so the list offers
+  every playlist again: pick another and it switches at once, or click away and the old one comes back. The **×** in the box clears the filter (every song).
 - **Click an Artist or Album cell** (or **Volume**, the CD id, on the archive tab) to show only that artist/album/CD. A plain click *replaces* the other filters;
   **Ctrl-click** (⌘-click) *adds* it to them. A chip such as `Artist: Coldplay ×` appears next to the count (click × to remove it) with a **← back**
   button that restores the filters you had before the click (up to 20 steps). The match ignores capitals and accents, so it also finds "A-HA" and "a-ha".
@@ -128,7 +132,7 @@ top right says why and nothing changes.
 - **💾 Save as playlist** (next to Presets, iTunes tab, needs the helper): writes the songs now in the list, in the order shown, as
   `[Gen] <name>.m3u8` in the repo's `playlists\` folder (UTF-8, CRLF). Filter first (Raw Feel, Feel Axes box, stars, anything), then save. Music Hub
   never touches iTunes for this: import the file yourself (*File → Library → Import Playlist…*), then check it. It refuses a name that is already in
-  `playlists\archive` (already imported) and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
+  `playlists\archive` (already imported), with a message box that stays until you close it, and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
   warned: importing the same name only adds the songs iTunes doesn't have, it never replaces the old list (delete the old playlist in iTunes first).
 - **ⓘ About** (top right) opens a small box: the version (the helper reads the `VERSION` file at the repo root each time; without the helper, the one `data.js` was built with; "Not released yet" until the first release), when the data was built, what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
