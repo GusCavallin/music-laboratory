@@ -4,6 +4,9 @@ A rebuild of Music Hub (`..\music-hub`, vanilla JavaScript) in React and TypeScr
 own helper and installs as an app. The current page stays in the repo beside it for now. The Python helper (`..\music-hub-core\helper.py`, shared by both pages) and `data.js`
 are not changed: this app reads the same data and calls the same endpoints.
 
+**What Music Hub does and how to use it** (the tabs, searching, playing, rating, Raw Feel and Feel Axes, where the data comes from, troubleshooting) is in the
+[Music Hub README](../music-hub/README.md), which applies to this version too. This README covers how the React version is built and run.
+
 ![How the parts of Music Hub in React work together](../../docs/architecture-react.svg)
 
 **Published as it grew.** Each slice is a tagged commit (`react-slice-1`, `react-slice-2`, ... `react-slice-6`), so the history shows how it was built.

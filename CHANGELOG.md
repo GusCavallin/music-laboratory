@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Fixed
+
+- The README (front page) and the Music Hub README show a screenshot of the demo (`docs/MusicHub_Demo_Feel-Axes_Classical.png`), and the React README links to the Music Hub README for what Music Hub does and how to use it.
+
 ## 0.6.2 - 2026-11-22
 
 The Feel scripts now work on a fresh clone, where they used to crash for lack of the data files that hold your own ratings, and the docs tell an AI agent how to set the repo up and start rating. No change to Music Hub's pages. After updating, click **Refresh data** if you have no Feel axes of your own.

@@ -12,6 +12,8 @@ published [Feel ratings of classical recordings](data/README.md): the table, the
 MP3 Archive tab shows a few made-up CDs. There is no audio and the stars cannot be changed (a highlighted "Demo data" note in the header says so); your own
 data and saved views are never touched. The React version has the same option (`serve.bat --demo` in `tools/music-hub-react`, after `npm install` once).
 
+![Music Hub running its demo: the Feel Axes tab, with 961 classical recordings as dots in a cube](docs/MusicHub_Demo_Feel-Axes_Classical.png)
+
 ## Setup (for your own library)
 
 1. Copy `config.example.json` to `config.json` (it is git-ignored, so your paths stay on your machine).
