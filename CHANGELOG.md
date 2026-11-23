@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.7.0 - 2026-11-23
+
+Music Hub can start with no console window: double-click `serve.pyw` (or point a shortcut at it) in either page's folder. `serve.bat` stays for when you want to see the helper. After updating, restart the helper (close the app window and start it again) so the About box shows 0.7.0.
+
 ### Added
 
 - Music Hub, both pages: `serve.pyw` starts the helper with no console window (and no taskbar button for it), the same as `serve.bat` otherwise: double-click it or point a shortcut at it (`serve.pyw --demo` works). What `serve.bat` would print goes to `logs\music-hub.log` or `logs\music-hub-react.log` in the repo (the folder is git-ignored), which is where a failed start shows. Rating in iTunes and the React page's build no longer flash a console when the helper has none (`creationflags=CREATE_NO_WINDOW`). `serve.bat` stays for when you want to see the helper.
