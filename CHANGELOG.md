@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.6.0 - 2026-11-22
+
+Music Hub can be tried without iTunes (`serve.bat --demo`, on the published classical Feel ratings), the MP3 Archive tab only appears when there is archive data, the app window reopens at the size you left it, and the Playlist box is wider and lets you switch playlists directly. Also new: a tool to queue a playlist's unrated songs for Feel rating, and the low end of the Awe axis is now called "Down-to-earth". After updating, restart `serve.bat` (the React page rebuilds itself), click **Refresh data** and reload.
+
 ### Added
 
 - Music Hub demo mode, both pages: `serve.bat --demo` opens Music Hub on the published classical Feel ratings (`data/classical-feel.csv`) instead of your library, so anyone can look around without iTunes: the table, filters, Raw Feel sliders and the Feel Axes cube work. There is no audio and the stars cannot be changed; your own `data.js` and saved views are not touched (`build_demo_data.py` builds `data.demo.js`, saved views go to `presets.demo.json`), and the header says "Demo data". The helper has tests for it.
