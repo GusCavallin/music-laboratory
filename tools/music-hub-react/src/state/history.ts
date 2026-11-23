@@ -41,6 +41,7 @@ export function historyReducer(h: HistoryState, a: HistoryAction): HistoryState 
     case "apply":
       return { ui: a.view, hist: remember(h), fwd: [] };
     case "facet":
+    case "open": // a link from outside replaces the view like a click on an album does
       return { ui: reduce(h.ui, a), hist: remember(h), fwd: [] };
     default: {
       const ui = reduce(h.ui, a);

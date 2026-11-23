@@ -42,6 +42,10 @@ in the MP3 Archive tab: no audio, the stars cannot be changed, and your own `dat
 and keeps its look while its text changes. It needs no `config.json`. (The current page has the same option and needs only Python 3.) The MP3 Archive tab is left out
 of the page whenever the library has no CD archive.
 
+**Links to an album or a song.** `http://127.0.0.1:9223/#artist=…&album=…` (and `&q=…` for one song) opens the iTunes tab with that Artist and Album chip, when the page opens
+and when it is already open. The other filters are cleared, **← back** returns to the view before, and a reload brings back the saved view (the link is used once). When the chips
+match nothing, the same words are searched instead. The current page reads the same links (`state/openLink.ts` here, `openFromHash` there).
+
 `npm run dev` serves the `data.js` of the `music-hub-core` folder at `/data.js`. To try another library (for example an invented one), set
 `$env:MUSICLAB_DATA_JS = "C:\path\to\data.js"` first.
 

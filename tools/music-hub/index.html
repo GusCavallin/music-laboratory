@@ -757,7 +757,19 @@ function restoreSession(){
 }
 addEventListener("pagehide",saveSession);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveSession()});
-picker();restoreSession();sessionReady=true;saveSession();
+// A link from outside (another page or tool):#artist=…&album=…&q=… opens the iTunes tab on that album, or on a song of it (q = its name).
+// It replaces the saved view and goes into "← back" like a click on an album. When the chips match nothing (a name the library spells differently)
+// the same words are searched instead. The React page reads the same links (src/state/openLink.ts).
+function openFromHash(){
+ const h=new URLSearchParams(location.hash.slice(1)),artist=h.get("artist")||null,album=h.get("album")||null,q=h.get("q")||"";
+ if(!artist&&!album&&!q)return;
+ history.replaceState(null,"",location.pathname+location.search); // used once: a reload brings back the saved view
+ hist.push(snap());fwd.length=0;if(hist.length>20)hist.shift();
+ if(tabName()!=="itunes")document.querySelector(TABSEL.itunes).click();
+ resetFilters();facet={artist,album,volume:null};$("q").value=q;readFeel();chips();run();
+ if(!res.length&&(artist||album)){facet=noFacet();$("q").value=[artist,album,q].filter(Boolean).join(" ");chips();run()}}
+addEventListener("hashchange",openFromHash);
+picker();restoreSession();openFromHash();sessionReady=true;saveSession();
 // --- Installed app window: a manifest cannot set a window size, so the page does it. It keeps the size the window had when you last resized it
 // (ls_window, outer size) and opens at that size, never bigger than the screen. The first time, with no kept size, an app window on a desktop
 // that is narrower than MIN_W (the width that keeps the Raw Feel controls beside the sliders) or shorter than MIN_H grows to it, once.

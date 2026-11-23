@@ -73,6 +73,8 @@ export type Action =
   /** a click on an artist, album or CD cell; `keep` (Ctrl-click) keeps the other filters */
   | { type: "facet"; kind: keyof Facet; value: string; keep: boolean }
   | { type: "removeFacet"; kind: keyof Facet }
+  /** a link from outside (see openLink.ts): the iTunes tab with that artist and album chip, and that search text */
+  | { type: "open"; artist: string | null; album: string | null; query: string }
   | { type: "clear" }
   /** a click on a column header */
   | { type: "sort"; key: string }
@@ -146,6 +148,14 @@ export function reduce(s: UiState, a: Action): UiState {
     }
     case "removeFacet":
       return { ...s, facet: { ...s.facet, [a.kind]: null } };
+    case "open":
+      return {
+        ...withoutFilters(s),
+        tab: "itunes",
+        sort: s.tab === "itunes" ? s.sort : noSort(), // a new tab starts unsorted, as with a click on a tab
+        facet: { artist: a.artist, album: a.album, volume: null },
+        query: a.query,
+      };
     case "clear":
       return { ...withoutFilters(s), facet: noFacet() };
     case "sort":

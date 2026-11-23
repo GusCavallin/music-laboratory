@@ -35,6 +35,7 @@ import { trackTip } from "./data/format";
 import { loadPrefs, moveColumn, resetColumnWidth, resetOrder, savePrefs, setColumnShown, setColumnWidth, visibleColumns } from "./state/columnPrefs";
 import { historyReducer, initialHistory } from "./state/history";
 import { legacyToView, viewToLegacy } from "./state/legacy";
+import { openAction, parseOpenLink } from "./state/openLink";
 import { fitToLibrary, fromSession, loadSession, toSession, writeSession } from "./state/session";
 import { archiveFilterOf, cubeBoxOf, isSongTab, songFilterOf, type UiState } from "./state/uiState";
 import { playlistsOf } from "./tips/tips";
@@ -233,6 +234,24 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
   useEffect(() => {
     if (gaveUp) void recheck();
   }, [gaveUp, recheck]);
+
+  // a link from outside (another page or tool, `#artist=…&album=…&q=…`) opens the iTunes tab on that album or song, when the page opens and
+  // when it is already open; the link is used once, so a reload brings back the view you had
+  const uiRef = useRef(ui);
+  useEffect(() => {
+    uiRef.current = ui;
+  });
+  useEffect(() => {
+    const open = () => {
+      const link = parseOpenLink(window.location.hash);
+      if (!link) return;
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      dispatch(openAction(dataset, uiRef.current, link));
+    };
+    open();
+    window.addEventListener("hashchange", open);
+    return () => window.removeEventListener("hashchange", open);
+  }, [dataset]);
 
   // the space bar plays and pauses, unless you are typing or on a control
   const playOrPauseRef = useRef(playOrPause);
