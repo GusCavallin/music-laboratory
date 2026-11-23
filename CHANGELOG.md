@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.6.1 - 2026-11-22
+
+A refused **Save as playlist** in Music Hub now tells you why in a message box that stays, and the READMEs describe the demo mode, the MP3 Archive tab that only appears with a CD archive, and the Playlist box. After updating, restart `serve.bat` (the React page rebuilds itself) and reload.
+
 ### Fixed
 
 - The READMEs: the front page now has a "Try it without a library" section (`serve.bat --demo`), and the Music Hub, React and core READMEs describe the demo mode, the MP3 Archive tab that only appears with a CD archive, the Playlist box (pick another playlist directly, the ×) and the new iTunes COM scripts; `serve.sh` lists `--demo`.
