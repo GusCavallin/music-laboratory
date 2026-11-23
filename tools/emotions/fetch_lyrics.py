@@ -24,6 +24,7 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", ".."))
 from musiclab_config import SOURCE_LIBRARY  # noqa: E402
+import emotions_data  # noqa: E402
 
 OUT = os.path.join(HERE, "lyrics")
 UA = "music-lab/0.5 (personal use, https://github.com/GusCavallin/music-laboratory)"
@@ -100,7 +101,9 @@ def main():
     if not (a.artist or a.low_confidence or a.stars or a.loved):
         ap.error("give at least one of --artist, --low-confidence, --stars")
 
-    gems = json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))["songs"]
+    gems = emotions_data.gems()["songs"]
+    if not gems:
+        sys.exit("No rated songs yet: queue some, rate them and run merge.py first (see README.md).")
     lib = plistlib.load(open(SOURCE_LIBRARY, "rb"))
     skip = set()  # artists in review-skip.txt are left out, unless --artist asks for one by name
     if not a.artist and os.path.exists(os.path.join(HERE, "review-skip.txt")):
@@ -132,8 +135,8 @@ def main():
         return
 
     os.makedirs(OUT, exist_ok=True)
-    import csv  # the idx used in batches/*.csv, so the ratings can be written straight from the combined file
-    idx_of = {r["persistent_id"]: r["idx"] for r in csv.DictReader(open(os.path.join(HERE, "poc_songs.csv"), encoding="utf-8-sig"))}
+    # the idx used in batches/*.csv, so the ratings can be written straight from the combined file
+    idx_of = {r["persistent_id"]: r["idx"] for r in emotions_data.queue()}
     missing, combined = [], []
     for n, t in enumerate(picked, 1):
         pid, artist, title = t["Persistent ID"], t.get("Artist", ""), t["Name"]

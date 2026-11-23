@@ -1,11 +1,14 @@
 """Are the ten Feel scales independent (orthogonal)?  Pearson correlations, principal components and variance inflation
 factors over every rated song in gems.json.   py -3 correlations.py   -> prints and writes correlations.md
 Pure Python (no numpy): Jacobi eigenvalues for the symmetric correlation matrix, Gauss-Jordan for its inverse."""
-import json, math, os
+import json, math, os, sys
+import emotions_data
 HERE = os.path.dirname(os.path.abspath(__file__))
-g = json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))
+g = emotions_data.gems()
 SC = g["scales"]
 rows = list(g["songs"].values())
+if not rows:
+    sys.exit("No rated songs yet: queue some, rate them and run merge.py first (see README.md).")
 
 
 def corr(a, b):

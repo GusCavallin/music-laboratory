@@ -9,9 +9,12 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repo root, for musiclab_config
 from musiclab_config import SOURCE_LIBRARY  # noqa: E402
 LIB_XML = SOURCE_LIBRARY
-gems = json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))
+import emotions_data  # noqa: E402
+gems = emotions_data.gems()
 SC = gems["scales"]
 songs = gems["songs"]
+if not songs:
+    sys.exit("No rated songs yet: queue some, rate them and run merge.py first (see README.md).")
 lib = plistlib.load(open(LIB_XML, "rb"))
 info = {t["Persistent ID"]: (0 if t.get("Rating Computed") else t.get("Rating", 0) // 20, bool(t.get("Loved")))
         for t in lib["Tracks"].values()}

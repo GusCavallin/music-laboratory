@@ -7,9 +7,10 @@ what a typical listener feels, from knowing the songs (GEMS scales, Zentner et a
 the emotional maturity of the lyrics (ambivalence, responsibility, commitment as a choice, repair, acceptance, loss told honestly).
 """
 import csv, glob, json, os
+import emotions_data
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCALES = ["wonder", "transcendence", "tenderness", "nostalgia", "peacefulness", "power", "joyful", "tension", "sadness", "maturity"]
-songs = {r["idx"]: r for r in csv.DictReader(open(os.path.join(HERE, "poc_songs.csv"), encoding="utf-8-sig"))}
+SCALES = emotions_data.SCALES
+songs = {r["idx"]: r for r in emotions_data.queue()}   # on a first run the queue and the batches folder are made empty
 out, bad = {}, []
 for f in sorted(glob.glob(os.path.join(HERE, "batches", "b*.csv"))):
     for row in csv.reader(open(f, encoding="utf-8")):

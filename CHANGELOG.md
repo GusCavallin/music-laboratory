@@ -5,6 +5,15 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- **A first run for the Feel ratings, from a fresh clone.** The scripts in `tools/emotions` used to crash without the author's private data files (`poc_songs.csv`, `gems.json`, `batches/`); now they make what they need (`emotions_data.py`), so `queue_playlist.py`, `add_set.py` and `merge.py` work from nothing, and `correlations.py`, `stats.py` and `fetch_lyrics.py` say "No rated songs yet" instead of crashing. `axes.py` waits for at least 100 rated songs (`--force` runs it earlier), and until you have your own axes Music Hub shows the Feel Axes tab with the published ones (`data/feel-axes.json`). `test_first_run.py` runs the whole first run on an invented library.
+- `AGENTS.md` has a "First time here?" section for an AI agent setting the repo up for a user (make `config.json`, find the iTunes library file, check it with a read-only build, then queue and rate a small first playlist), and the README has a section "Rate how your songs feel, with an AI agent" and says where the iTunes library file is.
+
+### Fixed
+
+- The README (front page) has a "Trademarks" section: the project is not affiliated with or endorsed by Apple, and iTunes is a trademark of Apple Inc.
+
 ## 0.6.1 - 2026-11-22
 
 A refused **Save as playlist** in Music Hub now tells you why in a message box that stays, and the READMEs describe the demo mode, the MP3 Archive tab that only appears with a CD archive, and the Playlist box. After updating, restart `serve.bat` (the React page rebuilds itself) and reload.

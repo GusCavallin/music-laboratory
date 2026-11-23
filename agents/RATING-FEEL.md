@@ -27,7 +27,12 @@ For each song, ten numbers from 0 to 10 and a confidence:
 
 ## Workflow
 
-1. **Queue songs.** `py -3 add_set.py 4` appends the 4-star loved songs that are not yet queued to `poc_songs.csv`
+**On a first run nothing exists yet.** `poc_songs.csv`, `batches\` and `gems.json` are the user's own ratings, so a fresh clone has none of them: the scripts
+make what they need (`emotions_data.py`), and `axes.py` waits for at least 100 rated songs (until then Music Hub shows the Feel Axes tab with the published
+axes in `data/feel-axes.json`). Start with a small playlist of songs the user knows well, not the whole library.
+
+1. **Queue songs.** `py -3 queue_playlist.py "Playlist name" --dry-run` lists the unrated songs of one playlist (without `--dry-run` it queues them);
+   `py -3 add_set.py 4` appends the 4-star loved songs that are not yet queued to `poc_songs.csv`
    (`add_set.py 4 unloved` for those without a heart; `5` for five stars). A song absent from `gems.json` but present in
    `poc_songs.csv` was skipped on purpose.
 2. **Write a batch.** Add `batches\bNN.csv`: one row per song, no header, columns

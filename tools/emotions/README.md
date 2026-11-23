@@ -16,6 +16,18 @@ choice, repair after conflict, acceptance, loss told honestly. Low = obsession o
 
 Each rating also has a **confidence**: 1 low, 2 medium, 3 high.
 
+## First run
+
+A fresh clone has none of the files below (the ratings are your own, so they are not published). The scripts make what they need, so this works from nothing:
+
+1. `py -3 queue_playlist.py "Playlist name" --dry-run` lists the songs of a playlist that have no rating yet. Start with a small playlist of 20 to 50 songs you know well
+   (`add_set.py 4` queues by stars instead). Without `--dry-run` it makes `poc_songs.csv` and `batches\` and queues the songs.
+2. Rate the queued songs (an AI agent does it, following `agents/RATING-FEEL.md`) into `batches\b01.csv`.
+3. `py -3 merge.py` makes `gems.json`. Click **Refresh data** in Music Hub (or run `py -3 ../music-hub-core/build_data.py`) to see the songs in Raw Feel and Feel Axes.
+4. `axes.py` waits for at least 100 rated songs (`--force` runs it earlier); until then the Feel Axes tab uses the published axes (`data/feel-axes.json`).
+
+`emotions_data.py` holds the file names and creates what is missing; `py -3 -m unittest test_first_run` runs all of this on an invented library.
+
 ## Files
 
 | File | What it is |

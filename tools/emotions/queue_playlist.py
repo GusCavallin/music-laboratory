@@ -10,6 +10,7 @@ import csv, json, os, pathlib, plistlib, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repo root, for musiclab_config
 from musiclab_config import SOURCE_LIBRARY  # noqa: E402
+import emotions_data  # noqa: E402
 
 SPOKEN = ("Podcast", "Spoken & Audio", "Spoken Word", "Audiobook")
 
@@ -24,10 +25,10 @@ def main(argv):
     if not pl:
         sys.exit("No playlist named " + repr(names[0]))
     by_id = {t["Track ID"]: t for t in lib["Tracks"].values()}
-    f = os.path.join(HERE, "poc_songs.csv")
-    have = list(csv.DictReader(open(f, encoding="utf-8-sig")))
+    f = emotions_data.POC
+    have = emotions_data.queue()   # made with its header on a first run
     queued = {r["persistent_id"]: r for r in have}
-    rated = set(json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))["songs"])
+    rated = set(emotions_data.gems()["songs"])   # none before the first merge
     todo, seen = [], set()
     total = skipped = 0
     for it in pl[0].get("Playlist Items", []):

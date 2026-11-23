@@ -15,7 +15,8 @@ data and saved views are never touched. The React version has the same option (`
 ## Setup (for your own library)
 
 1. Copy `config.example.json` to `config.json` (it is git-ignored, so your paths stay on your machine).
-2. Set `source_music_library` to the path of your library file (forward slashes work on Windows: `C:/Music/Library.xml`). Optional:
+2. Set `source_music_library` to the path of your library file (forward slashes work on Windows: `C:/Music/Library.xml`). In iTunes the file is
+   `iTunes Music Library.xml` in your iTunes folder; it exists when *Edit → Preferences → Advanced → "Share iTunes Library XML with other applications"* is on. Optional:
    `cd_archive_index` (a spreadsheet indexing MP3s burned on CDs, for Music Hub's archive tab) and, for the MusicBrainz
    lookups, `contact_email`.
 3. Run a tool from its folder, for example `py -3 build_data.py`. The environment variables `MUSICLAB_SOURCE_LIBRARY`,
@@ -23,6 +24,12 @@ data and saved views are never touched. The React version has the same option (`
 
 The scripts get these settings from `musiclab_config.py` at the repo root. Python 3 is the only requirement (standard library only); the React version of Music
 Hub also needs Node.js, and the iTunes COM scripts need the desktop iTunes for Windows.
+
+## Rate how your songs feel, with an AI agent
+
+Point your AI agent at this repo and ask it to set you up: [AGENTS.md](AGENTS.md) has a "First time here?" section that makes `config.json`, checks that your library reads
+correctly, and then queues a small first playlist for the agent to rate on the nine GEMS scales plus maturity. The ratings show up in Music Hub (Raw Feel and Feel Axes). They
+are the agent's estimates, not measurements, and the titles and artists of the songs go to whichever AI you use. See [tools/emotions](tools/emotions/README.md).
 
 ## Tools
 
@@ -49,3 +56,7 @@ music-laboratory is licensed under the [PolyForm Noncommercial License 1.0.0](ht
 with the Required Notice in the first line of [LICENSE](LICENSE).
 
 The data in `data/` is the exception: it is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (see [data/README.md](data/README.md)).
+
+## Trademarks
+
+This project is not affiliated with or endorsed by Apple. iTunes is a trademark of Apple Inc., registered in the U.S. and other countries. Other product names are used only to say what the tools work with.

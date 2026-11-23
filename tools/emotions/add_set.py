@@ -7,8 +7,9 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repo
 from musiclab_config import SOURCE_LIBRARY  # noqa: E402
 stars = int(sys.argv[1]) if len(sys.argv) > 1 else 4
 loved = not (len(sys.argv) > 2 and sys.argv[2] == "unloved")   # py -3 add_set.py 5 unloved = 5-star songs that are NOT loved
-f = os.path.join(HERE, "poc_songs.csv")
-have = list(csv.DictReader(open(f, encoding="utf-8-sig")))
+import emotions_data  # noqa: E402
+f = emotions_data.POC
+have = emotions_data.queue()   # made with its header on a first run
 known = {r["persistent_id"] for r in have}
 lib = plistlib.load(open(SOURCE_LIBRARY, "rb"))
 rows, seen = [], set()

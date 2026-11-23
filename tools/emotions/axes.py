@@ -3,12 +3,18 @@
 A song's coordinate on an axis = sum(loading * z-score of each scale) / sqrt(eigenvalue), i.e. unit variance over the rated songs.
 Re-run it only when you want the axes recomputed (they stay fixed while ratings are added, so the cube does not shift).
 Maturity is not part of the axes: the page shows it as the colour of each dot."""
-import json, math, os
+import json, math, os, sys
+import emotions_data
 HERE = os.path.dirname(os.path.abspath(__file__))
-g = json.load(open(os.path.join(HERE, "gems.json"), encoding="utf-8"))
+MIN_SONGS = 100   # principal components of nine scales need a few hundred songs to settle; below this they would be noise (--force to run anyway)
+g = emotions_data.gems()
 SC = g["scales"][:9]
 rows = [r for r in g["songs"].values()]
 n = len(rows)
+if n < MIN_SONGS and "--force" not in sys.argv:
+    print(f"Only {n} rated songs: at least {MIN_SONGS} are needed for axes that mean something (--force runs it anyway). Until then "
+          "Music Hub shows the Feel Axes tab with the published axes (data/feel-axes.json). Nothing was written.")
+    sys.exit(0)   # not an error: it is just too early
 mean = [sum(r[k] for r in rows) / n for k in SC]
 sd = [math.sqrt(sum((r[k] - m) ** 2 for r in rows) / (n - 1)) for k, m in zip(SC, mean)]
 Z = [[(r[k] - m) / s for k, m, s in zip(SC, mean, sd)] for r in rows]

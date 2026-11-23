@@ -20,7 +20,8 @@ def _config():
 
 YEARS = HERE.parent / "release-years" / "release_years.csv"
 GENRES = HERE.parent / "artist-genres" / "artist_genres.csv"
-AXES = HERE.parent / "emotions" / "axes.json"   # optional: the three independent axes of the Feel Axes tab (tools/emotions/axes.py)
+# optional: the three independent axes of the Feel Axes tab: your own (tools/emotions/axes.py, once you have enough ratings), else the published ones (data/feel-axes.json)
+AXES = next((p for p in (HERE.parent / "emotions" / "axes.json", HERE.parents[1] / "data" / "feel-axes.json") if p.exists()), HERE.parent / "emotions" / "axes.json")
 GEMS = HERE.parent / "emotions" / "gems.json"   # optional: emotional-tone ratings (tools/emotions)
 BPM = HERE.parent / "bpm" / "bpm.csv"   # optional: tempo from AcousticBrainz (tools/bpm/update_bpm.py)
 VERSION = HERE.parents[1] / "VERSION"   # one line at the repo root, written by a release (see CONVENTIONS.md, Versioning)
