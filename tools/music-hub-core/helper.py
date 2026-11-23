@@ -44,6 +44,9 @@ import build_data  # noqa: E402
 import build_demo_data  # noqa: E402
 
 
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)   # so a helper without a console (serve.pyw) does not flash one for PowerShell or npm
+
+
 def name_and_version():
     """"Music Hub 0.1.0", from the VERSION file at the repo root; plain "Music Hub" before the first release."""
     v = build_data.VERSION.read_text(encoding="utf-8").strip() if build_data.VERSION.exists() else ""
@@ -147,7 +150,8 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "LibrarySearch"
 
     def log_message(self, fmt, *args):
-        sys.stderr.write("%s %s\n" % (self.command, self.path.split("?")[0]))
+        if sys.stderr:   # None when there is no console (serve.pyw gives it a log file, but be safe)
+            sys.stderr.write("%s %s\n" % (self.command, self.path.split("?")[0]))
 
     def send_text(self, status, body, ctype="text/plain; charset=utf-8"):
         data = body.encode("utf-8") if isinstance(body, str) else body
@@ -306,7 +310,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             p = subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script,
                                 "-Path", path, "-Name", name, "-Stars", str(stars)] + (["-FromPlaylist", from_pl] if from_pl else []),
-                               capture_output=True, text=True, timeout=60)
+                               capture_output=True, text=True, timeout=60, creationflags=NO_WINDOW)
             line = (p.stdout.strip().splitlines() or ["ERR no answer"])[-1]
         except (OSError, subprocess.TimeoutExpired) as e:
             line = f"ERR {type(e).__name__}"

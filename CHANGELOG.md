@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+### Added
+
+- Music Hub, both pages: `serve.pyw` starts the helper with no console window (and no taskbar button for it), the same as `serve.bat` otherwise: double-click it or point a shortcut at it (`serve.pyw --demo` works). What `serve.bat` would print goes to `logs\music-hub.log` or `logs\music-hub-react.log` in the repo (the folder is git-ignored), which is where a failed start shows. Rating in iTunes and the React page's build no longer flash a console when the helper has none (`creationflags=CREATE_NO_WINDOW`). `serve.bat` stays for when you want to see the helper.
+
 ### Fixed
 
 - The README (front page) and the Music Hub README show a screenshot of the demo (`docs/MusicHub_Demo_Feel-Axes_Classical.png`), and the React README links to the Music Hub README for what Music Hub does and how to use it.

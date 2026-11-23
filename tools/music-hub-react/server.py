@@ -48,7 +48,7 @@ def build(root=HERE):
         return False
     print("Building the page (npm run build)...", flush=True)
     try:
-        r = subprocess.run(["npm", "run", "build"], cwd=root, shell=(os.name == "nt"))  # on Windows npm is npm.cmd
+        r = subprocess.run(["npm", "run", "build"], cwd=root, shell=(os.name == "nt"), creationflags=helper.NO_WINDOW)  # on Windows npm is npm.cmd
     except OSError:
         print("npm was not found: install Node.js, or start with --no-build to serve what is in dist\\.", flush=True)
         return False

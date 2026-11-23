@@ -10,6 +10,7 @@ What the Music Hub pages share, so each page's own folder holds only the page.
 | `data.js` | The built data (git-ignored, always regenerable). |
 | `presets.json` | Your saved views (git-ignored; created on the first Save). Shared by the pages. |
 | `mojibake_fixes.json` | Spelling repairs for the CD index. |
+| `serve_hidden.py` | What each page's `serve.pyw` calls: runs the page's `server.py` with no console window, its output going to `logs\<page folder>.log` in the repo (git-ignored). |
 | `test_helper.py` | Tests for the helper and the data script, on an invented library. |
 
 ## How a page uses the helper

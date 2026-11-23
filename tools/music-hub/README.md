@@ -28,6 +28,7 @@ only) and opens Music Hub in an app-style window (Chrome, else Edge).
 
 - **Closing the app window stops the helper.** Each open page keeps one connection (`/presence`) to the helper; when the last one drops
   (window closed, browser crashed) the helper exits after a few seconds, so a simple reload doesn't kill it. Ctrl+C in the terminal also stops it.
+- **No console window?** Double-click **`serve.pyw`** instead (the same, run by `pythonw`, so no black window and no taskbar button for it; options work too, for example from a shortcut: `serve.pyw --demo`). What `serve.bat` would print goes to `logs\music-hub.log` in the repo (rewritten at each start; the `logs` folder is git-ignored), and a start that fails shows up there. Closing the app window still stops the helper. Use `serve.bat` when you want to see what the helper does.
 - **Already running?** Running `serve.bat` again just opens the window again.
 - **Port busy?** It takes the next free port. Choose one with `serve.bat --port 9000` (or set `LIBRARY_SEARCH_PORT`).
 - **Options:** `--keep-alive` (don't stop when the window closes), `--browser edge`, `--tab` (a normal browser tab instead of an app window), `--no-browser`.
@@ -243,6 +244,7 @@ width that keeps the Raw Feel controls beside the sliders. The size is kept by t
 | `build_data.py` / `build_data.sh` | Pass on to the scripts in `tools/music-hub-core/` (so the old command still works). |
 | `server.py` | Starts the helper for this page (port 9123). The helper itself is `tools/music-hub-core/helper.py`. |
 | `serve.bat` / `serve.sh` | Start the helper and open the page. |
+| `serve.pyw` | The same with no console window (what it prints goes to `logs\music-hub.log`). |
 | `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `make_icons.py` | The installable-app pieces. |
 
 **Shared with the React version** (`tools/music-hub-react/`), in `tools/music-hub-core/`: the helper (audio, rating, playlists, presets, rebuild), `build_data.py`, the built `data.js`
