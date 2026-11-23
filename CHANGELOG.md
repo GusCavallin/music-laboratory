@@ -5,6 +5,10 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 ## Unreleased
 
+## 0.8.0 - 2026-11-23
+
+Music Hub, both pages, can be opened on an album or a song from a link (`#artist=…&album=…&q=…`). After updating, restart the helper (close the app window and start it again) so the About box shows 0.8.0.
+
 ### Added
 
 - Music Hub, both pages: a link can open the page on an album or a song. `#artist=…&album=…` shows that album (the Artist and Album chips on the iTunes tab, the other filters cleared, **← back** returns), and `&q=…` adds a search for one song. It works when the page opens and when it is already open, is used once (a reload brings back the saved view), and searches the same words when the chips match nothing. The React page has it as an `open` action (`state/openLink.ts`, with tests); the current page as `openFromHash`. Another page can link to it: a ↗ after each album and each song name can open the React page when its helper is running, else the current one.
