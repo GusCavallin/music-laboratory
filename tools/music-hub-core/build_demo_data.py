@@ -38,16 +38,24 @@ def main(csv_path=None):
         feel = [None if r[s] == "" else int(r[s]) for s in SCALES] + [num(r["confidence"], 1)]
         items.append([r["title"], r["artist"], r["album"], r["composer"], "classical", "", 0, num(r["stars"]), num(r["loved"]), 0, "",
                       num(r["seconds"]), "", 0, 0, num(r["track"]), 0, num(r["disc"]), 0, feel, ""])   # no file: path is empty
+    # a small made-up CD archive, so the MP3 Archive tab has something to show: the first albums of 8-40 songs, each as one "CD"
+    by_album = {}
+    for r in rows:
+        if r["album"]:
+            by_album.setdefault(r["album"], []).append(r)
+    cds = [rs for rs in by_album.values() if 8 <= len(rs) <= 40][:8]
+    archive = [[r["title"], r["artist"], r["album"], "Classical", f"CD {i:02d}", num(r["track"]), 1, ""]
+               for i, rs in enumerate(cds, 1) for r in sorted(rs, key=lambda r: (num(r["disc"]), num(r["track"])))]
     axes_file = next((p for p in AXES if p.exists()), None)
     data = {
         "itunes_cols": COLS, "itunes": items, "playlists": [], "archive_cols": ["name", "artist", "album", "category", "volume", "track", "in_itunes", "path"],
-        "archive": [], "axes": json.load(open(axes_file, encoding="utf-8")) if axes_file else None, "demo": 1,
+        "archive": archive, "axes": json.load(open(axes_file, encoding="utf-8")) if axes_file else None, "demo": 1,
         "built": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "version": VERSION.read_text(encoding="utf-8").strip() if VERSION.exists() else "",
     }
     out = HERE / "data.demo.js"
     out.write_text("window.LIB = " + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
-    print(f"demo songs: {len(items)}  data.demo.js: {out.stat().st_size/1e6:.2f} MB" + ("" if axes_file else "  (no axes file: the Feel Axes tab stays empty)"))
+    print(f"demo songs: {len(items)}  demo archive rows: {len(archive)}  data.demo.js: {out.stat().st_size/1e6:.2f} MB" + ("" if axes_file else "  (no axes file: the Feel Axes tab stays empty)"))
 
 
 if __name__ == "__main__":

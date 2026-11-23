@@ -100,7 +100,7 @@ describe("saveAsPlaylist", () => {
   });
 
   it("a name that was already imported is refused with the helper's reason (no question)", async () => {
-    const imported: PlaylistResult = { ok: false, error: '"[Gen] Calm" was already imported (it is in playlists/bak); choose another name', exists: "imported" };
+    const imported: PlaylistResult = { ok: false, error: '"[Gen] Calm" was already imported (it is in playlists/archive); choose another name', exists: "imported" };
     const t = setup({ results: [imported] });
     expect(await t.run()).toBe(imported.ok ? "" : imported.error);
     expect(t.confirm).not.toHaveBeenCalled();

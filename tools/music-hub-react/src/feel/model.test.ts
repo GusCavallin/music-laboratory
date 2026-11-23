@@ -44,7 +44,7 @@ describe("cubeModel", () => {
   const model = cubeModel(cube, fullBox(cube), ds.feelStats);
   it("three axes with the names and the short ends of the axes", () => {
     expect(model).toMatchObject({ kind: "cube", n: 3, colorName: "maturity" });
-    expect(model.ax.map((a) => [a.name, a.ls, a.hs])).toEqual([["Calm", "Bright", "Calm"], ["Ease", "Demanding", "Easy"], ["Awe", "Everyday", "Awe"]]);
+    expect(model.ax.map((a) => [a.name, a.ls, a.hs])).toEqual([["Calm", "Bright", "Calm"], ["Ease", "Demanding", "Easy"], ["Awe", "Down-to-earth", "Awe"]]);
     expect(model.ax[0]!.lowT).toBe("Bright · strong");
   });
   it("only rated songs can be drawn, at their coordinates plus the nudge", () => {

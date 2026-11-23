@@ -107,4 +107,10 @@ describe("fitToLibrary", () => {
     const fit = fitToLibrary(ui, library);
     expect(fit).toMatchObject({ playlist: "", decade: "1980s", country: "", category: "", query: "keep" });
   });
+  it("opens a view that was on the MP3 Archive tab on the iTunes tab when the library has no archive", () => {
+    const ui = run([{ type: "tab", tab: "archive" }]);
+    expect(fitToLibrary(ui, { ...library, hasArchive: false }).tab).toBe("itunes");
+    expect(fitToLibrary(ui, { ...library, hasArchive: true })).toBe(ui);
+    expect(fitToLibrary(ui, library)).toBe(ui);
+  });
 });

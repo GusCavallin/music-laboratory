@@ -103,19 +103,36 @@ describe("the page opens as it was left", () => {
   });
 });
 
+describe("the MP3 Archive tab", () => {
+  const tabNames = () => screen.getAllByRole("tab").map((t) => t.textContent);
+  it("is there when the library has a CD archive", async () => {
+    await open();
+    expect(tabNames()).toContain("MP3 Archive (CDs)");
+  });
+  it("is left out when there is no archive data, and a view saved on it opens on the iTunes tab", async () => {
+    localStorage.setItem("ls_session", JSON.stringify(toSession(view({ type: "tab", tab: "archive" }), false, null)));
+    await open(buildDataset({ ...fixtureLibrary(), archive: [] }));
+    expect(tabNames()).toEqual(["iTunes Library", "Raw Feel", "Feel Axes"]);
+    expect(screen.getByRole("tab", { name: "iTunes Library" }).getAttribute("aria-selected")).toBe("true");
+  });
+});
+
 describe("the demo data", () => {
   const demo = () => buildDataset({ ...fixtureLibrary(), demo: 1 });
   it("says so in the header, all the time, and a normal library does not", async () => {
     await open(demo());
     expect(document.querySelector(".rmsg")?.textContent).toBe("Demo data: classical Feel ratings, no audio");
+    expect(document.querySelector(".rmsg")?.classList.contains("demo")).toBe(true);   // shown as a highlighted pill
     cleanup();
     await open();
     expect(document.querySelector(".rmsg")?.textContent).toBe("");
+    expect(document.querySelector(".rmsg")?.classList.contains("demo")).toBe(false);
   });
   it("plays nothing, and says why", async () => {
     await open(demo());
     await userEvent.click(screen.getByRole("button", { name: "Next" })); // idle: it would start the list
     expect(document.querySelector(".rmsg")?.textContent).toBe("Demo data: there is no audio to play here");
+    expect(document.querySelector(".rmsg")?.classList.contains("demo")).toBe(true);   // the pill keeps its look while the text changes
     expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
   });
 });

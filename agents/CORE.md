@@ -18,7 +18,7 @@ Reading and writing are deliberately asymmetric: use the richest source to read 
 
 ## Repo layout and git
 
-- `playlists\` generated playlist files · `exports\` manual iTunes exports · `tools\<name>\` scripts and their data ·
+- `playlists\` generated playlist files waiting to be imported; `playlists\archive\` the ones confirmed imported and still in iTunes (verified in the library XML; the user says when, or asks me to check), `playlists\bak\` temporary lists that were imported, used and removed (they no longer exist as playlists) · `exports\` manual iTunes exports · `tools\<name>\` scripts and their data ·
   `games\<name>\` self-contained pages.
 - Each tool folder has its own `README.md`. Outputs derived from the library that can be regenerated (e.g. `release_years.csv`,
   `data.js`) are git-ignored. Caches that are costly to rebuild (e.g. `mb_cache.json`) are kept, and never deleted.

@@ -1,4 +1,4 @@
-import type { Dispatch } from "react";
+import { useState, type Dispatch } from "react";
 import { archiveCounts, categoryOptions, countryOptions, decadeOptions } from "../data/options";
 import type { Dataset } from "../data/types";
 import type { Action, UiState } from "../state/uiState";
@@ -17,22 +17,52 @@ export function FilterRow({ dataset, state, dispatch }: Props) {
 }
 
 function SongFilters({ dataset, state, dispatch }: Props) {
+  // The browser's list only offers playlists that match the box's text, so with one chosen it would offer just that one. When the box is
+  // clicked with a playlist in it, the text is set aside (it becomes the placeholder) so the list offers them all; picking one switches,
+  // clicking away restores the old one. `draft` is that set-aside state; null = show the real value. The × clears the filter.
+  const [draft, setDraft] = useState<string | null>(null);
+  const known = (name: string) => dataset.playlists.some((p) => p.name === name);
+  const plText = draft ?? state.playlist;
   const decades = decadeOptions(dataset);
   const countries = countryOptions(dataset);
   return (
     <div className="row filters">
       <label>
         Playlist{" "}
-        <input
-          type="search"
-          className="pl"
-          list="playlists"
-          placeholder="any (type to filter)"
-          autoComplete="off"
-          spellCheck={false}
-          value={state.playlist}
-          onChange={(e) => dispatch({ type: "playlist", value: e.target.value })}
-        />
+        <span className="plwrap">
+          <input
+            type="search"
+            className="pl"
+            list="playlists"
+            placeholder={draft === "" && known(state.playlist) ? state.playlist : "any (type to filter)"}
+            autoComplete="off"
+            spellCheck={false}
+            aria-label="Playlist"
+            value={plText}
+            onFocus={() => known(plText) && setDraft("")}
+            onMouseDown={() => known(plText) && setDraft("")}
+            onKeyDown={(e) => (e.key === "ArrowDown" || e.key === "ArrowUp") && known(plText) && setDraft("")}
+            onBlur={() => setDraft(null)}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              dispatch({ type: "playlist", value: e.target.value });
+            }}
+          />
+          {plText !== "" && (
+            <button
+              type="button"
+              className="plclear"
+              aria-label="Show every song: no playlist"
+              data-tip="No playlist (show every song)"
+              onClick={() => {
+                setDraft(null);
+                dispatch({ type: "playlist", value: "" });
+              }}
+            >
+              ×
+            </button>
+          )}
+        </span>
         <datalist id="playlists">
           {dataset.playlists.map((p) => (
             <option key={p.name} value={p.name} label={`${p.ids.length.toLocaleString()} songs`} />

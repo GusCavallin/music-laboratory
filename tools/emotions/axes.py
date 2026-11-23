@@ -42,7 +42,7 @@ vals, vecs = jacobi(corr)
 # every axis is named after its HIGH end and grows toward the pleasant side; (name, high end, low end, scale that must load with the given sign)
 NAMES = [("Calm", "Calm · tender", "Bright · strong", "peacefulness", +1),
          ("Ease", "Easy · cheerful", "Demanding · intense", "tension", -1),
-         ("Awe", "Awe · grandeur", "Everyday", "wonder", +1)]
+         ("Awe", "Awe · grandeur", "Down-to-earth", "wonder", +1)]
 axes = []
 tot = sum(vals)
 for i, (name, high, low, anchor, sign) in enumerate(NAMES):

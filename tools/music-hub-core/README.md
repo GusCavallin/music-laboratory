@@ -6,7 +6,7 @@ What the Music Hub pages share, so each page's own folder holds only the page.
 |---|---|
 | `build_data.py` / `build_data.sh` | Builds `data.js` from the library XML and the optional indexes (release years, genres, Feel ratings, tempo, the CD archive). Run it here, or click **Refresh data** in a page. |
 | `helper.py` | The local helper every page talks to: serves the page, streams audio (with seeking), rates songs in iTunes, saves playlists and presets, rebuilds the data, and stops itself when the last page closes. Standard library only. |
-| `build_demo_data.py` | Builds `data.demo.js` from the published classical Feel ratings (`data/classical-feel.csv`), so a page can open without a library: start it with `--demo` (for example `serve.bat --demo`). No audio, no rating; `presets.demo.json` keeps the saved views of the demo apart. |
+| `build_demo_data.py` | Builds `data.demo.js` from the published classical Feel ratings (`data/classical-feel.csv`), so a page can open without a library: start it with `--demo` (for example `serve.bat --demo`). No audio, no rating; the MP3 Archive tab shows a few made-up CDs built from the albums; `presets.demo.json` keeps the saved views of the demo apart. |
 | `data.js` | The built data (git-ignored, always regenerable). |
 | `presets.json` | Your saved views (git-ignored; created on the first Save). Shared by the pages. |
 | `mojibake_fixes.json` | Spelling repairs for the CD index. |

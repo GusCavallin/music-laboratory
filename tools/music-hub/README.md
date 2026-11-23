@@ -43,7 +43,7 @@ Without the helper you can still double-click `index.html`: search, filters and 
 | **iTunes Library** | Every song file in iTunes, with stars, hearts, plays, original year, genres and country. You can play and rate from here. |
 | **Raw Feel** | The rated songs, searchable by emotional tone: ten sliders (nine GEMS scales plus maturity). See [Raw Feel and Feel Axes](#raw-feel-and-feel-axes). |
 | **Feel Axes** | The same songs as dots in a cube of three independent feelings; a box you size picks the songs in the list. |
-| **MP3 Archive (CDs)** | The index of MP3s burned on CDs. The paths are not on disk, so these songs can't be played; the tab shows which ones are already in iTunes. |
+| **MP3 Archive (CDs)** | The index of MP3s burned on CDs. The paths are not on disk, so these songs can't be played; the tab shows which ones are already in iTunes. The tab is only there when you have a CD archive (see *Where the data comes from*); the demo has a small made-up one, built from a few classical albums. |
 
 **Screenshots** (a classical playlist; the Feel scores are estimates).
 
@@ -128,7 +128,7 @@ top right says why and nothing changes.
 - **💾 Save as playlist** (next to Presets, iTunes tab, needs the helper): writes the songs now in the list, in the order shown, as
   `[Gen] <name>.m3u8` in the repo's `playlists\` folder (UTF-8, CRLF). Filter first (Raw Feel, Feel Axes box, stars, anything), then save. Music Hub
   never touches iTunes for this: import the file yourself (*File → Library → Import Playlist…*), then check it. It refuses a name that is already in
-  `playlists\bak` (already imported) and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
+  `playlists\archive` (already imported) and asks before replacing a file still waiting to be imported. If iTunes already has a playlist of that name, you are
   warned: importing the same name only adds the songs iTunes doesn't have, it never replaces the old list (delete the old playlist in iTunes first).
 - **ⓘ About** (top right) opens a small box: the version (the helper reads the `VERSION` file at the repo root each time; without the helper, the one `data.js` was built with; "Not released yet" until the first release), when the data was built, what Music Hub is, who made it, the license, and the links to the source and the Ko-fi page. Esc, **Close** or a click outside closes it.
 - After a change, iTunes rewrites its library file within seconds to a minute; click **⟳ Refresh data** to see ratings made elsewhere.
@@ -169,7 +169,7 @@ each named after its high end and growing toward the pleasant side:
 |---|---|---|
 | **Calm** | Calm · tender | Bright · strong |
 | **Ease** | Easy · cheerful | Demanding · intense |
-| **Awe** | Awe · grandeur | Everyday |
+| **Awe** | Awe · grandeur | Down-to-earth |
 
 Dot color is **maturity** (cool/warm as above; a hollow ring means no score). Three axis sliders plus a maturity slider size a translucent box; dots inside stay bright, the rest fade,
 and the list on the left shows exactly the songs inside the box (other filters still apply). Drag to rotate, wheel to zoom, double-click to reset the view; hover a dot to see the song, click it to play it. A bright blue ring (with a soft glow) marks the song that is playing, in the cube and in the flat plots (even when your filters fade it).
@@ -189,7 +189,7 @@ file works even from `file://`, where `fetch` of a JSON file would be blocked, a
 | Feel ratings | `tools/emotions/gems.json` | Raw Feel and Feel Axes tabs |
 | Composite axes (Calm, Ease, Awe) | `tools/emotions/axes.json` | Feel Axes tab |
 | Tempo (BPM) | `tools/bpm/bpm.csv` | Built into the data but the column is hidden (see below) |
-| CD archive | the spreadsheet named by `cd_archive_index` in `config.json` (optional, read-only; without it the archive tab is empty). Its Path column shows `$DL` in place of the drive letter, which only said which CD drive the disc was read in | The archive tab |
+| CD archive | the spreadsheet named by `cd_archive_index` in `config.json` (optional, read-only; without it there is no archive tab). Its Path column shows `$DL` in place of the drive letter, which only said which CD drive the disc was read in | The archive tab |
 | Spelling repairs | `tools/music-hub-core/mojibake_fixes.json` | Fixes accented letters lost in the CD index |
 
 Rebuilding: **⟳ Refresh data** (with the helper running) rebuilds `data.js` from iTunes and swaps the new data in without reloading the page: your search, scroll position and the playing song are kept.
@@ -217,8 +217,8 @@ With the helper running, open the page in Chrome or Edge and use **Install** (th
 the helper (`serve.bat`) must be running, and the port must stay the same (an app installed from `:9123` won't work from another port).
 `manifest.webmanifest`, `sw.js` (installability only; it caches nothing, so data is always fresh) and the icons (`make_icons.py`) are served by the helper (`server.py` starts it).
 
-**Window size.** A web app manifest cannot set one, so when the app window opens on a desktop, the page makes it at least `MIN_W` × `MIN_H` (1090 × 600, at the end of `index.html`), once. 1090 is the narrowest
-width that keeps the Raw Feel controls beside the sliders. You can still drag the window smaller (the browser decides how small, and a web page cannot stop it), but the page then keeps at least 1090 px of width and scrolls sideways instead of squeezing: the Raw Feel controls stay beside the sliders. A normal browser tab and a phone are left alone, and keep the narrow layouts.
+**Window size.** A web app manifest cannot set one, so the page does it: it keeps the size of the app window when you resize it (a moment after you stop dragging) and opens the window at that size next time, never bigger than the screen. The first time, with no kept size, it makes the window at least `MIN_W` × `MIN_H` (1090 × 600, at the end of `index.html`), once. 1090 is the narrowest
+width that keeps the Raw Feel controls beside the sliders. The size is kept by the browser for this address, so if the helper has to use another port (the usual one is busy), that window starts from the minimum again. You can still drag the window smaller (the browser decides how small, and a web page cannot stop it), but the page then keeps at least 1090 px of width and scrolls sideways instead of squeezing: the Raw Feel controls stay beside the sliders. A normal browser tab and a phone are left alone, and keep the narrow layouts.
 
 ## Troubleshooting
 

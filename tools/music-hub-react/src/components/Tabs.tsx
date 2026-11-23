@@ -7,10 +7,11 @@ const TABS: readonly { tab: Tab; label: string; tip?: string }[] = [
   { tab: "archive", label: "MP3 Archive (CDs)" },
 ];
 
-export function Tabs({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) => void }) {
+/** `hasArchive` false (no CD archive in the library) leaves the MP3 Archive tab out. */
+export function Tabs({ tab, onChange, hasArchive = true }: { tab: Tab; onChange: (tab: Tab) => void; hasArchive?: boolean }) {
   return (
     <div className="tabs" role="tablist" aria-label="Library">
-      {TABS.map((t) => (
+      {TABS.filter((t) => hasArchive || t.tab !== "archive").map((t) => (
         <button
           key={t.tab}
           type="button"

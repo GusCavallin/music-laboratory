@@ -10,9 +10,14 @@ from pathlib import Path
 HERE = Path(__file__).parent
 import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repo root, for musiclab_config
-from musiclab_config import CD_ARCHIVE_INDEX, SOURCE_LIBRARY  # noqa: E402
-LIB_XML = SOURCE_LIBRARY
-XLSX = CD_ARCHIVE_INDEX   # optional (cd_archive_index in config.json)
+
+
+def _config():
+    """The settings of config.json, read only when a build needs them: `serve --demo` imports this file but needs no library, so it must work without config.json."""
+    import musiclab_config
+    return musiclab_config
+
+
 YEARS = HERE.parent / "release-years" / "release_years.csv"
 GENRES = HERE.parent / "artist-genres" / "artist_genres.csv"
 AXES = HERE.parent / "emotions" / "axes.json"   # optional: the three independent axes of the Feel Axes tab (tools/emotions/axes.py)
@@ -45,7 +50,7 @@ def itunes_rows():
     ag = {r["artist"]: r for r in read_csv(GENRES)}
     gems = json.load(open(GEMS, encoding="utf-8"))["songs"] if GEMS.exists() else {}
     scales = json.load(open(GEMS, encoding="utf-8"))["scales"] if GEMS.exists() else []
-    lib = plistlib.load(open(LIB_XML, "rb"))
+    lib = plistlib.load(open(_config().SOURCE_LIBRARY, "rb"))
     rows, by_path, by_id = [], {}, {}
     for t in lib["Tracks"].values():
         if t.get("Track Type") != "File" or "Location" not in t:
@@ -125,6 +130,7 @@ def fix_text(s):
 
 
 def xlsx_rows():
+    XLSX = _config().CD_ARCHIVE_INDEX   # optional (cd_archive_index in config.json)
     if not XLSX:
         return []
     M = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"

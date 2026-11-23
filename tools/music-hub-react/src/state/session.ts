@@ -77,15 +77,17 @@ export function writeSession(session: SavedSession, storage: Storage_ = localSto
 
 /**
  * A view from an earlier visit (or a preset) can name things the library no longer has: a playlist that was deleted, a decade nobody has now. Those
- * choices are dropped, the rest stays.
+ * choices are dropped, the rest stays. The MP3 Archive tab is only there when the library has an archive (`hasArchive`, true when left out), so a view
+ * that was on it opens on the iTunes tab instead.
  */
-export function fitToLibrary(ui: UiState, library: { playlists: readonly string[]; decades: readonly string[]; countries: readonly string[]; categories: readonly string[] }): UiState {
+export function fitToLibrary(ui: UiState, library: { playlists: readonly string[]; decades: readonly string[]; countries: readonly string[]; categories: readonly string[]; hasArchive?: boolean }): UiState {
   const keep = (value: string, all: readonly string[]) => (value === "" || all.includes(value) ? value : "");
   const next = {
     decade: keep(ui.decade, library.decades),
     country: keep(ui.country, library.countries),
     playlist: keep(ui.playlist, library.playlists),
     category: keep(ui.category, library.categories),
+    tab: ui.tab === "archive" && library.hasArchive === false ? ("itunes" as const) : ui.tab,
   };
-  return next.decade === ui.decade && next.country === ui.country && next.playlist === ui.playlist && next.category === ui.category ? ui : { ...ui, ...next };
+  return next.decade === ui.decade && next.country === ui.country && next.playlist === ui.playlist && next.category === ui.category && next.tab === ui.tab ? ui : { ...ui, ...next };
 }

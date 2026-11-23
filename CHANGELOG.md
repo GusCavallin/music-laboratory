@@ -9,7 +9,21 @@ Notable changes to Music Laboratory. The format follows [Keep a Changelog](https
 
 - Music Hub demo mode, both pages: `serve.bat --demo` opens Music Hub on the published classical Feel ratings (`data/classical-feel.csv`) instead of your library, so anyone can look around without iTunes: the table, filters, Raw Feel sliders and the Feel Axes cube work. There is no audio and the stars cannot be changed; your own `data.js` and saved views are not touched (`build_demo_data.py` builds `data.demo.js`, saved views go to `presets.demo.json`), and the header says "Demo data". The helper has tests for it.
 - `data/classical-feel.csv`: the Feel ratings of the classical recordings (artist, composer, album, title, length, your own stars and favorites, and the ten scales, with a confidence), published under CC BY 4.0, with a README that explains the columns and how to credit it. Nothing of the library it came from is in it: no paths, play counts or dates.
+- `tools/emotions/queue_playlist.py`: queues the songs of one playlist that have no Feel rating yet, so they can be rated and merged. Described in `tools/emotions/README.md`.
 - `tools/emotions/fetch_lyrics.py`: fetches the lyrics of the songs you pick (by artist, low confidence or your own stars) into a git-ignored `lyrics/` folder, with one combined file to read, so a weak Feel rating can be redone from what the song says. Described in `tools/emotions/README.md`.
+
+### Changed
+
+- Feel Axes: the low end of the Awe axis is now called "Down-to-earth" instead of "Everyday" (practical and realistic, with no hint of maturity). Only the label changed, not the axis or any song's place on it; after updating, click **Refresh data** (or run `build_data.py`) for Music Hub to show it.
+- Music Hub, both pages: the installed app window now opens at the size it had when you last resized it (never bigger than the screen), instead of at the 1090 × 600 minimum every time; the minimum is only used the first time. The size is kept for the address (port) the page is served from.
+- Music Hub, both pages: the MP3 Archive (CDs) tab only appears when there is archive data (a `cd_archive_index` spreadsheet in `config.json`); without one it is left out instead of showing an empty table, and a saved view that was on it opens on the iTunes Library tab. The demo shows the tab, with a small made-up archive of eight "CDs" built from the classical albums (`build_demo_data.py`).
+- Music Hub demo mode, both pages: the "Demo data: classical Feel ratings, no audio" note in the header is now a highlighted amber pill (bold, with a border), so it cannot be missed; it stays a pill when its text changes (for example "there is no audio to play here" after a click on a song).
+
+### Fixed
+
+- Music Hub, both pages: `serve.bat --demo` no longer asks for `config.json` and a library ("'source_music_library' is not set"); the demo needs neither (the settings are now read only when a build of your own library needs them). The helper has a test for starting the demo with no library.
+- Music Hub, both pages: with a playlist chosen, the Playlist box's drop-down offered only that playlist (the browser lists what matches the text in the box), so you had to click the × before you could pick another. Now clicking the box sets the chosen name aside (it stays as the grey placeholder) and the list offers every playlist; pick one and it switches, click away without picking and the old one comes back. The × stays and clears the filter. The × is now our own button (as in the search box), and the browser's own × is hidden.
+- Music Hub, both pages: the Playlist box (and with it the list of playlists that drops down from it) is wider, 480 px instead of 260, so the longest playlist names and their song counts fit; on a narrow window it shrinks to fit.
 
 ## 0.5.2 - 2026-11-21
 

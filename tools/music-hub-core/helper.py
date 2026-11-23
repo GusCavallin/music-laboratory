@@ -248,7 +248,7 @@ class Handler(BaseHTTPRequestHandler):
     def playlist_save(self):
         """Write the songs the page is showing as "[Gen] <name>.m3u8" in the repo's playlists folder (UTF-8, CRLF, as in
         agents/WRITING-PLAYLISTS.md). Only songs listed in data.js are accepted. Nothing is touched in iTunes: the user imports the file.
-        Refuses a name that was already imported (playlists/bak); an unimported file of the same name needs overwrite=true."""
+        Refuses a name that was already imported (playlists/archive); an unimported file of the same name needs overwrite=true."""
         def fail(status, error, **extra):
             return self.send_text(status, json.dumps({"ok": False, "error": error, **extra}), "application/json")
         try:
@@ -276,8 +276,8 @@ class Handler(BaseHTTPRequestHandler):
             return fail(HTTPStatus.BAD_REQUEST, str(e))
         fname = f"{GEN}{name}.m3u8"
         out = os.path.join(PLAYLISTS, fname)
-        if os.path.exists(os.path.join(PLAYLISTS, "bak", fname)):
-            return fail(HTTPStatus.CONFLICT, f'"{GEN}{name}" was already imported (it is in playlists/bak); choose another name', exists="imported")
+        if os.path.exists(os.path.join(PLAYLISTS, "archive", fname)):
+            return fail(HTTPStatus.CONFLICT, f'"{GEN}{name}" was already imported (it is in playlists/archive); choose another name', exists="imported")
         if os.path.exists(out) and not overwrite:
             return fail(HTTPStatus.CONFLICT, f'"{fname}" is already in the playlists folder, waiting to be imported', exists="pending")
         os.makedirs(PLAYLISTS, exist_ok=True)

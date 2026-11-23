@@ -66,7 +66,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
   const [boot] = useState(() => {
     const saved = fromSession(loadSession());
     const names = dataset.playlists.map((p) => p.name);
-    return { ...saved, ui: fitToLibrary(saved.ui, { playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset) }) };
+    return { ...saved, ui: fitToLibrary(saved.ui, { playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset), hasArchive: dataset.archive.length > 0 }) };
   });
   const [{ ui, hist, fwd }, dispatch] = useReducer(historyReducer, boot.ui, initialHistory);
   const [message, flash] = useFlash();
@@ -322,7 +322,7 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
     if (!p) return;
     const names = dataset.playlists.map((x) => x.name);
     const view: UiState = fitToLibrary(legacyToView(p.state, undefined, bounds), {
-      playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset),
+      playlists: names, decades: decadeOptions(dataset), countries: countryOptions(dataset), categories: categoryOptions(dataset), hasArchive: dataset.archive.length > 0,
     });
     dispatch({ type: "apply", view: { ...view, cube: { ...view.cube, view: ui.cube.view } } }); // the Cube / Flat choice is a way of looking, not part of a view
   };
@@ -446,14 +446,14 @@ export function Library({ dataset, reload }: { dataset: Dataset; reload: () => P
         <div className="top">
           <h1>Music Hub</h1>
           <span className="preview" data-tip="The React version of Music Hub: it has its own helper (port 9223) and can be installed as an app">React</span>
-          <Tabs tab={ui.tab} onChange={(tab) => dispatch({ type: "tab", tab })} />
+          <Tabs tab={ui.tab} onChange={(tab) => dispatch({ type: "tab", tab })} hasArchive={dataset.archive.length > 0} />
           <div className="acts">
             {helper.available === false && (
               <span className="nohelper" data-tip="The Python helper (serve.bat) streams the songs and talks to iTunes. Start it and this note goes away.">
                 ⚠ helper not running
               </span>
             )}
-            <span className="rmsg" role="status" data-tip={message || (dataset.demo ? DEMO_NOTE : undefined)}>{message || (dataset.demo ? DEMO_NOTE : "")}</span>
+            <span className={"rmsg" + (dataset.demo ? " demo" : "")} role="status" data-tip={message || (dataset.demo ? DEMO_NOTE : undefined)}>{message || (dataset.demo ? DEMO_NOTE : "")}</span>
             <button
               type="button"
               disabled={refreshing}

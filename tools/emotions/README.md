@@ -25,6 +25,7 @@ Each rating also has a **confidence**: 1 low, 2 medium, 3 high.
 | `batches/b01.csv`, `b02.csv`, ... | The raw ratings, one row per song: `idx, wonder, transcendence, tenderness, nostalgia, peacefulness, power, joyful, tension, sadness, maturity, confidence`. |
 | `merge.py` | Rebuilds `gems.json` from `poc_songs.csv` + `batches/` (writes through a temp file, so it never leaves a half-written file). |
 | `add_set.py` | Queues more songs by star rating: `py -3 add_set.py 4` (4-star loved) or `py -3 add_set.py 4 unloved`. |
+| `queue_playlist.py` | Queues the songs of one playlist that have no Feel rating yet: `py -3 queue_playlist.py "Playlist name" --dry-run` lists them, without `--dry-run` it appends them to `poc_songs.csv`; then rate them in a new `batches/bNN.csv` and run `merge.py`. |
 | `fetch_lyrics.py` | Fetches the lyrics of the songs you pick (by artist, low confidence or stars) into `lyrics/`, to rate them from what they say. See *Rating from the lyrics* below. |
 | `stats.py` / `stats.md` | Mean and standard deviation of every scale overall and by stars and hearts. |
 | `correlations.py` / `correlations.md` | The orthogonality check: correlations, principal components, variance inflation factors. |
@@ -77,7 +78,7 @@ toward the pleasant side; a song's coordinate is the sum of loading x z-score ov
 |---|---|---|---|
 | **Calm** | Calm · tender | Bright · strong | peacefulness, tenderness, nostalgia, transcendence; against joyful and power |
 | **Ease** | Easy · cheerful | Demanding · intense | against tension and sadness; with joyful |
-| **Awe** | Awe · grandeur | Everyday | wonder, transcendence, power |
+| **Awe** | Awe · grandeur | Down-to-earth | wonder, transcendence, power |
 
 Maturity is **not** part of the axes (it is empty for instrumentals); the page shows it as dot color. The axes are saved in `axes.json` and stay fixed while ratings are added, so the cube doesn't shift;
 re-run `py -3 axes.py` only when you want them recomputed (Music Hub picks the new file up on **Refresh data**).

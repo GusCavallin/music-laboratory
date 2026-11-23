@@ -49,7 +49,7 @@ export const fixtureLibrary = (): RawLibrary => ({
     axes: [
       { name: "Calm", low: "Bright · strong", high: "Calm · tender", loadings: [0, 0, 0.5, 0.2, 0.5, -0.4, -0.2, 0, 0], eigenvalue: 4 },
       { name: "Ease", low: "Demanding · intense", high: "Easy · cheerful", loadings: [0, 0, 0, 0, 0, 0, 0.5, -0.5, -0.5], eigenvalue: 1 },
-      { name: "Awe", low: "Everyday", high: "Awe · grandeur", loadings: [0.5, 0.5, 0, 0, 0, 0.3, 0, 0, 0], eigenvalue: 1 },
+      { name: "Awe", low: "Down-to-earth", high: "Awe · grandeur", loadings: [0.5, 0.5, 0, 0, 0, 0.3, 0, 0, 0], eigenvalue: 1 },
     ],
   },
   built: "2026-11-19 10:00",

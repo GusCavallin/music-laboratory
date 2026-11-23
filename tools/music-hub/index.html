@@ -14,8 +14,8 @@ header{flex:none;background:var(--bg);border-bottom:1px solid var(--line);paddin
 .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
 select,input[type=number],input#pl,button{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--chip);color:var(--fg)}
 button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-label{color:var(--mut)}#f1,#f2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}#f1[hidden],#f2[hidden]{display:none}#pl{max-width:260px}#qrow{display:flex;gap:10px;align-items:center}#qrow #q{flex:1;min-width:0;width:auto;padding-right:36px}#qwrap{position:relative;flex:1;min-width:0;display:flex}#qclear{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mut);font-size:20px;line-height:1;padding:2px 9px 4px;border-radius:50%;cursor:pointer}#qclear:hover{color:var(--fg);background:var(--chip)}#q:placeholder-shown+#qclear{display:none}/* the title and the tabs keep their size; the actions take what is left and the message in them is cut with "…" (its tip, set below, has all of it) instead of squeezing the tabs into a scrollbar; below about 940px the tabs get their own row (media query above) */
-#rmsg{color:var(--mut);flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#count{color:var(--mut);white-space:nowrap;text-align:right;min-width:11ch}
+label{color:var(--mut)}#f1,#f2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}#f1[hidden],#f2[hidden]{display:none}#pl{width:min(480px,calc(100vw - 110px))}#plwrap{position:relative;display:inline-flex;vertical-align:middle}input#pl{padding-right:50px}#pl::-webkit-search-cancel-button{display:none}#plclear{position:absolute;right:26px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mut);font-size:20px;line-height:1;padding:2px 9px 4px;border-radius:50%;cursor:pointer}#plclear:hover{color:var(--fg);background:var(--chip)}#pl:placeholder-shown+#plclear{display:none}#qrow{display:flex;gap:10px;align-items:center}#qrow #q{flex:1;min-width:0;width:auto;padding-right:36px}#qwrap{position:relative;flex:1;min-width:0;display:flex}#qclear{position:absolute;right:5px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mut);font-size:20px;line-height:1;padding:2px 9px 4px;border-radius:50%;cursor:pointer}#qclear:hover{color:var(--fg);background:var(--chip)}#q:placeholder-shown+#qclear{display:none}/* the title and the tabs keep their size; the actions take what is left and the message in them is cut with "…" (its tip, set below, has all of it) instead of squeezing the tabs into a scrollbar; below about 940px the tabs get their own row (media query above) */
+#rmsg{color:var(--mut);flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#rmsg.demo{color:var(--fg);font-weight:600;padding:2px 10px;border:1px solid var(--warm);border-radius:999px;background:color-mix(in srgb,var(--warm) 18%,transparent)}#count{color:var(--mut);white-space:nowrap;text-align:right;min-width:11ch}
 main{flex:1;min-height:0;overflow:auto;padding:0 16px 40px}
 /* An installed app window on a desktop (the script in <head> puts class "app" on <html>) never lays out narrower than 1090px (MIN_W at the end of the script: the width that keeps the Raw Feel controls beside the sliders): a narrower window scrolls sideways instead of squeezing the page. A browser tab and a phone are untouched. The width breakpoints look at the window and not at the page, so the app also gets the wide layouts below whatever the window width. */
 html.app{min-width:1090px;overflow-x:auto}
@@ -63,7 +63,7 @@ tbody tr{cursor:pointer}td[data-k=path]{cursor:copy}tbody tr:hover{background:va
 <div class="row" id="feel" hidden></div>
 <div class="row" id="cubectl" hidden></div>
  <div class="row" id="src">
-  <span id="f1"><label>Playlist <input id="pl" type="search" list="pllist" placeholder="any (type to filter)" autocomplete="off" spellcheck="false"><datalist id="pllist"></datalist></label>
+  <span id="f1"><label>Playlist <span id="plwrap"><input id="pl" type="search" list="pllist" placeholder="any (type to filter)" autocomplete="off" spellcheck="false"><button id="plclear" type="button" aria-label="Show every song: no playlist" data-tip="No playlist (show every song)">×</button></span><datalist id="pllist"></datalist></label>
   <label>Rating <select id="stars" data-tip="Rating from"><option>0<option>1<option>2<option>3<option>4<option>5</select> – <select id="starsmax" data-tip="Rating to"><option>0<option>1<option>2<option>3<option>4<option selected>5</select></label>
   <label><input type="checkbox" id="loved"> Loved</label>
   <label>Decade <select id="dec"><option value="">any</option></select></label>
@@ -129,7 +129,9 @@ D.itunes.forEach((o,i)=>{o._ix=i;const f=o.feel;FEEL.forEach((s,j)=>o["f_"+s[0]]
   for(const o of D.itunes){o._ak=clash.has(o.album)?o.artist:"";o._dk=o.disc||1}} // _dk: the disc a Track sort uses (a song with no disc tag counts as disc 1, as the column shows it)
  FEELSTAT={};FEEL.forEach((s,j)=>{const v=D.itunes.map(o=>o.feel?o.feel[j]:null).filter(x=>x!=null),n=v.length,m=v.reduce((a,b)=>a+b,0)/n;FEELSTAT[s[0]]={n,m,sd:Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1))}}); // mean and stdev of each scale over all rated songs
  for(const o of D.itunes)index(o,["name","artist","album","composer"]);
- for(const o of D.archive)index(o,["name","artist","album"])}
+ for(const o of D.archive)index(o,["name","artist","album"]);
+ document.querySelector("#tabs [data-s=archive]").hidden=!D.archive.length; // no CD archive configured: no MP3 Archive tab (the demo has a small one)
+ try{if(!D.archive.length&&src==="archive")document.querySelector("#tabs [data-s=itunes]:not([data-feel]):not([data-cube])").click()}catch(e){}} // (data refreshed to no archive while on it; before the first build src is not ready yet)
 build();
 const COLS={
  itunes:[["name","Name"],["artist","Artist"],["album","Album"],["track","Track",1],["year","Year",1],["loved","❤️",1],["stars","Rating"],["plays","Plays",1],["last_played","Last played"],["genres","Genres"],["country","Ctry"],["composer","Composer"],["secs","Time",1],["path","Path"]],
@@ -284,7 +286,7 @@ audio.ontimeupdate=()=>{const now=Date.now();if(now-lastSave>3000){lastSave=now;
  $("seek").value=audio.duration?audio.currentTime/audio.duration*1000:0;$("ptime").textContent=mmss(audio.currentTime)+" / "+mmss(audio.duration)};
 $("seek").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/1000*audio.duration};
 let rtimer;
-if(LIB.demo)$("rmsg").textContent="Demo data: classical Feel ratings, no audio";
+if(LIB.demo){$("rmsg").textContent="Demo data: classical Feel ratings, no audio";$("rmsg").classList.add("demo")}
 function flash(msg){const el=$("rmsg"),old=el.dataset.old??el.textContent;el.dataset.old=old;el.textContent=msg;clearTimeout(rtimer);
  rtimer=setTimeout(()=>{el.textContent=old;delete el.dataset.old},2000)}
 async function copyText(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}}
@@ -376,8 +378,19 @@ $("qclear").onclick=()=>{$("q").value="";$("q").focus();run()}; // the × shows 
 document.querySelectorAll("select,input[type=checkbox]").forEach(e=>e.onchange=run);
 // playlist box: filters when the text is exactly a playlist name (picked from the list or typed in full); leaving it with anything else clears it
 const plOk=v=>(LIB.playlists||[]).some(p=>p[0]===v);
-$("pl").oninput=()=>{const v=$("pl").value;if(v===""||plOk(v))run()};
+// The browser's list only offers the playlists that match the text in the box, so with a playlist chosen it would offer just that one.
+// So when the box is clicked (or tabbed into) with a playlist in it, the text is set aside (it stays the placeholder) and the list offers them all;
+// pick one and it switches; click away without choosing and the old one comes back. The × clears the filter.
+const PL_PH=$("pl").placeholder;let plSaved=null,plTyped=false;
+const plEdit=()=>{if(plSaved===null&&plOk($("pl").value)){plSaved=$("pl").value;plTyped=false;$("pl").placeholder=plSaved;$("pl").value=""}};
+$("pl").onfocus=$("pl").onmousedown=plEdit;
+$("pl").onkeydown=e=>{if(e.key==="ArrowDown"||e.key==="ArrowUp")plEdit()};
+$("pl").oninput=()=>{plTyped=true;plSaved=null;$("pl").placeholder=PL_PH;const v=$("pl").value;if(v===""||plOk(v))run()};
+$("pl").onblur=()=>{const t=plTyped;plTyped=false;$("pl").placeholder=PL_PH;
+ if(plSaved!==null&&!t)$("pl").value=plSaved;else if(!plOk($("pl").value)&&$("pl").value!==""){$("pl").value="";run()}
+ plSaved=null};
 $("pl").onchange=()=>{if(!plOk($("pl").value))$("pl").value="";run()};
+$("plclear").onclick=()=>{$("pl").value="";plSaved=null;$("pl").placeholder=PL_PH;run()};
 // custom tooltips (the browser's own title= tooltip has a fixed, slow delay): any [data-tip] element
 const TIP_DELAY=150; // ms
 const tip=document.body.appendChild(Object.assign(document.createElement("div"),{id:"tip"}));
@@ -720,7 +733,7 @@ function restoreSession(){
  let s=null;try{s=JSON.parse(localStorage.getItem("ls_session")||"null")}catch(e){}
  if(s&&typeof s==="object"){
   try{
-   if(s.src==="archive")document.querySelector("#tabs [data-s=archive]").click();
+   if(s.src==="archive"&&D.archive.length)document.querySelector("#tabs [data-s=archive]").click();
    else if(s.cube)document.querySelector("#tabs [data-cube]").click();
    else if(s.feel)document.querySelector("#tabs [data-feel]").click();
    for(const id of SESSION_FIELDS){const v=s.f&&s.f[id];if(v==null)continue;const el=$(id);
@@ -743,13 +756,16 @@ function restoreSession(){
 addEventListener("pagehide",saveSession);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveSession()});
 picker();restoreSession();sessionReady=true;saveSession();
-// --- Installed app window: a manifest cannot set a window size, so on opening, an app window on a desktop that is narrower than MIN_W (the
-// width that keeps the Raw Feel controls beside the sliders) or shorter than MIN_H grows to it, once. Dragging it smaller afterwards is
-// left alone. A normal browser tab, a phone and a screen smaller than the size are untouched. ---
+// --- Installed app window: a manifest cannot set a window size, so the page does it. It keeps the size the window had when you last resized it
+// (ls_window, outer size) and opens at that size, never bigger than the screen. The first time, with no kept size, an app window on a desktop
+// that is narrower than MIN_W (the width that keeps the Raw Feel controls beside the sliders) or shorter than MIN_H grows to it, once.
+// A normal browser tab, a phone and a screen smaller than the size are untouched. ---
 {const MIN_W=1090,MIN_H=600,asApp=["standalone","minimal-ui","window-controls-overlay"].some(m=>matchMedia(`(display-mode: ${m})`).matches);
  if(asApp&&matchMedia("(pointer: fine)").matches){
-  const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;
-  if(dw>0||dh>0)try{resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}catch(e){}}}
+  let kept=null;try{const v=JSON.parse(localStorage.getItem("ls_window")||"null");if(v&&v.width>=400&&v.height>=300)kept=v}catch(e){} // (smaller than 400 x 300 is not a window somebody meant: a minimized one reports 0)
+  try{if(kept){const w=Math.min(Math.round(kept.width),screen.availWidth),h=Math.min(Math.round(kept.height),screen.availHeight);if(w!==outerWidth||h!==outerHeight)resizeTo(w,h)}
+   else{const dw=Math.min(MIN_W,screen.availWidth)-innerWidth,dh=Math.min(MIN_H,screen.availHeight)-innerHeight;if(dw>0||dh>0)resizeTo(outerWidth+Math.max(dw,0),outerHeight+Math.max(dh,0))}}catch(e){}
+  let wt;addEventListener("resize",()=>{clearTimeout(wt);wt=setTimeout(()=>{if(outerWidth>=400&&outerHeight>=300)try{localStorage.setItem("ls_window",JSON.stringify({width:outerWidth,height:outerHeight}))}catch(e){}},500)})}}
 // the message next to Refresh data is cut when there is little room: its tip always has all of it
 new MutationObserver(()=>{const t=$("rmsg").textContent;t?$("rmsg").dataset.tip=t:delete $("rmsg").dataset.tip}).observe($("rmsg"),{childList:true,characterData:true,subtree:true});
 // --- About: a small dialog (Esc, the Close button or a click outside closes it) ---

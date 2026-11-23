@@ -64,7 +64,7 @@ class Tree:
         t = self.root / "tools"
         shutil.copy(REPO / "musiclab_config.py", self.root / "musiclab_config.py")
         (self.root / "VERSION").write_text("9.9.9\n")
-        (self.root / "playlists" / "bak").mkdir(parents=True)
+        (self.root / "playlists" / "archive").mkdir(parents=True)
         core = t / "music-hub-core"
         core.mkdir(parents=True)
         for name in ("helper.py", "build_data.py", "build_demo_data.py"):
@@ -323,6 +323,29 @@ class DemoTests(unittest.TestCase):
         out = json.loads(body)
         self.assertTrue(out["ok"], out)
         self.assertIn("demo songs: 2", out["output"])
+
+
+class DemoWithoutLibraryTests(unittest.TestCase):
+    """--demo on a machine with no config.json and no library (a fresh download): it must start and serve the demo data, not ask for the library."""
+    @classmethod
+    def setUpClass(cls):
+        cls.t = Tree()
+        (cls.t.root / "demo.csv").write_text(DEMO_CSV, encoding="utf-8")
+        cls.t.env["MUSICLAB_DEMO_CSV"] = str(cls.t.root / "demo.csv")
+        cls.t.env.pop("MUSICLAB_SOURCE_LIBRARY")
+        cls.port = free_port()
+        cls.proc = cls.t.start("vanilla", cls.port, "--demo")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.t.close()
+
+    def test_starts_and_serves_the_demo_data(self):
+        self.assertFalse((self.t.root / "config.json").exists())
+        self.t.wait_for(self.port)
+        status, _c, body = request(self.port, "/data.js")
+        self.assertEqual(status, 200)
+        self.assertIn('"demo": 1', body.decode().replace('"demo":1', '"demo": 1'))
 
 
 if __name__ == "__main__":

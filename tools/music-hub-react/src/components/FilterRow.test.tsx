@@ -43,6 +43,35 @@ describe("FilterRow on the iTunes tab", () => {
     expect([...options].map((o) => [o.value, o.label])).toEqual([["Road Trip", "4 songs"], ["Smart Mix", "1 songs"]]);
   });
 
+  it("with a playlist chosen, clicking the box sets its text aside (kept as the placeholder) so the list offers every playlist, and clicking away brings it back", async () => {
+    const user = userEvent.setup();
+    setup({ playlist: "Road Trip" });
+    const box = screen.getByLabelText("Playlist") as HTMLInputElement;
+    expect(box.value).toBe("Road Trip");
+    await user.click(box);
+    expect(box.value).toBe("");
+    expect(box.placeholder).toBe("Road Trip");
+    await user.click(document.body);
+    expect(box.value).toBe("Road Trip");
+    expect(box.placeholder).toBe("any (type to filter)");
+  });
+
+  it("picking another playlist switches to it, and the × clears the filter", async () => {
+    const user = userEvent.setup();
+    const dispatch = setup({ playlist: "Road Trip" });
+    const box = screen.getByLabelText("Playlist") as HTMLInputElement;
+    await user.click(box);
+    await user.type(box, "Smart Mix");
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "playlist", value: "Smart Mix" });
+    await user.click(screen.getByRole("button", { name: "Show every song: no playlist" }));
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "playlist", value: "" });
+  });
+
+  it("has no × while no playlist is chosen", () => {
+    setup();
+    expect(screen.queryByRole("button", { name: "Show every song: no playlist" })).toBeNull();
+  });
+
   it("shows the current choices", () => {
     setup({ stars: [2, 5], decade: "1980s", lovedOnly: true });
     expect((screen.getByLabelText("Decade") as HTMLSelectElement).value).toBe("1980s");

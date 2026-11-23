@@ -21,6 +21,8 @@ only songs listed in data.js). Clicking a star sets that rating in iTunes; click
 
 `remove_rated.ps1` removes the songs that have a rating of their own from one plain user playlist (playlist entry only; dry run by default, `-Apply` to do it).
 
+`rename_playlist.ps1 -Old "name" -New "name"` renames one plain playlist (the songs are untouched; dry run by default, `-Apply` to do it, then it reads the name back). Only done when exactly one plain playlist has the old name and none has the new one.
+
 `clean_to_rate.bat`: double-click to run `remove_rated.ps1` on "[Gen] To Rate": shows who would go, asks y/n, then removes.
 
 **The `[To Rate]` tag:** any plain playlist with `[To Rate]` in its name works as a to-rate list. In Music Hub, rating a song while such a playlist is selected also removes it from the playlist (entry only; `server.py` checks the tag and `rate_file.ps1` refuses smart playlists).
